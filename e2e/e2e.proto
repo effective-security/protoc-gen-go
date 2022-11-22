@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package e2e;
+
+option go_package = ".;e2e";
+
+// Basic just tests basic fields, including oneofs and so on that don't
+// generally work automatically with encoding/json.
+message Basic {
+  string a = 1;
+
+  oneof b {
+    int32  int = 2;
+    string str = 3;
+  }
+
+  map<string, string> map = 4;
+}
+
+// Test nested types
+message Nested {
+  message Message {
+    Basic basic = 1;
+  }
+}
