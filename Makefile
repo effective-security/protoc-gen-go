@@ -32,6 +32,7 @@ build:
 	echo "*** Building plugins"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-json ./cmd/protoc-gen-go-json
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-mock ./cmd/protoc-gen-go-mock
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-proxy ./cmd/protoc-gen-go-proxy
 
 proto:
 	echo "*** Building proto"
@@ -44,7 +45,7 @@ proto:
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:. \
 		--go-json_out=logs=true,multiline=true,partial=true:. \
 		--go-mock_out=logs=true:. \
+		--go-proxy_out=logs=true:. \
 		*.proto && \
-	goimports -l -w . && \
-	gofmt -s -l -w .
+	find . -name \*.go -exec sh -c "goimports -l -w {} && gofmt -s -l -w {}" \;
 
