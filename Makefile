@@ -30,9 +30,18 @@ tools:
 build:
 	echo "*** Building plugins"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-json ./cmd/protoc-gen-go-json
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-mock ./cmd/protoc-gen-go-mock
 
 proto:
 	echo "*** Building proto"
 	export PATH=${PROJ_ROOT}/bin:$$PATH && \
-    cd ${PROJ_ROOT}/e2e && protoc --go_out=. --go-json_out=logtostderr=true,v=10,multiline=true,partial=true:. *.proto
+    cd ${PROJ_ROOT}/e2e && \
+	protoc \
+		-I=. \
+		-I=../third_party \
+		--go_out=paths=source_relative:. \
+		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:. \
+		--go-json_out=logs=true,multiline=true,partial=true:. \
+		--go-mock_out=logs=true,imports=github.com/golang/protobuf/ptypes/empty:. \
+		*.proto
 

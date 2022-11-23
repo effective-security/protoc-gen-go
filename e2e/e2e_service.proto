@@ -1,11 +1,16 @@
 syntax = "proto3";
 
 package e2e;
-
-option go_package = ".;e2e";
+option go_package = "github.com/effective-security/protoc-gen-go/e2e";
 
 import "e2e.proto";
+import "google/protobuf/empty.proto";
 
+// E2E service provides a test
 service E2E {
+  // Hello returns a Basic
   rpc Hello(Basic) returns (Basic) {}
+
+  // Goodbuy returns a Nested
+  rpc Goodbuy(google.protobuf.Empty) returns (Nested) {}
 }

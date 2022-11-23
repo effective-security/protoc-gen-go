@@ -4,9 +4,11 @@ import (
 	"io"
 	"text/template"
 
-	"github.com/golang/glog"
+	"github.com/effective-security/xlog"
 	"google.golang.org/protobuf/compiler/protogen"
 )
+
+var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "go-json")
 
 // Options are the options to set for rendering the template.
 type Options struct {
@@ -34,11 +36,11 @@ func applyMessages(w io.Writer, msgs []*protogen.Message, opts Options) error {
 	for _, m := range msgs {
 
 		if m.Desc.IsMapEntry() {
-			glog.V(2).Infof("Skipping %s, mapentry message", m.GoIdent.GoName)
+			logger.Infof("Skipping %s, mapentry message", m.GoIdent.GoName)
 			continue
 		}
 
-		glog.V(2).Infof("Processing %s", m.GoIdent.GoName)
+		logger.Infof("Processing %s", m.GoIdent.GoName)
 		if err := messageTemplate.Execute(w, tplMessage{
 			Message: m,
 			Options: opts,
