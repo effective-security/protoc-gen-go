@@ -26,6 +26,7 @@ tools:
 	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	go install github.com/go-phorce/cov-report/cmd/cov-report
 	go install golang.org/x/lint/golint
+	go install golang.org/x/tools/cmd/goimports
 
 build:
 	echo "*** Building plugins"
@@ -42,6 +43,8 @@ proto:
 		--go_out=paths=source_relative:. \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:. \
 		--go-json_out=logs=true,multiline=true,partial=true:. \
-		--go-mock_out=logs=true,imports=github.com/golang/protobuf/ptypes/empty:. \
-		*.proto
+		--go-mock_out=logs=true:. \
+		*.proto && \
+	goimports -l -w . && \
+	gofmt -s -l -w .
 

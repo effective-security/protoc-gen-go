@@ -17,8 +17,6 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go"
 type Options struct {
 	// Package provides package name for the Mock
 	Package string
-	// Imports provides list on import to be added in the header
-	Imports []string
 	// Prefix specifies prefix to be added to message types:
 	// {{.Prefix}}{{.Message.GoName}}
 	// If not provided, the the package name of the process file will be used.
@@ -113,9 +111,6 @@ import (
 
 	{{.File.GoImportPath}}
 	"google.golang.org/protobuf/proto"
-	{{- range $index, $element := .Imports }}
-	"{{$element}}"
-	{{- end }}
 )
 `))
 
