@@ -15,6 +15,7 @@ build_log.txt
 *.pb.go
 *.pb.json.go
 *.pb.mock.go
+*.pb.proxy.go
 
 debug
 debug.test

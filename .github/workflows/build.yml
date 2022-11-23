@@ -24,7 +24,7 @@ env:
   MIN_TESTCOV: 80
   # NOTE(epk) this identifier is used to easily bust a pre-existing go
   # mod/build cache. To do so simply increment this number.
-  GO_CACHE_BUSTER: 1
+  GO_CACHE_BUSTER: 2
 
 jobs:
   UnitTest:
@@ -45,13 +45,13 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-        # with:
-        #   fetch-depth: 0
+        with:
+          fetch-depth: 0
         #   submodules: true
 
-      - name: Fetch History
-        run: |
-          git fetch --prune --unshallow
+      # - name: Fetch History
+      #   run: |
+      #     git fetch --prune --unshallow
 
       - name: Setup Go
         uses: actions/setup-go@v3
@@ -71,8 +71,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
-          restore-keys: ${{ runner.os }}-go-build-
+          key: ${{ runner.os }}-go-build-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-build-${{ env.GO_CACHE_BUSTER }}-
 
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
@@ -80,18 +80,17 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}-${{ env.GO_CACHE_BUSTER }}
-          restore-keys: ${{ runner.os }}-go-mod-
+          key: ${{ runner.os }}-go-mod-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-mod-${{ env.GO_CACHE_BUSTER }}-
 
       - name: Go Artifacts
-        if: steps.go-mod-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           go mod download
           go mod tidy
 
       - name: Prepare
-        run: make vars tools generate
+        run: make vars tools
 
       - name: Proto
         run: make build proto

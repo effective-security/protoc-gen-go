@@ -26,7 +26,7 @@ go install github.com/effective-security/protoc-gen-go/cmd/protoc-gen-go-json
 Also required:
 
 - [protoc](https://github.com/google/protobuf)
-- [protoc-gen-go](https://github.com/golang/protobuf)
+- [protoc-gen-go](https://google.golang.org/protobuf)
 
 ## Usage
 
