@@ -3,13 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"path"
 
 	"github.com/effective-security/protoc-gen-go/jsongen"
-	"github.com/golang/glog"
+	"github.com/effective-security/xlog"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
+var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "go-json")
+
 var (
+	log          = flag.Bool("logs", false, "output logs")
 	enumsAsInts  = flag.Bool("enums_as_ints", false, "render enums as integers as opposed to strings")
 	emitDefaults = flag.Bool("emit_defaults", false, "render fields with zero values")
 	origName     = flag.Bool("orig_name", false, "use original (.proto) name for fields")
@@ -20,11 +25,20 @@ var (
 
 func main() {
 	flag.Parse()
-	defer glog.Flush()
+	defer logger.Flush()
 
 	protogen.Options{
 		ParamFunc: flag.CommandLine.Set,
 	}.Run(func(gp *protogen.Plugin) error {
+		var formatter xlog.Formatter
+		if *log {
+			formatter = xlog.NewStringFormatter(os.Stderr).
+				Options(xlog.FormatNoCaller, xlog.FormatSkipTime, xlog.FormatSkipLevel)
+			xlog.SetGlobalLogLevel(xlog.INFO)
+		} else {
+			formatter = xlog.NewNilFormatter()
+		}
+		xlog.SetFormatter(formatter)
 
 		opts := jsongen.Options{
 			EnumsAsInts:        *enumsAsInts,
@@ -39,14 +53,15 @@ func main() {
 			f := gp.FilesByPath[name]
 
 			if len(f.Messages) == 0 {
-				glog.V(1).Infof("Skipping %s, no messages", name)
+				logger.Infof("Skipping %s, no messages", name)
 				continue
 			}
 
-			glog.V(1).Infof("Processing %s", name)
-			glog.V(2).Infof("Generating %s\n", fmt.Sprintf("%s.pb.json.go", f.GeneratedFilenamePrefix))
+			prefix := path.Base(f.GeneratedFilenamePrefix)
+			fn := fmt.Sprintf("%s.pb.json.go", prefix)
+			logger.Infof("Generating %s\n", fn)
 
-			gf := gp.NewGeneratedFile(fmt.Sprintf("%s.pb.json.go", f.GeneratedFilenamePrefix), f.GoImportPath)
+			gf := gp.NewGeneratedFile(fn, f.GoImportPath)
 
 			err := jsongen.ApplyTemplate(gf, f, opts)
 			if err != nil {

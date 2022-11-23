@@ -1,8 +1,9 @@
 syntax = "proto3";
 
 package e2e;
+option go_package = "github.com/effective-security/protoc-gen-go/e2e";
 
-option go_package = ".;e2e";
+import "google/protobuf/timestamp.proto";
 
 // Basic just tests basic fields, including oneofs and so on that don't
 // generally work automatically with encoding/json.
@@ -12,14 +13,17 @@ message Basic {
   oneof b {
     int32  int = 2;
     string str = 3;
+    uint64 id  = 4;
   }
 
-  map<string, string> map = 4;
+  map<string, string> map = 5;
+  google.protobuf.Timestamp created = 6;
 }
 
-// Test nested types
+// Nested for testing nested types
 message Nested {
   message Message {
+    // Basic type
     Basic basic = 1;
   }
 }
