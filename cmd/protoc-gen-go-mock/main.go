@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/effective-security/protoc-gen-go/mockgen"
 	"github.com/effective-security/xlog"
@@ -18,7 +17,6 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go"
 var (
 	log     = flag.Bool("logs", true, "output logs")
 	pkgName = flag.String("pkg", "mockpb", "go package name")
-	imports = flag.String("imports", "", "list of import separated by semi-colon")
 )
 
 func main() {
@@ -45,7 +43,6 @@ func main() {
 
 		opts := mockgen.Options{
 			Package: pkg,
-			Imports: strings.Split(*imports, ";"),
 		}
 
 		err := os.MkdirAll(pkg, os.ModePerm)
