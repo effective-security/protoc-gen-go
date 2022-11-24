@@ -51,13 +51,13 @@ func main() {
 
 		for _, name := range gp.Request.FileToGenerate {
 			f := gp.FilesByPath[name]
+			prefix := path.Base(f.GeneratedFilenamePrefix)
 
 			if len(f.Messages) == 0 {
 				logger.Infof("Skipping %s, no messages", name)
 				continue
 			}
 
-			prefix := path.Base(f.GeneratedFilenamePrefix)
 			fn := fmt.Sprintf("%s.pb.json.go", prefix)
 			logger.Infof("Generating %s\n", fn)
 

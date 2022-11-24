@@ -5,6 +5,7 @@ import (
 	"text/template"
 
 	"github.com/effective-security/xlog"
+	"github.com/pkg/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -26,7 +27,7 @@ func ApplyTemplate(w io.Writer, f *protogen.File, opts Options) error {
 	if err := headerTemplate.Execute(w, tplHeader{
 		File: f,
 	}); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to execute template: %s", f.GeneratedFilenamePrefix)
 	}
 
 	return applyMessages(w, f.Messages, opts)
@@ -45,7 +46,7 @@ func applyMessages(w io.Writer, msgs []*protogen.Message, opts Options) error {
 			Message: m,
 			Options: opts,
 		}); err != nil {
-			return err
+			return errors.Wrapf(err, "failed to execute template: %s", m.GoIdent.GoName)
 		}
 
 		if err := applyMessages(w, m.Messages, opts); err != nil {
