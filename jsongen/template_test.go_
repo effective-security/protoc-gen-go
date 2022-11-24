@@ -1,0 +1,38 @@
+package jsongen
+
+import (
+	"bytes"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/pluginpb"
+)
+
+func TestTemplate(t *testing.T) {
+
+	ops := protogen.Options{}
+
+	fn := "../e2e/e2e_service.proto"
+	p, err := ops.New(&pluginpb.CodeGeneratorRequest{
+		ProtoFile: []*descriptorpb.FileDescriptorProto{
+			{
+				Name: &fn,
+			},
+		},
+		FileToGenerate: []string{
+			"../e2e/e2e_service.proto",
+		},
+	})
+	require.NoError(t, err)
+
+	w := bytes.NewBuffer([]byte{})
+
+	exp := `{}`
+
+	err = ApplyTemplate(w, p.Files[0], Options{})
+	require.NoError(t, err)
+	assert.Equal(t, exp, w.String())
+}
