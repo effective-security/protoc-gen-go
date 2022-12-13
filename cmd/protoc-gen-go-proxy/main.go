@@ -45,11 +45,6 @@ func main() {
 			Package: pkg,
 		}
 
-		err := os.MkdirAll(pkg, os.ModePerm)
-		if err != nil {
-			return err
-		}
-
 		for _, name := range gp.Request.FileToGenerate {
 			f := gp.FilesByPath[name]
 
