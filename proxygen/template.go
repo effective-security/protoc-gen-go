@@ -122,17 +122,19 @@ package {{.Package}}
 
 import (
 	"context"
+	"net/http"
 
 	{{.File.GoImportPath}}
 	"google.golang.org/protobuf/proto"
 	"github.com/effective-security/porto/xhttp/httperror"
+	"github.com/effective-security/porto/pkg/retriable"
 )
 `))
 
 	serviceTemplate = template.Must(template.New("service").
 			Funcs(tempFuncs()).
 			Parse(`
-
+			
 type {{.ProxyStructName}} struct {
 	srv {{.Prefix}}{{.ServerName}}
 }
@@ -140,6 +142,10 @@ type {{.ProxyStructName}} struct {
 type {{.ClientStructName}} struct {
 	remote   {{.Prefix}}{{.ClientName}}
 	callOpts []grpc.CallOption
+}
+
+type post{{.ClientStructName}} struct {
+	client   retriable.PostRequester
 }
 
 // {{.Service.GoName}}ServerToClient returns {{.Prefix}}{{.ClientName}}
@@ -162,8 +168,14 @@ func New{{.ClientName}}FromProxy(proxy {{.Prefix}}{{.ClientName}}) {{.Prefix}}{{
 	}
 }
 
-`))
+// New{{.ClientName}}FromProxy returns instance of {{.ClientName}}
+func NewHTTP{{.ClientName}}(client retriable.PostRequester) {{.Prefix}}{{.ServerName}} {
+	return &post{{.ClientStructName}}{
+		client: client,
+	}
+}
 
+`))
 	methodTemplate = template.Must(template.New("method").
 			Funcs(tempFuncs()).
 			Parse(`
@@ -184,6 +196,17 @@ func (s *{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{t
 		return nil, httperror.NewFromPb(err)
 	}
 	return res, nil
+}
+
+{{ .Method.Comments.Leading -}}
+func (s *post{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}) (*{{type .Method.Output}}, error) {
+	var res {{type .Method.Output}}
+	path := "/{{.Package}}.{{.Method.Parent.GoName}}/{{.Method.GoName}}"
+	_, _, err := s.client.Post(ctx, path, req, &res)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 `))

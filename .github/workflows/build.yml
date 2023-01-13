@@ -24,7 +24,7 @@ env:
   MIN_TESTCOV: 80
   # NOTE(epk) this identifier is used to easily bust a pre-existing go
   # mod/build cache. To do so simply increment this number.
-  GO_CACHE_BUSTER: 2
+  GO_CACHE_BUSTER: 3
 
 jobs:
   UnitTest:
@@ -97,11 +97,16 @@ jobs:
 
       - name: Test
         if: github.event_name == 'push'
-        run: make test
+        run: |
+          # need to pull deps for generated files
+          go mod tidy
+          make test
 
       - name: CovTest
         if: github.event_name == 'pull_request'
         run: |
+          # need to pull deps for generated files
+          go mod tidy
           make covtest
           set -x && \
           total=`go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+'` && \
