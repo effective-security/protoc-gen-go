@@ -30,7 +30,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     produces: "application/json";
 };
 
-service StatusService {
+service Status {
     // Version returns the server version.
     rpc Version(google.protobuf.Empty) returns (ServerVersion) {
         option (google.api.http) = {

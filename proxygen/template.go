@@ -70,6 +70,7 @@ func applyServices(w io.Writer, svcs []*protogen.Service, opts Options) error {
 				Options:          opts,
 				ProxyStructName:  proxyName,
 				ClientStructName: clientName,
+				Namespace:        string(svc.Desc.FullName()),
 			}); err != nil {
 				return errors.Wrapf(err, "failed to execute template: %s", met.GoName)
 			}
@@ -109,6 +110,7 @@ type tplMethod struct {
 	Method           *protogen.Method
 	ProxyStructName  string
 	ClientStructName string
+	Namespace        string
 }
 
 var (
@@ -201,7 +203,7 @@ func (s *{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{t
 {{ .Method.Comments.Leading -}}
 func (s *post{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}) (*{{type .Method.Output}}, error) {
 	var res {{type .Method.Output}}
-	path := "/{{.Package}}.{{.Method.Parent.GoName}}/{{.Method.GoName}}"
+	path := "/{{.Namespace}}/{{.Method.GoName}}"
 	_, _, err := s.client.Post(ctx, path, req, &res)
 	if err != nil {
 		return nil, err
