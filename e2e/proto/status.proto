@@ -2,7 +2,7 @@ syntax = "proto3";
 package e2e;
 
 option go_package = "github.com/effective-security/protoc-gen-go/e2e";
-
+import "es/api/authz.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
@@ -36,6 +36,7 @@ service Status {
         option (google.api.http) = {
             get: "/v1/status/version"
         };
+        option (es.api.allowed_roles) = "admin";
     }
 
     // Server returns the server status.
@@ -43,6 +44,7 @@ service Status {
         option (google.api.http) = {
             get: "/v1/status/server"
         };
+        option (es.api.allowed_roles) = "user";
     }
 
     // Caller returns the caller status.
