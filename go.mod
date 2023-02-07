@@ -9,6 +9,7 @@ require (
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.14.0
+	github.com/lyft/protoc-gen-star v0.6.2
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
