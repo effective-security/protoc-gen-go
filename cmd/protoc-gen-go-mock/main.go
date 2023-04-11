@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/effective-security/protoc-gen-go/mockgen"
+	"github.com/effective-security/protoc-gen-go/internal/mockgen"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/compiler/protogen"

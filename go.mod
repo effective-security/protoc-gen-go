@@ -1,11 +1,11 @@
 module github.com/effective-security/protoc-gen-go
 
-go 1.19
+go 1.20
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
-	github.com/effective-security/porto v0.0.0-20230113154042-d6555e17c5ab
-	github.com/effective-security/xlog v0.0.0-20221221083126-54a4be3a12a9
+	github.com/effective-security/porto v0.0.0-20230411150435-ad45d3d757d1
+	github.com/effective-security/xlog v0.5.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
 	github.com/golang/protobuf v1.5.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.14.0
@@ -25,7 +25,8 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/effective-security/xpki v0.5.0 // indirect
+	github.com/effective-security/xpki v0.6.1-0.20230128090615-62fd68d0fc27 // indirect
+	github.com/golang/glog v1.0.0 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/huandu/xstrings v1.3.1 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect

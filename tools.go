@@ -7,6 +7,8 @@ package tools
 
 import (
 	_ "github.com/go-phorce/cov-report/cmd/cov-report"
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway"
+	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2"
 	_ "github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2/options"
 	_ "github.com/lyft/protoc-gen-star/protoc-gen-debug"
 	_ "golang.org/x/lint/golint"
