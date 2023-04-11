@@ -62,12 +62,12 @@ github.com/cncf/udpa/go v0.0.0-20201120205902-5459f2c99403/go.mod h1:WmhPx2Nbnht
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/effective-security/porto v0.0.0-20230113154042-d6555e17c5ab h1:T6+EYpIH+HGGeplhUCV1VYqgRFTSzefkrZHr1s8zcmI=
-github.com/effective-security/porto v0.0.0-20230113154042-d6555e17c5ab/go.mod h1:pIYF5NcmlrIdVkATl8WeIs0Zy5WYhBAghFSzJBFunQI=
-github.com/effective-security/xlog v0.0.0-20221221083126-54a4be3a12a9 h1:K4A2DLANtcGSL+pO2ch4naIbvuDHO0ZFwMsimB6PHsA=
-github.com/effective-security/xlog v0.0.0-20221221083126-54a4be3a12a9/go.mod h1:K/Rrf1LAhR7UpCKxAmiqe/vzeMySs57MYIGsolAWGNo=
-github.com/effective-security/xpki v0.5.0 h1:6Exz6R5cI2Q3DktQsqdBJoXhRm1qTuLFo3loiqfKPGM=
-github.com/effective-security/xpki v0.5.0/go.mod h1:oXQzIP4gIdNTuNz/28Zp4RyF1LpGtNgWmNAkpc8LbLs=
+github.com/effective-security/porto v0.0.0-20230411150435-ad45d3d757d1 h1:aSVuN2vxW8bjBsNX/UQ/q3N9DbRu0rFJ1W43DvOn7pU=
+github.com/effective-security/porto v0.0.0-20230411150435-ad45d3d757d1/go.mod h1:3fo/AbgNDGENjf7YejRlPxTxwoWqWePJW4hDhWoYTZ4=
+github.com/effective-security/xlog v0.5.0 h1:pbKiMpLeQWy4MkU8uAAamLRUpncetR6ya9aPnmzrs/o=
+github.com/effective-security/xlog v0.5.0/go.mod h1:ub0tHzMxKZ5RS2WsDu4cltyK6t0mJFmeHWAOw442NCg=
+github.com/effective-security/xpki v0.6.1-0.20230128090615-62fd68d0fc27 h1:dEf5g1MrC5/FzWdoQFCuQ2ImtJJ+cMyNIJU6C0ljaWQ=
+github.com/effective-security/xpki v0.6.1-0.20230128090615-62fd68d0fc27/go.mod h1:oXQzIP4gIdNTuNz/28Zp4RyF1LpGtNgWmNAkpc8LbLs=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
@@ -81,6 +81,8 @@ github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba h1:I45RdP92
 github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba/go.mod h1:UZQo6+h5O8HW6TPt7HaXd4Nc234FYx5aFvw9RKL2IUk=
 github.com/golang-jwt/jwt v3.2.2+incompatible h1:IfV12K8xAKAnZqdXVzCZ+TOjboZ2keLg81eXfW3O+oY=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
+github.com/golang/glog v1.0.0 h1:nfP3RFugxnNRyKgeWd4oI1nYvXpxrx8ck8ZrcizshdQ=
+github.com/golang/glog v1.0.0/go.mod h1:EWib/APOK0SL3dFbYqvxE3UYd8E6s1ouQ7iEp/0LWV4=
 github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/golang/groupcache v0.0.0-20191227052852-215e87163ea7/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=
 github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e/go.mod h1:cIg4eruTrX1D+g88fzRXU5OdNfaM+9IcxsU14FzY7Hc=

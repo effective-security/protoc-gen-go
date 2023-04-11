@@ -28,6 +28,8 @@ tools:
 	go install github.com/go-phorce/cov-report/cmd/cov-report
 	go install golang.org/x/lint/golint
 	go install golang.org/x/tools/cmd/goimports
+	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
 build:
 	echo "*** Building plugins"
@@ -69,3 +71,5 @@ proto:
 	cd ${PROJ_ROOT}/e2e && \
 	find . -name \*.go -exec sh -c "goimports -l -w {} && gofmt -s -l -w {}" \;
 
+docker: tools
+	docker build -f Dockerfile -t effectivesecurity/protoc-gen-go:main .
