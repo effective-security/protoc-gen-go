@@ -18,7 +18,7 @@ COPY ./bin/* ./genproto.sh /tools/
 COPY ./proto/ /third_party/
 
 RUN apt update && apt install -y curl zip
-RUN curl -L https://github.com/google/protobuf/releases/download/v3.2.0/protoc-3.2.0-linux-x86_64.zip -o /tmp/protoc.zip
+RUN curl -L https://github.com/google/protobuf/releases/download/v22.3/protoc-22.3-linux-x86_64.zip -o /tmp/protoc.zip
 RUN unzip /tmp/protoc.zip -d /tmp/protoc3
 RUN mv /tmp/protoc3/bin/* /usr/local/bin/
 RUN cp -r /tmp/protoc3/include/ /usr/local/
