@@ -7,7 +7,7 @@ require (
 	github.com/effective-security/porto v0.0.0-20230411150435-ad45d3d757d1
 	github.com/effective-security/xlog v0.5.0
 	github.com/go-phorce/cov-report v1.1.1-0.20200622030546-3fb510c4b1ba
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.3
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.14.0
 	github.com/lyft/protoc-gen-star v0.6.2
 	github.com/pkg/errors v0.9.1
