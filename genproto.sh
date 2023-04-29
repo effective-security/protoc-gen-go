@@ -13,6 +13,8 @@ set -e
 #   --mock {path}       - specifies to generate --go-mock_out
 #   --proxy {path}      - specifies to generate --go-proxy_out
 #   --methods {path}    - specifies to generate --go-allocator_out
+#   --python {path}     - specifies to generate --python_out
+#   --ts {path}         - specifies to generate --grpc-web_out
 #   --out               - specifies to output folder, default is '.'
 
 POSITIONAL=()

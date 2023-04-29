@@ -48,6 +48,9 @@ proto-dbg:
 		status.proto
 
 proto:
+	# TODO: install grpc-web plugin \
+	# --js_out=import_style=commonjs,binary:../ts \
+	# --grpc-web_out=import_style=typescript,mode=grpcweb:../ts \
 	echo "*** Building proto"
 	export PATH=${PROJ_ROOT}/bin:$$PATH && \
 	cd ${PROJ_ROOT}/proto/es/api && \
@@ -57,6 +60,7 @@ proto:
 		--go_out=paths=source_relative:./../../../api \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./../../../api \
 		*.proto && \
+	mkdir -p ${PROJ_ROOT}/e2e/ts && \
     cd ${PROJ_ROOT}/e2e/proto && \
 	protoc \
 		-I=. \
