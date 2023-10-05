@@ -6,29 +6,6 @@ import "es/api/authz.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
-import "protoc-gen-openapiv2/options/annotations.proto";
-
-option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
-	info: {
-		title: "Status API";
-		version: "1.0";
-		contact: {
-			name: "Effective Security";
-			url: "https://github.com/effective-security/protoc-gen-go";
-		};
-		extensions: {
-			key: "x-something-something";
-			value {
-				string_value: "yadda";
-			}
-		}
-	};
-    // host: "service:8043";
-    schemes: HTTP;
-    // schemes: HTTPS;
-    consumes: "application/json";
-    produces: "application/json";
-};
 
 service Status {
     // Version returns the server version.

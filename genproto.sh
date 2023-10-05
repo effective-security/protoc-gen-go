@@ -39,7 +39,7 @@ case $key in
     shift # past value
     ;;
     --oapi)
-    OPENAPI="--openapiv2_out=$2"
+    OPENAPI="--openapi_out=$2"
     shift # past argument
     shift # past value
     ;;

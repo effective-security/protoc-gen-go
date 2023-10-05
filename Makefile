@@ -22,14 +22,16 @@ clean:
 
 tools:
 	echo "*** Building tools"
-	go install github.com/lyft/protoc-gen-star/protoc-gen-debug
-	go install google.golang.org/protobuf/cmd/protoc-gen-go
-	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
-	go install github.com/go-phorce/cov-report/cmd/cov-report
-	go install golang.org/x/lint/golint
-	go install golang.org/x/tools/cmd/goimports
-	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
-	go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
+	go install github.com/lyft/protoc-gen-star/protoc-gen-debug@latest
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	go install github.com/effective-security/cov-report/cmd/cov-report@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54
+	go install golang.org/x/tools/cmd/goimports@latest
+	go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
+	
+	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
+	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
 build:
 	echo "*** Building plugins"
@@ -60,11 +62,12 @@ proto:
 		--go_out=paths=source_relative:./../../../api \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./../../../api \
 		*.proto && \
-	mkdir -p ${PROJ_ROOT}/e2e/ts && \
+	mkdir -p ${PROJ_ROOT}/e2e/ts ${PROJ_ROOT}/e2e/openapi && \
     cd ${PROJ_ROOT}/e2e/proto && \
 	protoc \
 		-I=. \
 		-I=../../proto \
+		--openapi_out=output_mode=source_relative,naming=proto:./../openapi \
 		--go_out=paths=source_relative:./.. \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./.. \
 		--go-json_out=logs=true,multiline=true,partial=true:./.. \
