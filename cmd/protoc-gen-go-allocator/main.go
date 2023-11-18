@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"go/format"
 	"os"
 	"path"
 	"strings"
@@ -55,6 +57,8 @@ func generator(gp *protogen.Plugin) error {
 		Package: *pkg,
 	}
 
+	buf := &bytes.Buffer{}
+
 	headerProduced := false
 	for _, name := range gp.Request.FileToGenerate {
 		f := gp.FilesByPath[name]
@@ -64,7 +68,7 @@ func generator(gp *protogen.Plugin) error {
 					opts.Package = string(f.GoPackageName)
 				}
 
-				if err := headerTemplate.Execute(gf, tplHeader{
+				if err := headerTemplate.Execute(buf, tplHeader{
 					Opts: opts,
 				}); err != nil {
 					gp.Error(err)
@@ -91,7 +95,7 @@ func generator(gp *protogen.Plugin) error {
 					}
 				}
 
-				if err := methodTemplate.Execute(gf, o); err != nil {
+				if err := methodTemplate.Execute(buf, o); err != nil {
 					gp.Error(err)
 					return errors.Wrapf(err, "failed to execute template: %s", *out)
 				}
@@ -100,14 +104,20 @@ func generator(gp *protogen.Plugin) error {
 	}
 
 	if headerProduced {
-		if err := footerTemplate.Execute(gf, tplHeader{
+		if err := footerTemplate.Execute(buf, tplHeader{
 			Opts: opts,
 		}); err != nil {
 			return errors.Wrapf(err, "failed to execute template: %s", *out)
 		}
 	}
 
-	return nil
+	code, err := format.Source(buf.Bytes())
+	if err != nil {
+		return errors.Wrapf(err, "failed to format source")
+	}
+	_, err = gf.Write(code)
+
+	return err
 }
 
 func tempFuncs() template.FuncMap {
@@ -216,7 +226,7 @@ var methods = map[string]*MethodInfo{
 	methodTemplate = template.Must(template.New("method").
 			Funcs(tempFuncs()).
 			Parse(`
-	"/{{.Package}}.{{.Service.GoName}}/{{.Method.GoName}}": {
+	{{.Service.GoName}}_{{.Method.GoName}}_FullMethodName: {
 		Allocator: func() any { return new({{type .Package .Method.Input}}) },
 		{{roles .Roles}}
 	},

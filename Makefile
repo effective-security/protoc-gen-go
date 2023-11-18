@@ -76,7 +76,7 @@ proto:
 		--go-allocator_out=logs=true:./.. \
 		*.proto && \
 	cd ${PROJ_ROOT}/e2e && \
-	find . -name \*.go -exec sh -c "goimports -l -w {} && gofmt -s -l -w {}" \;
+	find . -name \*.go -exec sh -c "goimports -l -w {}" \;
 
 docker: tools
 	docker build -f Dockerfile -t effectivesecurity/protoc-gen-go:main .

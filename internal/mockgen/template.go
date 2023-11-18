@@ -1,6 +1,8 @@
 package mockgen
 
 import (
+	"bytes"
+	"go/format"
 	"io"
 	"path"
 	"strings"
@@ -33,14 +35,25 @@ func ApplyTemplate(w io.Writer, f *protogen.File, opts Options) error {
 		opts.Prefix = opts.Prefix + "."
 	}
 
-	if err := headerTemplate.Execute(w, tplHeader{
+	buf := &bytes.Buffer{}
+	if err := headerTemplate.Execute(buf, tplHeader{
 		File:    f,
 		Options: opts,
 	}); err != nil {
 		return errors.Wrapf(err, "failed to execute template: %s", f.GeneratedFilenamePrefix)
 	}
 
-	return applyServices(w, f.Services, opts)
+	if err := applyServices(buf, f.Services, opts); err != nil {
+		return err
+	}
+
+	code, err := format.Source(buf.Bytes())
+	if err != nil {
+		return errors.Wrapf(err, "failed to format source: %s", f.GeneratedFilenamePrefix)
+	}
+	_, err = w.Write(code)
+	return err
+
 }
 
 func applyServices(w io.Writer, svcs []*protogen.Service, opts Options) error {

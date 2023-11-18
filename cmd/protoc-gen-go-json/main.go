@@ -62,7 +62,6 @@ func main() {
 			logger.Infof("Generating %s\n", fn)
 
 			gf := gp.NewGeneratedFile(fn, f.GoImportPath)
-
 			err := jsongen.ApplyTemplate(gf, f, opts)
 			if err != nil {
 				gf.Skip()
