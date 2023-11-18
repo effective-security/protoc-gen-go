@@ -1,6 +1,8 @@
 package jsongen
 
 import (
+	"bytes"
+	"go/format"
 	"io"
 	"text/template"
 
@@ -23,14 +25,23 @@ type Options struct {
 
 // This function is called with a param which contains the entire definition of a method.
 func ApplyTemplate(w io.Writer, f *protogen.File, opts Options) error {
-
-	if err := headerTemplate.Execute(w, tplHeader{
+	buf := &bytes.Buffer{}
+	if err := headerTemplate.Execute(buf, tplHeader{
 		File: f,
 	}); err != nil {
 		return errors.Wrapf(err, "failed to execute template: %s", f.GeneratedFilenamePrefix)
 	}
 
-	return applyMessages(w, f.Messages, opts)
+	if err := applyMessages(buf, f.Messages, opts); err != nil {
+		return err
+	}
+
+	code, err := format.Source(buf.Bytes())
+	if err != nil {
+		return errors.Wrapf(err, "failed to format source: %s", f.GeneratedFilenamePrefix)
+	}
+	_, err = w.Write(code)
+	return err
 }
 
 func applyMessages(w io.Writer, msgs []*protogen.Message, opts Options) error {

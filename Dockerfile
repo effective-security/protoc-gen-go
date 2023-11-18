@@ -20,7 +20,7 @@ COPY ./proto/ /third_party/
 
 RUN apt update && apt install -y curl zip
 
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v24.4/protoc-24.4-linux-x86_64.zip -o /tmp/protoc.zip
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v25.1/protoc-25.1-linux-x86_64.zip -o /tmp/protoc.zip
 RUN unzip /tmp/protoc.zip -d /tmp/protoc3
 RUN mv /tmp/protoc3/bin/* /usr/local/bin/
 RUN cp -r /tmp/protoc3/include/ /usr/local/
@@ -29,7 +29,7 @@ RUN curl -L https://github.com/protocolbuffers/protobuf-javascript/releases/down
 RUN unzip /tmp/protobuf-javascript.zip -d /tmp/protobuf-javascript
 RUN mv /tmp/protobuf-javascript/bin/* /tools/
 
-RUN curl -L https://go.dev/dl/go1.21.1.linux-amd64.tar.gz -o /tmp/go.tar.gz
+RUN curl -L https://go.dev/dl/go1.21.4.linux-amd64.tar.gz -o /tmp/go.tar.gz
 RUN tar -C /usr/local -xzf /tmp/go.tar.gz
 
 RUN curl -L https://github.com/grpc/grpc-web/releases/download/1.4.2/protoc-gen-grpc-web-1.4.2-linux-x86_64 -o /tools/protoc-gen-grpc-web
