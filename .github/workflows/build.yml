@@ -137,7 +137,7 @@ jobs:
       - name: Docker meta
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: docker_meta
-        uses: docker/metadata-action@v3
+        uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
           images: |
