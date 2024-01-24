@@ -58,7 +58,7 @@ func main() {
 				continue
 			}
 
-			fn := fmt.Sprintf("%s.pb.json.go", prefix)
+			fn := fmt.Sprintf("%s.json.pb.go", prefix)
 			logger.Infof("Generating %s\n", fn)
 
 			gf := gp.NewGeneratedFile(fn, f.GoImportPath)

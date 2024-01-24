@@ -185,6 +185,9 @@ import (
 // RequestAllocator defines constructor to allocate Protobuf request
 type RequestAllocator func() any
 
+// CheckAccessFunc defines function to check access rights for the HTTP request
+type CheckAccessFunc func(ctx context.Context, req any, action string) error
+
 // MethodInfo provides info about RPC method
 type MethodInfo struct {
 	Allocator    RequestAllocator
