@@ -58,6 +58,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --http)
+    HTTP="--go-http_out=logs=true:$2"
+    shift # past argument
+    shift # past value
+    ;;
     --methods)
     METHODS="--go-allocator_out=logs=true:$2"
     shift # past argument
@@ -95,6 +100,7 @@ echo "OPENAPI = $OPENAPI"
 echo "JSON    = $JSON"
 echo "MOCK    = $MOCK"
 echo "PROXY   = $PROXY"
+echo "HTTP    = $HTTP"
 echo "METHODS = $METHODS"
 echo "GOLANG  = $GOLANG"
 echo "TS      = $TS"
@@ -105,6 +111,6 @@ for dir in $DIRS; do
 		protoc $IMPORTS $OPENAPI \
 			-I=. \
 			-I=/usr/local/include \
-            $JSON $MOCK $PROXY $METHODS $GOLANG $PYTHON $TS $FILES
+            $JSON $MOCK $PROXY $METHODS $HTTP $GOLANG $PYTHON $TS $FILES
 	popd
 done

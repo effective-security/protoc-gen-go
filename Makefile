@@ -38,6 +38,7 @@ build:
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-json ./cmd/protoc-gen-go-json
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-mock ./cmd/protoc-gen-go-mock
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-proxy ./cmd/protoc-gen-go-proxy
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-http ./cmd/protoc-gen-go-http
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-allocator ./cmd/protoc-gen-go-allocator
 
 proto-dbg:
@@ -74,6 +75,7 @@ proto:
 		--go-mock_out=logs=true:./.. \
 		--go-proxy_out=logs=true:./.. \
 		--go-allocator_out=logs=true:./.. \
+		--go-http_out=logs=true,pbpkg=e2e:./.. \
 		*.proto && \
 	cd ${PROJ_ROOT}/e2e && \
 	find . -name \*.go -exec sh -c "goimports -l -w {}" \;

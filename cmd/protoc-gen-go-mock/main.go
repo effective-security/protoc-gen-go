@@ -56,7 +56,7 @@ func main() {
 			logger.Infof("Processing: %s", name)
 
 			prefix := path.Base(f.GeneratedFilenamePrefix)
-			fn := fmt.Sprintf("%s.pb.mock.go", prefix)
+			fn := fmt.Sprintf("%s.mock.pb.go", prefix)
 			fullFn := path.Join(pkg, fn)
 			logger.Infof("Generating %s\n", fullFn)
 

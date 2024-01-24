@@ -22,7 +22,7 @@ var _ = httperror.Error{}
 
 // Options are the options to set for rendering the template.
 type Options struct {
-	// Package provides package name for the Mock
+	// Package provides package name for the proxy
 	Package string
 	// Prefix specifies prefix to be added to message types:
 	// {{.Prefix}}{{.Message.GoName}}
@@ -77,6 +77,7 @@ func applyServices(w io.Writer, svcs []*protogen.Service, opts Options) error {
 
 		for _, met := range svc.Methods {
 			if err := methodTemplate.Execute(w, tplMethod{
+				Service:          svc,
 				Method:           met,
 				Options:          opts,
 				ProxyStructName:  proxyName,
@@ -118,6 +119,7 @@ type tplService struct {
 type tplMethod struct {
 	Options
 
+	Service          *protogen.Service
 	Method           *protogen.Method
 	ProxyStructName  string
 	ClientStructName string
@@ -219,7 +221,7 @@ func (s *{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{t
 {{ .Method.Comments.Leading -}}
 func (s *post{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}) (*{{type .Method.Output}}, error) {
 	var res {{type .Method.Output}}
-	path := "/{{.Namespace}}/{{.Method.GoName}}"
+	path := {{.Namespace}}_{{.Method.GoName}}_FullMethodName
 	_, _, err := s.client.Post(ctx, path, req, &res)
 	if err != nil {
 		return nil, err

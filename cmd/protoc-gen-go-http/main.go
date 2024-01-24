@@ -6,17 +6,18 @@ import (
 	"os"
 	"path"
 
-	"github.com/effective-security/protoc-gen-go/internal/proxygen"
+	"github.com/effective-security/protoc-gen-go/internal/httpgen"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
-var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "go-proxy")
+var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "go-http")
 
 var (
-	log     = flag.Bool("logs", true, "output logs")
-	pkgName = flag.String("pkg", "proxypb", "go package name")
+	log       = flag.Bool("logs", true, "output logs")
+	pkgName   = flag.String("pkg", "httppb", "go package name")
+	pbPkgName = flag.String("pbpkg", "pb", "go package name for main protobuf types")
 )
 
 func main() {
@@ -38,11 +39,16 @@ func main() {
 
 		pkg := *pkgName
 		if pkg == "" {
-			return errors.Errorf("Proxy should be generated in a separage package. Use -pkg flag.")
+			return errors.Errorf("HTTP handler should be generated in a separage package. Use -pkg flag.")
+		}
+		pbpkg := *pbPkgName
+		if pbpkg == "" {
+			pbpkg = "pb"
 		}
 
-		opts := proxygen.Options{
-			Package: pkg,
+		opts := httpgen.Options{
+			Package:   pkg,
+			PbPackage: *pbPkgName,
 		}
 
 		for _, name := range gp.Request.FileToGenerate {
@@ -56,13 +62,13 @@ func main() {
 			logger.Infof("Processing: %s", name)
 
 			prefix := path.Base(f.GeneratedFilenamePrefix)
-			fn := fmt.Sprintf("%s.proxy.pb.go", prefix)
+			fn := fmt.Sprintf("%s.pb.go", prefix)
 			fullFn := path.Join(pkg, fn)
 			logger.Infof("Generating %s\n", fullFn)
 
 			gf := gp.NewGeneratedFile(fullFn, f.GoImportPath)
 
-			err := proxygen.ApplyTemplate(gf, f, opts)
+			err := httpgen.ApplyTemplate(gf, f, opts)
 			if err != nil {
 				gf.Skip()
 				gp.Error(err)
