@@ -59,7 +59,7 @@ case $key in
     shift # past value
     ;;
     --http)
-    HTTP="--go-http_out=logs,pbpkg=pb:$2"
+    HTTP="--go-http_out=logs=true,pbpkg=pb:$2"
     shift # past argument
     shift # past value
     ;;
