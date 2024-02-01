@@ -39,7 +39,7 @@ jobs:
           GIT_USER: ${{ github.actor }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v2.1.0
+        uses: arduino/setup-protoc@v3.0.0
 
       - name: Checkout
         uses: actions/checkout@v4
