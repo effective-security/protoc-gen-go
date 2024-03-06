@@ -39,7 +39,7 @@ jobs:
           GIT_USER: ${{ github.actor }}
 
       - name: Install Protoc
-        uses: arduino/setup-protoc@v2.1.0
+        uses: arduino/setup-protoc@v3.0.0
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,7 +66,7 @@ jobs:
       # Cache go build cache, used to speedup go test
       - name: Go Build Cache
         id: go-build-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.go-cache-paths.outputs.go-build }}
           key: ${{ runner.os }}-go-build-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
@@ -75,7 +75,7 @@ jobs:
       # Cache go mod cache, used to speedup builds
       - name: Go Mod Cache
         id: go-mod-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ steps.go-cache-paths.outputs.go-mod }}
           key: ${{ runner.os }}-go-mod-${{ env.GO_CACHE_BUSTER }}-${{ hashFiles('**/go.sum') }}
@@ -116,7 +116,7 @@ jobs:
           GIT_USER: ${{ github.actor }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Login to Registry
         uses: docker/login-action@v3
@@ -125,7 +125,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -151,7 +151,7 @@ jobs:
       - name: Docker push
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: docker_build
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           file: ./Dockerfile
           context: .
