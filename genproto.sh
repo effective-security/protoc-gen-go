@@ -12,6 +12,7 @@ set -e
 #   --json {path}       - specifies to generate --go-json_out
 #   --mock {path}       - specifies to generate --go-mock_out
 #   --proxy {path}      - specifies to generate --go-proxy_out
+#   --http {pkg} {path} - specifies to generate --go-http_out
 #   --methods {path}    - specifies to generate --go-allocator_out
 #   --python {path}     - specifies to generate --python_out
 #   --ts {path}         - specifies to generate --grpc-web_out
@@ -59,9 +60,10 @@ case $key in
     shift # past value
     ;;
     --http)
-    HTTP="--go-http_out=logs=true,pbpkg=pb:$2"
+    HTTP="--go-http_out=logs=true,pbpkg=$2:$3"
     shift # past argument
-    shift # past value
+    shift # past pkg value
+    shift # past path value
     ;;
     --methods)
     METHODS="--go-allocator_out=logs=true:$2"
