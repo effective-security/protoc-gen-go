@@ -17,6 +17,7 @@ build_log.txt
 *.pb.mock.go
 *.pb.proxy.go
 e2e/ts
+e2e/cs
 !api/authz.pb.go
 
 debug
