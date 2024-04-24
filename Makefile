@@ -63,7 +63,7 @@ proto:
 		--go_out=paths=source_relative:./../../../api \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./../../../api \
 		*.proto && \
-	mkdir -p ${PROJ_ROOT}/e2e/ts ${PROJ_ROOT}/e2e/openapi && \
+	mkdir -p ${PROJ_ROOT}/e2e/ts ${PROJ_ROOT}/e2e/openapi ${PROJ_ROOT}/e2e/cs && \
     cd ${PROJ_ROOT}/e2e/proto && \
 	protoc \
 		-I=. \
@@ -76,6 +76,7 @@ proto:
 		--go-proxy_out=logs=true:./.. \
 		--go-allocator_out=logs=true:./.. \
 		--go-http_out=logs=true,pbpkg=e2e:./.. \
+		--csharp_out=./../cs \
 		*.proto && \
 	cd ${PROJ_ROOT}/e2e && \
 	find . -name \*.go -exec sh -c "goimports -l -w {}" \;

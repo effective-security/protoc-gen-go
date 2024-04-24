@@ -16,6 +16,7 @@ set -e
 #   --methods {path}    - specifies to generate --go-allocator_out
 #   --python {path}     - specifies to generate --python_out
 #   --ts {path}         - specifies to generate --grpc-web_out
+#   --csharp {path}     - specifies to generate --csharp_out
 #   --out               - specifies to output folder, default is '.'
 
 POSITIONAL=()
@@ -85,8 +86,13 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --csharp)
+    CS="--csharp_opt=serializable,file_extension=.gen.cs --grpc_opt=no_server --grpc_out=$2 --plugin=protoc-gen-grpc=/usr/local/bin/grpc_csharp_plugin --csharp_out=$2"
+    shift # past argument
+    shift # past value
+    ;;
     *)
-    echo "invalid flag $key: use --help to see the option"
+    echo "genproto.sh: invalid flag $key: use --help to see the option"
     exit 1
 esac
 done
@@ -106,6 +112,7 @@ echo "HTTP    = $HTTP"
 echo "METHODS = $METHODS"
 echo "GOLANG  = $GOLANG"
 echo "TS      = $TS"
+echo "CS      = $CS"
 
 for dir in $DIRS; do
 	pushd "$dir"
@@ -113,6 +120,6 @@ for dir in $DIRS; do
 		protoc $IMPORTS $OPENAPI \
 			-I=. \
 			-I=/usr/local/include \
-            $JSON $MOCK $PROXY $METHODS $HTTP $GOLANG $PYTHON $TS $FILES
+            $JSON $MOCK $PROXY $METHODS $HTTP $GOLANG $PYTHON $TS $CS $FILES
 	popd
 done
