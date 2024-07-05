@@ -41,10 +41,10 @@ func main() {
 		if pkg == "" {
 			return errors.Errorf("HTTP handler should be generated in a separage package. Use -pkg flag.")
 		}
-		pbpkg := *pbPkgName
-		if pbpkg == "" {
-			pbpkg = "pb"
-		}
+		// pbpkg := *pbPkgName
+		// if pbpkg == "" {
+		// 	pbpkg = "pb"
+		// }
 
 		opts := httpgen.Options{
 			Package:   pkg,
