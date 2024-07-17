@@ -33,7 +33,7 @@ RUN curl -sSL https://www.nuget.org/api/v2/package/Grpc.Tools/2.62.0 --output /t
 RUN unzip /tmp/GrpcTools.zip -d /tmp/GrpcTools
 RUN cp -r /tmp/GrpcTools/tools/linux_x64/grpc_csharp_plugin /usr/local/bin/
 
-RUN curl -L https://go.dev/dl/go1.22.3.linux-amd64.tar.gz -o /tmp/go.tar.gz
+RUN curl -L https://go.dev/dl/go1.22.5.linux-amd64.tar.gz -o /tmp/go.tar.gz
 RUN tar -C /usr/local -xzf /tmp/go.tar.gz
 
 RUN curl -L https://github.com/grpc/grpc-web/releases/download/1.5.0/protoc-gen-grpc-web-1.5.0-linux-x86_64 -o /tools/protoc-gen-grpc-web
