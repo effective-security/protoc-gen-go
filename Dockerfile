@@ -20,12 +20,12 @@ COPY ./proto/ /third_party/
 
 RUN apt update && apt install -y curl zip
 
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v27.2/protoc-27.2-linux-x86_64.zip -o /tmp/protoc.zip
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v28.1/protoc-28.1-linux-x86_64.zip -o /tmp/protoc.zip
 RUN unzip /tmp/protoc.zip -d /tmp/protoc3
 RUN mv /tmp/protoc3/bin/* /usr/local/bin/
 RUN cp -r /tmp/protoc3/include/ /usr/local/
 
-RUN curl -L https://github.com/protocolbuffers/protobuf-javascript/releases/download/v3.21.2/protobuf-javascript-3.21.2-linux-x86_64.zip -o /tmp/protobuf-javascript.zip
+RUN curl -L https://github.com/protocolbuffers/protobuf-javascript/releases/download/v3.21.4/protobuf-javascript-3.21.4-linux-x86_64.zip -o /tmp/protobuf-javascript.zip
 RUN unzip /tmp/protobuf-javascript.zip -d /tmp/protobuf-javascript
 RUN mv /tmp/protobuf-javascript/bin/* /tools/
 
