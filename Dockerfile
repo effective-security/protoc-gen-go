@@ -20,7 +20,7 @@ COPY ./proto/ /third_party/
 
 RUN apt update && apt install -y curl zip
 
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v28.1/protoc-28.1-linux-x86_64.zip -o /tmp/protoc.zip
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v28.3/protoc-28.3-linux-x86_64.zip -o /tmp/protoc.zip
 RUN unzip /tmp/protoc.zip -d /tmp/protoc3
 RUN mv /tmp/protoc3/bin/* /usr/local/bin/
 RUN cp -r /tmp/protoc3/include/ /usr/local/
@@ -33,7 +33,7 @@ RUN curl -sSL https://www.nuget.org/api/v2/package/Grpc.Tools/2.62.0 --output /t
 RUN unzip /tmp/GrpcTools.zip -d /tmp/GrpcTools
 RUN cp -r /tmp/GrpcTools/tools/linux_x64/grpc_csharp_plugin /usr/local/bin/
 
-RUN curl -L https://go.dev/dl/go1.22.5.linux-amd64.tar.gz -o /tmp/go.tar.gz
+RUN curl -L https://go.dev/dl/go1.23.2.linux-amd64.tar.gz -o /tmp/go.tar.gz
 RUN tar -C /usr/local -xzf /tmp/go.tar.gz
 
 RUN curl -L https://github.com/grpc/grpc-web/releases/download/1.5.0/protoc-gen-grpc-web-1.5.0-linux-x86_64 -o /tools/protoc-gen-grpc-web

@@ -153,6 +153,13 @@ func (m *{{.StructName}}) SetResponse(r proto.Message) {
 	m.Index = 0
 }
 
+// SetResponses sets responses without errors
+func (m *{{.StructName}}) SetResponses(r []proto.Message) {
+	m.Err = nil
+	m.Resps = r
+	m.Index = 0
+}
+
 func (m *{{.StructName}}) next() proto.Message {
 	c := len(m.Resps)
 	idx := m.Index
