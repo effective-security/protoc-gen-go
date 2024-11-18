@@ -8,7 +8,7 @@ require (
 	github.com/effective-security/xlog v0.9.39
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
