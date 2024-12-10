@@ -71,7 +71,7 @@ proto:
 		--openapi_out=output_mode=source_relative,naming=proto:./../openapi \
 		--go_out=paths=source_relative:./.. \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./.. \
-		--go-json_out=logs=true,multiline=true,partial=true:./.. \
+		--go-json_out=logs=true,enums_as_ints=true,multiline=true,partial=true:./.. \
 		--go-mock_out=logs=true:./.. \
 		--go-proxy_out=logs=true:./.. \
 		--go-allocator_out=logs=true:./.. \
