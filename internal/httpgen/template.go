@@ -142,6 +142,7 @@ import (
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/porto/xhttp/httperror"
+	"github.com/effective-security/porto/xhttp/marshal"
 	"github.com/effective-security/porto/pkg/retriable"
 )
 `))

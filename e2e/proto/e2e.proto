@@ -27,3 +27,16 @@ message Nested {
     Basic basic = 1;
   }
 }
+
+// JobStatus provides status
+message JobStatus {
+  enum Enum {
+      Unknown   = 0;
+      Scheduled = 0x1;
+      Running   = 0x2;
+      Succeeded = 0x4;
+      Failed    = 0x10;
+      Cancelled = 0x20;
+      All       = 0xffff;
+  }
+}
