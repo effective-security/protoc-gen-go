@@ -50,6 +50,11 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --enum)
+    ENUM="--go-enum_out=logs=true:$2"
+    shift # past argument
+    shift # past value
+    ;;
     --mock)
     MOCK="--go-mock_out=logs=true:$2"
     shift # past argument
@@ -106,6 +111,7 @@ echo "FILES   = $FILES"
 echo "IMPORTS = $IMPORTS"
 echo "OPENAPI = $OPENAPI"
 echo "JSON    = $JSON"
+echo "ENUM    = $ENUM"
 echo "MOCK    = $MOCK"
 echo "PROXY   = $PROXY"
 echo "HTTP    = $HTTP"
@@ -120,6 +126,6 @@ for dir in $DIRS; do
 		protoc $IMPORTS $OPENAPI \
 			-I=. \
 			-I=/usr/local/include \
-            $JSON $MOCK $PROXY $METHODS $HTTP $GOLANG $PYTHON $TS $CS $FILES
+            $JSON $ENUM $MOCK $PROXY $METHODS $HTTP $GOLANG $PYTHON $TS $CS $FILES
 	popd
 done

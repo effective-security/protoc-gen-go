@@ -74,3 +74,18 @@ message CallerStatusResponse {
     bytes Claims = 3 [json_name="Claims"];
 }
 
+// ServiceStatus provides status
+message ServiceStatus {
+    enum Enum {
+        Unknown = 0;
+        Running = 0x2;
+        Failed  = 0x10;
+        All     = 0xffff;
+    }
+}
+
+enum Role {
+    Unknown = 0;
+    Admin = 0x2;
+    User  = 0x10;
+}

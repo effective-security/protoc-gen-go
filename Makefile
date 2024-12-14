@@ -36,6 +36,7 @@ tools:
 build:
 	echo "*** Building plugins"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-json ./cmd/protoc-gen-go-json
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-enum ./cmd/protoc-gen-go-enum
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-mock ./cmd/protoc-gen-go-mock
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-proxy ./cmd/protoc-gen-go-proxy
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-http ./cmd/protoc-gen-go-http
@@ -72,6 +73,7 @@ proto:
 		--go_out=paths=source_relative:./.. \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./.. \
 		--go-json_out=logs=true,enums_as_ints=true,multiline=true,partial=true:./.. \
+		--go-enum_out=logs=true:./.. \
 		--go-mock_out=logs=true:./.. \
 		--go-proxy_out=logs=true:./.. \
 		--go-allocator_out=logs=true:./.. \
