@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/effective-security/porto v0.28.290
 	github.com/effective-security/x v0.9.48
-	github.com/effective-security/xlog v0.9.39
+	github.com/effective-security/xlog v0.9.41
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.36.4
