@@ -24,12 +24,18 @@ type Options struct {
 }
 
 // This function is called with a param which contains the entire definition of a method.
-func ApplyTemplate(w io.Writer, f *protogen.File, opts Options) error {
+func ApplyTemplate(w io.Writer, f *protogen.File, opts Options, withJsonOptions bool) error {
 	buf := &bytes.Buffer{}
 	if err := headerTemplate.Execute(buf, tplHeader{
 		File: f,
 	}); err != nil {
 		return errors.Wrapf(err, "failed to execute template: %s", f.GeneratedFilenamePrefix)
+	}
+
+	if withJsonOptions {
+		if err := jsonOptionsTemplate.Execute(buf, opts); err != nil {
+			return errors.Wrapf(err, "failed to execute template: %s", f.GeneratedFilenamePrefix)
+		}
 	}
 
 	if err := applyMessages(buf, f.Messages, opts); err != nil {
@@ -90,26 +96,40 @@ import (
 )
 `))
 
+	jsonOptionsTemplate = template.Must(template.New("message").Parse(`
+var JsonMarshalOptions = protojson.MarshalOptions {
+	UseEnumNumbers: {{.EnumsAsInts}},
+	EmitUnpopulated: {{.EmitDefaults}},
+	UseProtoNames: {{.OrigName}},
+	AllowPartial: {{.Partial}},
+	{{- if .Multiline}}
+	Multiline: true,
+	Indent: "\t",
+	{{- end}}
+}
+
+var JsonUnmarshalOptions = protojson.UnmarshalOptions {
+	DiscardUnknown: {{.AllowUnknownFields}},
+}
+
+// MarshalJSON implements json.Marshaler
+func MarshalJSON(v any) ([]byte, error) {
+	if JsonMarshalOptions.Multiline {
+		return json.MarshalIndent(v, "", JsonMarshalOptions.Indent)
+	}
+	return json.Marshal(v)
+}
+`))
+
 	messageTemplate = template.Must(template.New("message").Parse(`
 // MarshalJSON implements json.Marshaler
 func (msg *{{.GoIdent.GoName}}) MarshalJSON() ([]byte,error) {
-	return protojson.MarshalOptions {
-		UseEnumNumbers: {{.EnumsAsInts}},
-		EmitUnpopulated: {{.EmitDefaults}},
-		UseProtoNames: {{.OrigName}},
-		AllowPartial: {{.Partial}},
-		{{- if .Multiline}}
-		Multiline: true,
-		Indent: "\t",
-		{{- end}}
-	}.Marshal(msg)
+	return JsonMarshalOptions.Marshal(msg)
 }
 
 // UnmarshalJSON implements json.Unmarshaler
 func (msg *{{.GoIdent.GoName}}) UnmarshalJSON(b []byte) error {
-	return protojson.UnmarshalOptions {
-		DiscardUnknown: {{.AllowUnknownFields}},
-	}.Unmarshal(b, msg)
+	return JsonUnmarshalOptions.Unmarshal(b, msg)
 }
 `))
 )
