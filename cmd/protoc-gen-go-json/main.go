@@ -49,6 +49,7 @@ func main() {
 			Multiline:          *multiline,
 		}
 
+		isFirst := true
 		for _, name := range gp.Request.FileToGenerate {
 			f := gp.FilesByPath[name]
 			prefix := path.Base(f.GeneratedFilenamePrefix)
@@ -62,12 +63,13 @@ func main() {
 			logger.Infof("Generating %s\n", fn)
 
 			gf := gp.NewGeneratedFile(fn, f.GoImportPath)
-			err := jsongen.ApplyTemplate(gf, f, opts)
+			err := jsongen.ApplyTemplate(gf, f, opts, isFirst)
 			if err != nil {
 				gf.Skip()
 				gp.Error(err)
 				continue
 			}
+			isFirst = false
 		}
 
 		return nil
