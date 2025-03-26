@@ -1,17 +1,17 @@
 module github.com/effective-security/protoc-gen-go
 
-go 1.23.5
+go 1.24.1
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/effective-security/porto v0.31.311
-	github.com/effective-security/x v0.9.49
+	github.com/effective-security/porto v0.32.312
+	github.com/effective-security/x v0.10.50
 	github.com/effective-security/xlog v0.9.41
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250311190419-81fb87f6b8bf
 	google.golang.org/grpc v1.71.0
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.6
 )
 
 require (
@@ -20,7 +20,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/effective-security/metrics v0.7.83 // indirect
-	github.com/effective-security/xpki v0.23.214 // indirect
+	github.com/effective-security/xpki v0.24.215 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
@@ -45,7 +45,7 @@ require (
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

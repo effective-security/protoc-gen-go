@@ -198,7 +198,7 @@ func NewHTTP{{.ClientName}}(client retriable.PostRequester) {{.Prefix}}{{.Server
 
 {{- .Method.Comments.Leading -}}
 func (s *{{.ProxyStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}, opts ...grpc.CallOption) (*{{type .Method.Output}}, error) {
-	// add corellation ID to outgoing RPC calls
+	// add correlation ID to outgoing RPC calls
 	ctx = correlation.WithMetaFromContext(ctx)
 	res, err := s.srv.{{.Method.GoName}}(ctx, req)
 	if err != nil {
@@ -209,7 +209,7 @@ func (s *{{.ProxyStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{ty
 
 {{ .Method.Comments.Leading -}}
 func (s *{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}) (*{{type .Method.Output}}, error) {
-	// add corellation ID to outgoing RPC calls
+	// add correlation ID to outgoing RPC calls
 	ctx = correlation.WithMetaFromContext(ctx)
 	res, err := s.remote.{{.Method.GoName}}(ctx, req, s.callOpts...)
 	if err != nil {
