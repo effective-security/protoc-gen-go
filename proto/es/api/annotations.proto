@@ -1,0 +1,63 @@
+syntax = "proto3";
+package es.api;
+
+option go_package = "github.com/effective-security/protoc-gen-go/api";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.MethodOptions {
+    string allowed_roles = 1071;
+}
+
+extend google.protobuf.FieldOptions {
+    // search is the option for OpenSearch Index.
+    // It can include Index type:
+    // keyword|text|nested|object|flat_object|no_index,exclude.
+    // - `flat_object` for nested fields that should not be indexed.
+    // - `no_index` for fields that should not be indexed.
+    // - `exclude` for fields that should not be included in the search results.
+    string search = 51001;
+    // display is the option for the field's Display Name in the UI.
+    string display = 51002;
+    // description is the option for the field's description.
+    string description = 51003;
+    // csv is the option for the field's Name in CSV header.
+    string csv = 51004;
+}
+
+// Custom enum value option
+extend google.protobuf.EnumValueOptions {
+    // args is the option for the field's arguments,
+    // it can be used to specify the arguments for the enum value, as a string
+    // of comma-separated values.
+    // For example, "arg1,arg2,arg3" will be parsed as a list of strings
+    string enum_args = 52001;
+    // display is the option for the field's Display Name in the UI.
+    string enum_display = 52002;
+    // description is the option for the field's description.
+    string enum_description = 52003;
+}
+
+message EnumMeta {
+    int32 Value          = 1 [json_name = "Value"];
+    string Name          = 2 [json_name = "Name"];
+    string Display       = 3 [json_name = "Display"];
+    string Documentation = 4 [json_name = "Documentation"];
+    repeated string Args = 5 [json_name = "Args"];
+}
+
+message FieldMeta {
+    string Name          = 2 [json_name = "Name"];
+    string Display       = 3 [json_name = "Display"];
+    string Documentation = 4 [json_name = "Documentation"];
+}
+
+message EnumDescription {
+    string Name             = 1 [json_name = "Name"];
+    repeated EnumMeta Enums = 2 [json_name = "Enums"];
+}
+
+message MessageDescription {
+    string Name               = 1 [json_name = "Name"];
+    repeated FieldMeta Fields = 2 [json_name = "Fields"];
+}

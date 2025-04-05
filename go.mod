@@ -4,8 +4,8 @@ go 1.24.1
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/effective-security/porto v0.32.312
-	github.com/effective-security/x v0.10.50
+	github.com/effective-security/porto v0.32.315
+	github.com/effective-security/x v0.11.52
 	github.com/effective-security/xlog v0.9.41
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0

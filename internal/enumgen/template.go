@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/effective-security/protoc-gen-go/api"
 	"github.com/effective-security/x/enum"
 	"github.com/effective-security/xlog"
 	"github.com/pkg/errors"
@@ -30,12 +31,15 @@ func ApplyTemplate(w io.Writer, f *protogen.File) error {
 		return errors.Wrapf(err, "failed to execute template: %s", f.GeneratedFilenamePrefix)
 	}
 
-	if err := applyEnums(buf, f.Enums); err != nil {
+	err := applyEnums(buf, f.Enums)
+	if err != nil {
 		return err
 	}
-	if err := applyMessages(buf, f.Messages); err != nil {
+	err = applyMessages(buf, f.Messages)
+	if err != nil {
 		return err
 	}
+
 	src := buf.Bytes()
 	code, err := format.Source(src)
 	if err != nil {
@@ -49,9 +53,10 @@ func ApplyTemplate(w io.Writer, f *protogen.File) error {
 func applyEnums(w io.Writer, enums []*protogen.Enum) error {
 	for _, en := range enums {
 		logger.Infof("Processing %s", en.GoIdent.GoName)
-
+		desc := createEnumDescription(en)
 		if err := enumTemplate.Execute(w, tplEnum{
-			Enum: en,
+			Enum:        en,
+			Description: desc,
 		}); err != nil {
 			return errors.Wrapf(err, "failed to execute template: %s", en.GoIdent.GoName)
 		}
@@ -69,8 +74,10 @@ func applyMessages(w io.Writer, msgs []*protogen.Message) error {
 		for _, en := range msg.Enums {
 			logger.Infof("Processing %s_%s", msg.GoIdent.GoName, en.GoIdent.GoName)
 
+			desc := createEnumDescription(en)
 			if err := enumTemplate.Execute(w, tplEnum{
-				Enum: en,
+				Enum:        en,
+				Description: desc,
 			}); err != nil {
 				return errors.Wrapf(err, "failed to execute template: %s", en.GoIdent.GoName)
 			}
@@ -92,6 +99,19 @@ func tempFuncs() template.FuncMap {
 		}
 		return strings.Join(names, ",")
 	}
+	m["enum_name"] = func(f *protogen.Enum, name string) string {
+		return strings.TrimSuffix(f.GoIdent.GoName, "_Enum") + "_" + name
+	}
+	m["list"] = func(vals []string) string {
+		if len(vals) == 0 {
+			return "nil"
+		}
+		var result []string
+		for _, v := range vals {
+			result = append(result, fmt.Sprintf("\"%s\"", v))
+		}
+		return "[]string{" + strings.Join(result, ",") + "}"
+	}
 	return m
 }
 
@@ -100,8 +120,9 @@ type tplHeader struct {
 }
 
 type tplEnum struct {
-	Enum    *protogen.Enum
-	Message *protogen.Message
+	Enum        *protogen.Enum
+	Message     *protogen.Message
+	Description *api.EnumDescription
 }
 
 var (
@@ -117,6 +138,7 @@ import (
 	{{.GoImportPath}}
 	"google.golang.org/protobuf/proto"
 	"github.com/effective-security/x/enum"
+	"github.com/effective-security/protoc-gen-go/api"
 )
 `))
 
@@ -183,6 +205,63 @@ func (s *{{.Enum.GoIdent.GoName}}) UnmarshalYAML(unmarshal func(any) error) erro
 	// If both attempts fail, set to default
 	*s = 0
 	return nil
+}
+
+// DisplayName returns display name of Enum value
+func (s {{.Enum.GoIdent.GoName}}) DisplayName() string {
+	return {{.Enum.GoIdent.GoName}}_DisplayName[s]
+}
+
+// Meta returns Enum meta information
+func (s {{.Enum.GoIdent.GoName}}) Meta() *api.EnumMeta {
+	return {{.Enum.GoIdent.GoName}}_Meta[s]
+}
+
+// Describe returns Enum meta information for all values
+func (s {{.Enum.GoIdent.GoName}}) Describe() map[{{.Enum.GoIdent.GoName}}]*api.EnumMeta {
+	return {{.Enum.GoIdent.GoName}}_Meta
+}
+
+var {{.Enum.GoIdent.GoName}}_Name = map[{{.Enum.GoIdent.GoName}}]string {
+{{- with .Enum }}
+{{- range $.Description.Enums }}
+	{{enum_name $.Enum .Name}}: "{{.Name}}",
+{{- end }}
+{{- end }}
+}
+
+var {{.Enum.GoIdent.GoName}}_Value = map[string]{{.Enum.GoIdent.GoName}} {
+{{- with .Enum }}
+{{- range $.Description.Enums }}
+	"{{.Name}}":{{enum_name $.Enum .Name}},
+{{- end }}
+{{- end }}
+}
+
+var {{.Enum.GoIdent.GoName}}_DisplayName = map[{{.Enum.GoIdent.GoName}}]string {
+{{- with .Enum }}
+{{- range $.Description.Enums }}
+	{{enum_name $.Enum .Name}}: "{{.Display}}",
+{{- end }}
+{{- end }}
+}
+
+var {{.Enum.GoIdent.GoName}}_Meta = map[{{.Enum.GoIdent.GoName}}]*api.EnumMeta {
+	{{- with .Enum }}
+	{{- range $.Description.Enums }}
+	{{enum_name $.Enum .Name}}: {
+		Value:         {{.Value}},
+		Name:          "{{.Name}}",
+		Display:       "{{.Display}}",
+		{{- if .Args }}
+		Args:          {{list .Args}},
+		{{- end }}
+		{{- if .Documentation }}
+		Documentation: ` + "`{{.Documentation}}`" + `,
+		{{- end }}
+	},
+	{{- end }}
+	{{- end }}
 }
 
 `))

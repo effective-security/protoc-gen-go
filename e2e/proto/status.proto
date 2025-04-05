@@ -2,7 +2,7 @@ syntax = "proto3";
 package e2e;
 
 option go_package = "github.com/effective-security/protoc-gen-go/e2e";
-import "es/api/authz.proto";
+import "es/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
@@ -35,57 +35,77 @@ service Status {
 // ServerVersion provides server build and runtime version
 message ServerVersion {
     // Build is the server build version.
-    string Build = 1 [json_name="Build"];
+    string Build = 1 [json_name = "Build"];
     // Runtime is the runtime version.
-    string Runtime = 2 [json_name="Runtime"];
+    string Runtime = 2 [json_name = "Runtime"];
 }
 
 // ServerStatus provides server status information
 message ServerStatus {
     // Name of the server or application.
-    string Name = 1 [json_name="Name"];
+    string Name = 1 [json_name = "Name"];
     // Nodename is the human-readable name of the cluster member,
     // or empty for single host.
-    string Nodename = 2 [json_name="Nodename"];
+    string Nodename = 2 [json_name = "Nodename"];
     // Hostname is operating system's host name.
-    string Hostname = 3 [json_name="Hostname"];
+    string Hostname = 3 [json_name = "Hostname"];
     // ListenURLs is the list of URLs the service is listening on.
-    repeated string ListenUrls = 4 [json_name="ListenUrls"];
+    repeated string ListenUrls = 4 [json_name = "ListenUrls"];
     // StartedAt is the time when the server has started.
-    google.protobuf.Timestamp StartedAt = 5 [json_name="StartedAt"];
+    google.protobuf.Timestamp StartedAt = 5
+        [json_name = "StartedAt", (es.api.display) = "Started At"];
 }
 
 // ServerStatusResponse returns status and version
 message ServerStatusResponse {
     // Status of the server.
-    ServerStatus Status = 1 [json_name="Status"];
+    ServerStatus Status = 1 [json_name = "Status"];
 
     // Version of the server.
-    ServerVersion Version = 2 [json_name="Version"];
+    ServerVersion Version = 2 [json_name = "Version"];
 }
 
 // CallerStatusResponse returns the caller information
 message CallerStatusResponse {
     // Subject of the caller.
-    string Subject = 1 [json_name="Subject"];
+    string Subject = 1 [json_name = "Subject"];
     // Rame of the caller.
-    string Role = 2 [json_name="Role"];
+    string Role = 2 [json_name = "Role"];
     // Claims from the token, json encoded map[string]interface{}
-    bytes Claims = 3 [json_name="Claims"];
+    bytes Claims = 3
+        [json_name = "Claims", (es.api.search) = "no_index,exclude"];
 }
 
 // ServiceStatus provides status
 message ServiceStatus {
     enum Enum {
+        // Unknown status is used when the status is not known.
         Unknown = 0;
+        // Running status is used when the service is running.
+        //
+        // Second line of the description.
         Running = 0x2;
-        Failed  = 0x10;
-        All     = 0xffff;
+        Failed  = 0x10 [
+            (es.api.enum_args) = "error, code",
+            (es.api.enum_description) =
+                "Failed status has error code and message"
+        ];
+        // All is a bitmask of all statuses.
+        All = 0x7fffffff;
     }
 }
 
 enum Role {
-    Unknown = 0;
-    Admin = 0x2;
-    User  = 0x10;
+    Unknown = 0 [
+        (es.api.enum_description) = "Unknown role",
+        (es.api.enum_display)     = "Unknown"
+    ];
+    Admin = 0x2 [
+        (es.api.enum_description) = "Administrator role",
+        (es.api.enum_display)     = "Administrator"
+    ];
+    User = 0x10 [
+        (es.api.enum_description) = "User role",
+        (es.api.enum_display)     = "User"
+    ];
 }
