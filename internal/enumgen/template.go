@@ -207,9 +207,38 @@ func (s *{{.Enum.GoIdent.GoName}}) UnmarshalYAML(unmarshal func(any) error) erro
 	return nil
 }
 
+// DisplayNames returns display names of Enum bitflag value
+func (s {{.Enum.GoIdent.GoName}}) DisplayNames() []string {
+	flags := enum.Flags(s)
+	count := len(flags)
+	if count == 0 {
+		return nil
+	}
+	if count == 1 {
+		return []string{ {{.Enum.GoIdent.GoName}}_DisplayName[flags[0]] }
+	}
+	var names []string
+	for _, flag := range flags {
+		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayName[flag])
+	}
+	return names
+}
+
 // DisplayName returns display name of Enum value
 func (s {{.Enum.GoIdent.GoName}}) DisplayName() string {
-	return {{.Enum.GoIdent.GoName}}_DisplayName[s]
+	flags := enum.Flags(s)
+	count := len(flags)
+	if count == 0 {
+		return ""
+	}
+	if count == 1 {
+		return {{.Enum.GoIdent.GoName}}_DisplayName[flags[0]]
+	}
+	var names []string
+	for _, flag := range flags {
+		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayName[flag])
+	}
+	return strings.Join(names, ",")
 }
 
 // Meta returns Enum meta information
