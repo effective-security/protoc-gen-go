@@ -26,9 +26,10 @@ type EnumMeta struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Value         int32                  `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"`
 	Name          string                 `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
-	Display       string                 `protobuf:"bytes,3,opt,name=Display,proto3" json:"Display,omitempty"`
-	Documentation string                 `protobuf:"bytes,4,opt,name=Documentation,proto3" json:"Documentation,omitempty"`
-	Args          []string               `protobuf:"bytes,5,rep,name=Args,proto3" json:"Args,omitempty"`
+	FullName      string                 `protobuf:"bytes,3,opt,name=FullName,proto3" json:"FullName,omitempty"`
+	Display       string                 `protobuf:"bytes,4,opt,name=Display,proto3" json:"Display,omitempty"`
+	Documentation string                 `protobuf:"bytes,5,opt,name=Documentation,proto3" json:"Documentation,omitempty"`
+	Args          []string               `protobuf:"bytes,6,rep,name=Args,proto3" json:"Args,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -77,6 +78,13 @@ func (x *EnumMeta) GetName() string {
 	return ""
 }
 
+func (x *EnumMeta) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
+}
+
 func (x *EnumMeta) GetDisplay() string {
 	if x != nil {
 		return x.Display
@@ -100,7 +108,8 @@ func (x *EnumMeta) GetArgs() []string {
 
 type FieldMeta struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,2,opt,name=Name,proto3" json:"Name,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
+	FullName      string                 `protobuf:"bytes,2,opt,name=FullName,proto3" json:"FullName,omitempty"`
 	Display       string                 `protobuf:"bytes,3,opt,name=Display,proto3" json:"Display,omitempty"`
 	Documentation string                 `protobuf:"bytes,4,opt,name=Documentation,proto3" json:"Documentation,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -140,6 +149,13 @@ func (*FieldMeta) Descriptor() ([]byte, []int) {
 func (x *FieldMeta) GetName() string {
 	if x != nil {
 		return x.Name
+	}
+	return ""
+}
+
+func (x *FieldMeta) GetFullName() string {
+	if x != nil {
+		return x.FullName
 	}
 	return ""
 }
@@ -383,15 +399,17 @@ var File_annotations_proto protoreflect.FileDescriptor
 
 const file_annotations_proto_rawDesc = "" +
 	"\n" +
-	"\x11annotations.proto\x12\x06es.api\x1a google/protobuf/descriptor.proto\"\x88\x01\n" +
+	"\x11annotations.proto\x12\x06es.api\x1a google/protobuf/descriptor.proto\"\xa4\x01\n" +
 	"\bEnumMeta\x12\x14\n" +
 	"\x05Value\x18\x01 \x01(\x05R\x05Value\x12\x12\n" +
-	"\x04Name\x18\x02 \x01(\tR\x04Name\x12\x18\n" +
-	"\aDisplay\x18\x03 \x01(\tR\aDisplay\x12$\n" +
-	"\rDocumentation\x18\x04 \x01(\tR\rDocumentation\x12\x12\n" +
-	"\x04Args\x18\x05 \x03(\tR\x04Args\"_\n" +
+	"\x04Name\x18\x02 \x01(\tR\x04Name\x12\x1a\n" +
+	"\bFullName\x18\x03 \x01(\tR\bFullName\x12\x18\n" +
+	"\aDisplay\x18\x04 \x01(\tR\aDisplay\x12$\n" +
+	"\rDocumentation\x18\x05 \x01(\tR\rDocumentation\x12\x12\n" +
+	"\x04Args\x18\x06 \x03(\tR\x04Args\"{\n" +
 	"\tFieldMeta\x12\x12\n" +
-	"\x04Name\x18\x02 \x01(\tR\x04Name\x12\x18\n" +
+	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x1a\n" +
+	"\bFullName\x18\x02 \x01(\tR\bFullName\x12\x18\n" +
 	"\aDisplay\x18\x03 \x01(\tR\aDisplay\x12$\n" +
 	"\rDocumentation\x18\x04 \x01(\tR\rDocumentation\"M\n" +
 	"\x0fEnumDescription\x12\x12\n" +

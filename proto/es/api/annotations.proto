@@ -41,13 +41,15 @@ extend google.protobuf.EnumValueOptions {
 message EnumMeta {
     int32 Value          = 1 [json_name = "Value"];
     string Name          = 2 [json_name = "Name"];
-    string Display       = 3 [json_name = "Display"];
-    string Documentation = 4 [json_name = "Documentation"];
-    repeated string Args = 5 [json_name = "Args"];
+    string FullName      = 3 [json_name = "FullName"];
+    string Display       = 4 [json_name = "Display"];
+    string Documentation = 5 [json_name = "Documentation"];
+    repeated string Args = 6 [json_name = "Args"];
 }
 
 message FieldMeta {
-    string Name          = 2 [json_name = "Name"];
+    string Name          = 1 [json_name = "Name"];
+    string FullName      = 2 [json_name = "FullName"];
     string Display       = 3 [json_name = "Display"];
     string Documentation = 4 [json_name = "Documentation"];
 }

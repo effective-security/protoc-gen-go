@@ -9,8 +9,8 @@ import (
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
-// Convert enum descriptor to EnumMeta message
-func createEnumDescription(en *protogen.Enum) *api.EnumDescription {
+// CreateEnumDescription convert enum descriptor to EnumMeta message
+func CreateEnumDescription(en *protogen.Enum) *api.EnumDescription {
 	res := &api.EnumDescription{
 		Name: string(en.GoIdent.GoName),
 	}
@@ -32,6 +32,7 @@ func createEnumDescription(en *protogen.Enum) *api.EnumDescription {
 		meta := &api.EnumMeta{
 			Value:         int32(value.Desc.Number()),
 			Name:          string(value.Desc.Name()),
+			FullName:      string(value.Desc.FullName()),
 			Display:       display,
 			Documentation: cleanComment(description),
 			Args:          nonEmptyStrings(strings.Split(args, ",")),
