@@ -8,35 +8,49 @@ import "google/protobuf/timestamp.proto";
 // Basic just tests basic fields, including oneofs and so on that don't
 // generally work automatically with encoding/json.
 message Basic {
-  string a = 1;
+    string a = 1;
 
-  oneof b {
-    int32  int = 2;
-    string str = 3;
-    uint64 id  = 4;
-  }
+    oneof b {
+        int32 int  = 2;
+        string str = 3;
+        uint64 id  = 4;
+    }
 
-  map<string, string> map = 5;
-  google.protobuf.Timestamp created = 6;
+    map<string, string> map           = 5;
+    google.protobuf.Timestamp created = 6;
+
+    JobStatus.Enum statuses          = 7;
+    ResourceType.Enum resource_types = 8;
 }
 
 // Nested for testing nested types
 message Nested {
-  message Message {
-    // Basic type
-    Basic basic = 1;
-  }
+    message Message {
+        // Basic type
+        Basic basic = 1;
+    }
 }
 
 // JobStatus provides status
 message JobStatus {
-  enum Enum {
-      Unknown   = 0;
-      Scheduled = 0x1;
-      Running   = 0x2;
-      Succeeded = 0x4;
-      Failed    = 0x10;
-      Cancelled = 0x20;
-      All       = 0xffff;
-  }
+    enum Enum {
+        Unknown   = 0;
+        Scheduled = 0x1;
+        Running   = 0x2;
+        Succeeded = 0x4;
+        Failed    = 0x10;
+        Cancelled = 0x20;
+        All       = 0x7fffffff;
+    }
+}
+
+// ResourceType provides status
+message ResourceType {
+    enum Enum {
+        Unknown        = 0;
+        EC2Instance    = 0x1;
+        S3Bucket       = 0x2;
+        LambdaFunction = 0x4;
+        All            = 0x7fffffff;
+    }
 }
