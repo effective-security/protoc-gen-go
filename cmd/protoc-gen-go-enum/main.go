@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
 
 	"github.com/effective-security/protoc-gen-go/internal/enumgen"
 	"github.com/effective-security/xlog"
@@ -14,7 +13,10 @@ import (
 var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "go-enums")
 
 var (
-	log = flag.Bool("logs", false, "output logs")
+	log        = flag.Bool("logs", false, "output logs")
+	out        = flag.String("out", "enums", "output file prefix")
+	importpath = flag.String("import", "", "go import path")
+	pkg        = flag.String("package", "", "go package name")
 )
 
 func main() {
@@ -34,33 +36,35 @@ func main() {
 		}
 		xlog.SetFormatter(formatter)
 
+		opts := enumgen.Opts{
+			Package: *pkg,
+		}
+
+		var allEnums []*protogen.Enum
+
 		for _, name := range gp.Request.FileToGenerate {
 			f := gp.FilesByPath[name]
-			prefix := path.Base(f.GeneratedFilenamePrefix)
-
 			if len(f.Enums) == 0 && len(f.Messages) == 0 {
 				logger.Infof("Skipping %s, no enums", name)
 				continue
 			}
 
-			enumsCount := 0
-			for _, m := range f.Messages {
-				enumsCount += len(m.Enums)
-			}
-			if enumsCount == 0 {
-				logger.Infof("Skipping %s, no enums", name)
-				continue
+			if opts.Package == "" {
+				opts.Package = string(f.GoPackageName)
 			}
 
-			fn := fmt.Sprintf("%s.enum.pb.go", prefix)
+			allEnums = append(allEnums, f.Enums...)
+			allEnums = append(allEnums, enumgen.GetEnums(f.Messages)...)
+		}
+
+		if len(allEnums) > 0 {
+			fn := fmt.Sprintf("%s.pb.go", *out)
 			logger.Infof("Generating %s\n", fn)
 
-			gf := gp.NewGeneratedFile(fn, f.GoImportPath)
-			err := enumgen.ApplyTemplate(gf, f)
+			f := gp.NewGeneratedFile(fn, protogen.GoImportPath(*importpath))
+			err := enumgen.ApplyTemplate(f, opts, allEnums)
 			if err != nil {
-				gf.Skip()
 				gp.Error(err)
-				continue
 			}
 		}
 
