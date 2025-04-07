@@ -36,7 +36,7 @@ func ApplyTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum)
 		return errors.Wrapf(err, "failed to execute template")
 	}
 
-	err := ApplyEnums(buf, enums)
+	err := ApplyEnums(buf, opts, enums)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func ApplyTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum)
 	return err
 }
 
-func ApplyEnums(w io.Writer, enums []*protogen.Enum) error {
+func ApplyEnums(w io.Writer, opts Opts, enums []*protogen.Enum) error {
 	var descriptions []tplEnum
 	for _, en := range enums {
 		logger.Infof("Processing %s", en.GoIdent.GoName)
@@ -62,7 +62,10 @@ func ApplyEnums(w io.Writer, enums []*protogen.Enum) error {
 		})
 	}
 
-	if err := descrsTemplate.Execute(w, tplDescriptions{Data: descriptions}); err != nil {
+	if err := descrsTemplate.Execute(w, tplDescriptions{
+		Opts: opts,
+		Data: descriptions,
+	}); err != nil {
 		return errors.Wrapf(err, "failed to execute template")
 	}
 
@@ -103,6 +106,12 @@ func tempFuncs() template.FuncMap {
 	m["enum_name"] = func(f *protogen.Enum, name string) string {
 		return strings.TrimSuffix(f.GoIdent.GoName, "_Enum") + "_" + name
 	}
+	m["enum_dot_name"] = func(f *protogen.Enum) string {
+		if strings.HasSuffix(f.GoIdent.GoName, "_Enum") {
+			return strings.TrimSuffix(f.GoIdent.GoName, "_Enum") + ".Enum"
+		}
+		return f.GoIdent.GoName
+	}
 	m["list"] = func(vals []string) string {
 		if len(vals) == 0 {
 			return "nil"
@@ -126,6 +135,7 @@ type tplEnum struct {
 }
 
 type tplDescriptions struct {
+	Opts
 	Data []tplEnum
 }
 
@@ -209,36 +219,36 @@ func (s *{{.Enum.GoIdent.GoName}}) UnmarshalYAML(unmarshal func(any) error) erro
 	return nil
 }
 
-// DisplayNames returns display names of Enum bitflag value
-func (s {{.Enum.GoIdent.GoName}}) DisplayNames() []string {
+// DisplayValues returns display names of Enum bitflag value
+func (s {{.Enum.GoIdent.GoName}}) DisplayValues() []string {
 	flags := enum.Flags(s)
 	count := len(flags)
 	if count == 0 {
-		return nil
+		return []string{s.String()}
 	}
 	if count == 1 {
-		return []string{ {{.Enum.GoIdent.GoName}}_DisplayName[flags[0]] }
+		return []string{ {{.Enum.GoIdent.GoName}}_DisplayValue[flags[0]] }
 	}
 	var names []string
 	for _, flag := range flags {
-		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayName[flag])
+		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayValue[flag])
 	}
 	return names
 }
 
-// DisplayName returns display name of Enum value
-func (s {{.Enum.GoIdent.GoName}}) DisplayName() string {
+// DisplayValue returns display name of Enum value
+func (s {{.Enum.GoIdent.GoName}}) DisplayValue() string {
 	flags := enum.Flags(s)
 	count := len(flags)
 	if count == 0 {
-		return ""
+		return s.String()
 	}
 	if count == 1 {
-		return {{.Enum.GoIdent.GoName}}_DisplayName[flags[0]]
+		return {{.Enum.GoIdent.GoName}}_DisplayValue[flags[0]]
 	}
 	var names []string
 	for _, flag := range flags {
-		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayName[flag])
+		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayValue[flag])
 	}
 	return strings.Join(names, ",")
 }
@@ -269,7 +279,7 @@ var {{.Enum.GoIdent.GoName}}_Value = map[string]{{.Enum.GoIdent.GoName}} {
 {{- end }}
 }
 
-var {{.Enum.GoIdent.GoName}}_DisplayName = map[{{.Enum.GoIdent.GoName}}]string {
+var {{.Enum.GoIdent.GoName}}_DisplayValue = map[{{.Enum.GoIdent.GoName}}]string {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
 	{{enum_name $.Enum .Name}}: Display_{{enum_name $.Enum .Name}},
@@ -313,16 +323,10 @@ const (
 {{- end }}
 )
 
-var EnumFullNameTypes = map[string]reflect.Type{
+var EnumNameTypes = map[string]reflect.Type{
 {{- range .Data }}
-{{- $root := . }}
-{{- with .Enum }}
-  {{- range $root.Description.Enums }}
-    "{{.FullName}}": reflect.TypeOf({{enum_name $root.Enum .Name}}),
-  {{- end }}
-{{- end }}
+    "{{$.Package}}.{{enum_dot_name .Enum}}": reflect.TypeOf({{.Enum.GoIdent.GoName}}(0)),
 {{- end }}
 }
-
 `))
 )
