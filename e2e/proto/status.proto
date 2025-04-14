@@ -34,6 +34,8 @@ service Status {
 
 // ServerVersion provides server build and runtime version
 message ServerVersion {
+    option (es.api.generate_meta) = true;
+
     // Build is the server build version.
     string Build = 1 [json_name = "Build"];
     // Runtime is the runtime version.
@@ -42,6 +44,8 @@ message ServerVersion {
 
 // ServerStatus provides server status information
 message ServerStatus {
+    option (es.api.generate_meta) = true;
+
     // Name of the server or application.
     string Name = 1 [json_name = "Name"];
     // Nodename is the human-readable name of the cluster member,
@@ -58,18 +62,23 @@ message ServerStatus {
 
 // ServerStatusResponse returns status and version
 message ServerStatusResponse {
+    option (es.api.generate_meta) = true;
+
     // Status of the server.
-    ServerStatus Status = 1 [json_name = "Status"];
+    ServerStatus Status = 1 [json_name = "Status", (es.api.search) = "object"];
 
     // Version of the server.
-    ServerVersion Version = 2 [json_name = "Version"];
+    ServerVersion Version = 2
+        [json_name = "Version", (es.api.search) = "object"];
 }
 
 // CallerStatusResponse returns the caller information
 message CallerStatusResponse {
+    option (es.api.generate_meta) = true;
+
     // Subject of the caller.
     string Subject = 1 [json_name = "Subject"];
-    // Rame of the caller.
+    // Role of the caller.
     string Role = 2 [json_name = "Role"];
     // Claims from the token, json encoded map[string]interface{}
     bytes Claims = 3

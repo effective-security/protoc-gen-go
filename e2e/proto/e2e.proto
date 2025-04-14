@@ -4,10 +4,13 @@ package e2e;
 option go_package = "github.com/effective-security/protoc-gen-go/e2e";
 
 import "google/protobuf/timestamp.proto";
+import "es/api/annotations.proto";
 
 // Basic just tests basic fields, including oneofs and so on that don't
 // generally work automatically with encoding/json.
 message Basic {
+    option (es.api.generate_meta) = true;
+
     string a = 1;
 
     oneof b {
@@ -31,8 +34,8 @@ message Nested {
     }
 }
 
-// JobStatus provides status
 message JobStatus {
+    // JobStatus provides status
     enum Enum {
         Unknown   = 0;
         Scheduled = 0x1;
@@ -44,8 +47,8 @@ message JobStatus {
     }
 }
 
-// ResourceType provides status
 message ResourceType {
+    // ResourceType provides status
     enum Enum {
         Unknown        = 0;
         EC2Instance    = 0x1;

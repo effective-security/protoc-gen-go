@@ -12,10 +12,16 @@ extend google.protobuf.MethodOptions {
 extend google.protobuf.FieldOptions {
     // search is the option for OpenSearch Index.
     // It can include Index type:
-    // keyword|text|nested|object|flat_object|no_index,exclude.
+    // facet|store|nested|object|flat_object|no_index,exclude.
+    // - `object` for fields that should be indexed as object.
+    // - `nested` for fields that should be indexed as nested.
     // - `flat_object` for nested fields that should not be indexed.
     // - `no_index` for fields that should not be indexed.
     // - `exclude` for fields that should not be included in the search results.
+    // - `facet` for fields that should be indexed as facet.
+    // - `store` for fields that should be stored.
+    // - other values are define type:
+    // keyword|text|integer|float|double|boolean|date|geo_point|ip.
     string search = 51001;
     // display is the option for the field's Display Name in the UI.
     string display = 51002;
@@ -32,10 +38,21 @@ extend google.protobuf.EnumValueOptions {
     // of comma-separated values.
     // For example, "arg1,arg2,arg3" will be parsed as a list of strings
     string enum_args = 52001;
-    // display is the option for the field's Display Name in the UI.
+    // enum_display is the option for the field's Display Name in the UI.
     string enum_display = 52002;
-    // description is the option for the field's description.
+    // enum_description is the option for the field's description.
     string enum_description = 52003;
+}
+
+// Custom message option
+extend google.protobuf.MessageOptions {
+    // generate_meta is the option for generating the message's meta
+    // information.
+    bool generate_meta = 53001;
+    // message_display is the option for the message's Display Name in the UI.
+    string message_display = 53002;
+    // message_description is the option for the message's description.
+    string message_description = 52003;
 }
 
 message EnumMeta {
@@ -47,19 +64,46 @@ message EnumMeta {
     repeated string Args = 6 [json_name = "Args"];
 }
 
+message SearchOption {
+    enum Enum {
+        None     = 0;
+        Facet    = 0x1;
+        NoIndex  = 0x2;
+        Exclude  = 0x4;
+        Store    = 0x8;
+        Sortable = 0x10;
+    }
+}
+
 message FieldMeta {
     string Name          = 1 [json_name = "Name"];
     string FullName      = 2 [json_name = "FullName"];
     string Display       = 3 [json_name = "Display"];
     string Documentation = 4 [json_name = "Documentation"];
+    string Type          = 5 [json_name = "Type"];
+    string GoType        = 6 [json_name = "GoType"];
+    // SearchType is the type of search for the field.
+    // It can be one of the following:
+    // keyword|text|integer|float|double|boolean|date|geo_point|ip|object|nested|flat_object.
+    string SearchType = 7 [json_name = "SearchType"];
+    // SearchOptions is populated from es.api.search option.
+    SearchOption.Enum SearchOptions = 8 [json_name = "SearchOptions"];
+
+    // Fields is provided for nested messages
+    repeated FieldMeta Fields = 12 [json_name = "Fields"];
+    // EnumDescription is provided for enum fields
+    EnumDescription EnumDescription = 13 [json_name = "EnumDescription"];
 }
 
 message EnumDescription {
     string Name             = 1 [json_name = "Name"];
     repeated EnumMeta Enums = 2 [json_name = "Enums"];
+    string Documentation    = 3 [json_name = "Documentation"];
 }
 
 message MessageDescription {
     string Name               = 1 [json_name = "Name"];
-    repeated FieldMeta Fields = 2 [json_name = "Fields"];
+    string Display            = 2 [json_name = "Display"];
+    repeated FieldMeta Fields = 3 [json_name = "Fields"];
+    string Documentation      = 4 [json_name = "Documentation"];
 }
