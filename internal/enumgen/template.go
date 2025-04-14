@@ -28,7 +28,7 @@ type Opts struct {
 }
 
 // This function is called with a param which contains the entire definition of a method.
-func ApplyTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum) error {
+func ApplyTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum, msgs []*protogen.Message) error {
 	buf := &bytes.Buffer{}
 	if err := headerTemplate.Execute(buf, tplHeader{
 		Opts: opts,
@@ -36,9 +36,18 @@ func ApplyTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum)
 		return errors.Wrapf(err, "failed to execute template")
 	}
 
-	err := ApplyEnums(buf, opts, enums)
-	if err != nil {
-		return err
+	if len(enums) > 0 {
+		err := ApplyEnums(buf, opts, enums)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(msgs) > 0 {
+		err := ApplyMessages(buf, opts, msgs)
+		if err != nil {
+			return err
+		}
 	}
 
 	src := buf.Bytes()
@@ -55,14 +64,14 @@ func ApplyEnums(w io.Writer, opts Opts, enums []*protogen.Enum) error {
 	var descriptions []tplEnum
 	for _, en := range enums {
 		logger.Infof("Processing %s", en.GoIdent.GoName)
-		desc := CreateEnumDescription(en)
+		desc := CreateEnumDescription(en, opts)
 		descriptions = append(descriptions, tplEnum{
 			Enum:        en,
 			Description: desc,
 		})
 	}
 
-	if err := descrsTemplate.Execute(w, tplDescriptions{
+	if err := descrEnumsTemplate.Execute(w, tplEnumDescriptions{
 		Opts: opts,
 		Data: descriptions,
 	}); err != nil {
@@ -75,6 +84,20 @@ func ApplyEnums(w io.Writer, opts Opts, enums []*protogen.Enum) error {
 		}
 	}
 
+	return nil
+}
+
+func ApplyMessages(w io.Writer, opts Opts, msgs []*protogen.Message) error {
+	for _, msg := range msgs {
+		logger.Infof("Processing %s", msg.GoIdent.GoName)
+		if err := descrMessageTemplate.Execute(w, tplMessage{
+			Opts:        opts,
+			Message:     msg,
+			Description: CreateMessageDescription(msg, opts),
+		}); err != nil {
+			return errors.Wrapf(err, "failed to execute template: %s", msg.GoIdent.GoName)
+		}
+	}
 	return nil
 }
 
@@ -91,17 +114,66 @@ func GetEnums(msgs []*protogen.Message) []*protogen.Enum {
 	return enums
 }
 
+func GetMessagesToDescribe(msgs []*protogen.Message) []*protogen.Message {
+	var res []*protogen.Message
+
+	for _, msg := range msgs {
+		opts := msg.Desc.Options().ProtoReflect()
+		describe := opts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
+		if describe {
+			res = append(res, msg)
+		}
+	}
+
+	return res
+}
+
 func tempFuncs() template.FuncMap {
 	m := sprig.TxtFuncMap()
 	// m["type"] = func(f *protogen.Message) string {
 	// 	return path.Base(string(f.GoIdent.GoImportPath)) + "." + f.GoIdent.GoName
 	// }
+	m["trim_package"] = func(val, pack string) string {
+		if strings.HasPrefix(val, pack) {
+			return val[len(pack)+1:]
+		}
+		return val
+	}
 	m["supported"] = func(f *protogen.Enum) string {
 		var names []string
 		for _, v := range f.Values {
 			names = append(names, string(v.Desc.Name()))
 		}
 		return strings.Join(names, ",")
+	}
+	m["search_enum"] = func(val api.SearchOption_Enum) string {
+		var names []string
+		exclude := false
+		if val&api.SearchOption_NoIndex != 0 {
+			names = append(names, "api.SearchOption_NoIndex")
+			exclude = true
+		}
+		if val&api.SearchOption_Exclude != 0 {
+			names = append(names, "api.SearchOption_Exclude")
+			exclude = true
+		}
+
+		if !exclude {
+			if val&api.SearchOption_Facet != 0 {
+				names = append(names, "api.SearchOption_Facet")
+			}
+			if val&api.SearchOption_Sortable != 0 {
+				names = append(names, "api.SearchOption_Sortable")
+			}
+			if val&api.SearchOption_Store != 0 {
+				names = append(names, "api.SearchOption_Store")
+			}
+		}
+		if len(names) == 0 {
+			return "api.SearchOption_None"
+		}
+
+		return strings.Join(names, "|")
 	}
 	m["enum_name"] = func(f *protogen.Enum, name string) string {
 		return strings.TrimSuffix(f.GoIdent.GoName, "_Enum") + "_" + name
@@ -134,9 +206,15 @@ type tplEnum struct {
 	Description *api.EnumDescription
 }
 
-type tplDescriptions struct {
+type tplEnumDescriptions struct {
 	Opts
 	Data []tplEnum
+}
+
+type tplMessage struct {
+	Opts
+	Message     *protogen.Message
+	Description *api.MessageDescription
 }
 
 var (
@@ -287,30 +365,52 @@ var {{.Enum.GoIdent.GoName}}_DisplayValue = map[{{.Enum.GoIdent.GoName}}]string 
 {{- end }}
 }
 
-var {{.Enum.GoIdent.GoName}}_Meta = map[{{.Enum.GoIdent.GoName}}]*api.EnumMeta {
+var {{.Enum.GoIdent.GoName}}_displayValue = map[int32]string {
+{{- with .Enum }}
+{{- range $.Description.Enums }}
+	{{.Value}}: Display_{{enum_name $.Enum .Name}},
+{{- end }}
+{{- end }}
+}
+
+var {{.Enum.GoIdent.GoName}}_EnumDescription = &api.EnumDescription {
+	Name: "{{.Description.Name}}",
+	Enums: []*api.EnumMeta {
 	{{- with .Enum }}
 	{{- range $.Description.Enums }}
-	{{enum_name $.Enum .Name}}: {
-		Value:         {{.Value}},
-		Name:          "{{.Name}}",
-		FullName:      "{{.FullName}}",
-		Display:       Display_{{enum_name $.Enum .Name}},
-		{{- if .Args }}
-		Args:          {{list .Args}},
-		{{- end }}
-		{{- if .Documentation }}
-		Documentation: ` + "`{{.Documentation}}`" + `,
-		{{- end }}
+		{
+			Value: {{.Value}},
+			Name: "{{.Name}}",
+			FullName: "{{.FullName}}",
+			Display: Display_{{enum_name $.Enum .Name}},
+			{{- if .Args }}
+			Args: {{list .Args}},
+			{{- end }}
+			{{- if .Documentation }}
+			Documentation: ` + "`{{.Documentation}}`" + `,
+			{{- end }}
+		},
+	{{- end }}
+	{{- end }}
 	},
+	{{- if .Description.Documentation }}
+	Documentation: ` + "`{{.Description.Documentation}}`" + `,
+	{{- end }}
+}
+
+var {{.Enum.GoIdent.GoName}}_Meta = map[{{.Enum.GoIdent.GoName}}]*api.EnumMeta {
+	{{- with .Enum }}
+	{{- range $i, $value := $.Description.Enums }}
+	{{enum_name $.Enum $value.Name}}: {{$.Enum.GoIdent.GoName}}_EnumDescription.Enums[{{$i}}],
 	{{- end }}
 	{{- end }}
 }
 
 `))
 
-	descrsTemplate = template.Must(template.New("descriptions").
-			Funcs(tempFuncs()).
-			Parse(`
+	descrEnumsTemplate = template.Must(template.New("enum_descriptions").
+				Funcs(tempFuncs()).
+				Parse(`
 
 const (
 {{- range .Data }}
@@ -327,6 +427,45 @@ var EnumNameTypes = map[string]reflect.Type{
 {{- range .Data }}
     "{{$.Package}}.{{enum_dot_name .Enum}}": reflect.TypeOf({{.Enum.GoIdent.GoName}}(0)),
 {{- end }}
+}
+`))
+
+	descrMessageTemplate = template.Must(template.New("message_descriptions").
+				Funcs(tempFuncs()).
+				Parse(`
+{{- $root := . }}				
+var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
+	Name: "{{.Description.Name}}",
+	Display: "{{.Description.Display}}",
+	{{- if .Description.Documentation }}
+	Documentation: ` + "`{{.Description.Documentation}}`" + `,
+	{{- end }}
+	Fields: []*api.FieldMeta {
+	{{- range .Description.Fields }}
+		{
+			Name: "{{.Name}}",
+			FullName: "{{.FullName}}",
+			Display: "{{.Display}}",
+			Type: "{{.Type}}",
+			GoType: "{{.GoType}}",
+			{{- if .SearchOptions }}
+			SearchOptions: {{search_enum .SearchOptions}},
+			{{- end }}
+			{{- if .SearchType }}
+			SearchType: "{{.SearchType}}",
+			{{- end }}
+			{{- if .Documentation }}
+			Documentation: ` + "`{{.Documentation}}`" + `,
+			{{- end }}
+			{{- if .Fields }}
+			Fields: {{trim_package .GoType $root.Package }}_MessageDescription.Fields,
+			{{- end }}
+			{{- if .EnumDescription }}
+			EnumDescription: {{.EnumDescription.Name}}_EnumDescription,
+			{{- end }}
+		},
+	{{- end }}
+	},
 }
 `))
 )

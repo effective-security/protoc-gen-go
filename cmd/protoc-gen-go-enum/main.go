@@ -41,6 +41,7 @@ func main() {
 		}
 
 		var allEnums []*protogen.Enum
+		var msgs []*protogen.Message
 
 		for _, name := range gp.Request.FileToGenerate {
 			f := gp.FilesByPath[name]
@@ -55,14 +56,16 @@ func main() {
 
 			allEnums = append(allEnums, f.Enums...)
 			allEnums = append(allEnums, enumgen.GetEnums(f.Messages)...)
+
+			msgs = append(msgs, enumgen.GetMessagesToDescribe(f.Messages)...)
 		}
 
-		if len(allEnums) > 0 {
+		if len(allEnums) > 0 || len(msgs) > 0 {
 			fn := fmt.Sprintf("%s.pb.go", *out)
 			logger.Infof("Generating %s\n", fn)
 
 			f := gp.NewGeneratedFile(fn, protogen.GoImportPath(*importpath))
-			err := enumgen.ApplyTemplate(f, opts, allEnums)
+			err := enumgen.ApplyTemplate(f, opts, allEnums, msgs)
 			if err != nil {
 				gp.Error(err)
 			}
