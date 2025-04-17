@@ -56,6 +56,8 @@ func parseSearchOptions(searchOpts string, field *protogen.Field) (opts api.Sear
 			opts |= api.SearchOption_Facet
 		case "store":
 			opts |= api.SearchOption_Store
+		case "hide", "hidden":
+			opts |= api.SearchOption_Hidden
 		case "object":
 			typ = "object"
 		case "nested":

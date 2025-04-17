@@ -31,6 +31,7 @@ const (
 	SearchOption_Exclude  SearchOption_Enum = 4
 	SearchOption_Store    SearchOption_Enum = 8
 	SearchOption_Sortable SearchOption_Enum = 16
+	SearchOption_Hidden   SearchOption_Enum = 32
 )
 
 // Enum value maps for SearchOption_Enum.
@@ -42,6 +43,7 @@ var (
 		4:  "Exclude",
 		8:  "Store",
 		16: "Sortable",
+		32: "Hidden",
 	}
 	SearchOption_Enum_value = map[string]int32{
 		"None":     0,
@@ -50,6 +52,7 @@ var (
 		"Exclude":  4,
 		"Store":    8,
 		"Sortable": 16,
+		"Hidden":   32,
 	}
 )
 
@@ -559,6 +562,7 @@ var (
 	// - `exclude` for fields that should not be included in the search results.
 	// - `facet` for fields that should be indexed as facet.
 	// - `store` for fields that should be stored.
+	// - `hidden` for fields that should be hidden in the search query by UI.
 	// - other values are define type:
 	// keyword|text|integer|float|double|boolean|date|geo_point|ip.
 	//
@@ -625,15 +629,17 @@ const file_annotations_proto_rawDesc = "" +
 	"\bFullName\x18\x03 \x01(\tR\bFullName\x12\x18\n" +
 	"\aDisplay\x18\x04 \x01(\tR\aDisplay\x12$\n" +
 	"\rDocumentation\x18\x05 \x01(\tR\rDocumentation\x12\x12\n" +
-	"\x04Args\x18\x06 \x03(\tR\x04Args\"^\n" +
-	"\fSearchOption\"N\n" +
+	"\x04Args\x18\x06 \x03(\tR\x04Args\"j\n" +
+	"\fSearchOption\"Z\n" +
 	"\x04Enum\x12\b\n" +
 	"\x04None\x10\x00\x12\t\n" +
 	"\x05Facet\x10\x01\x12\v\n" +
 	"\aNoIndex\x10\x02\x12\v\n" +
 	"\aExclude\x10\x04\x12\t\n" +
 	"\x05Store\x10\b\x12\f\n" +
-	"\bSortable\x10\x10\"\xf6\x02\n" +
+	"\bSortable\x10\x10\x12\n" +
+	"\n" +
+	"\x06Hidden\x10 \"\xf6\x02\n" +
 	"\tFieldMeta\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x1a\n" +
 	"\bFullName\x18\x02 \x01(\tR\bFullName\x12\x18\n" +

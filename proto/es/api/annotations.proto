@@ -20,6 +20,7 @@ extend google.protobuf.FieldOptions {
     // - `exclude` for fields that should not be included in the search results.
     // - `facet` for fields that should be indexed as facet.
     // - `store` for fields that should be stored.
+    // - `hidden` for fields that should be hidden in the search query by UI.
     // - other values are define type:
     // keyword|text|integer|float|double|boolean|date|geo_point|ip.
     string search = 51001;
@@ -72,6 +73,7 @@ message SearchOption {
         Exclude  = 0x4;
         Store    = 0x8;
         Sortable = 0x10;
+        Hidden   = 0x20;
     }
 }
 
