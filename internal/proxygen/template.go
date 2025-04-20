@@ -140,10 +140,12 @@ import (
 	"net/http"
 
 	{{.File.GoImportPath}}
-	"google.golang.org/protobuf/proto"
+	"github.com/effective-security/porto/pkg/retriable"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/porto/xhttp/httperror"
-	"github.com/effective-security/porto/pkg/retriable"
+	"github.com/effective-security/protoc-gen-go/api"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 )
 `))
 
@@ -196,6 +198,32 @@ func NewHTTP{{.ClientName}}(client retriable.PostRequester) {{.Prefix}}{{.Server
 			Funcs(tempFuncs()).
 			Parse(`
 
+{{- if .Method.Desc.IsStreamingServer }}
+{{- .Method.Comments.Leading -}}
+// streaming proxy Client to Server
+func (s *{{.ProxyStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}, opts ...grpc.CallOption) (grpc.ServerStreamingClient[{{type .Method.Output}}], error) {
+	// add correlation ID to outgoing RPC calls
+	ctx = correlation.WithMetaFromContext(ctx)
+	msgs := make(chan *{{type .Method.Output}}, 8)
+    clientStream := &api.ProxyClientStream[{{type .Method.Output}}]{
+        Msgs: msgs,
+        Ctx:  ctx,
+    }
+
+    go func() {
+        // run the real server handler in‑proc
+        serverStream := &api.ServerStreamAdapter[{{type .Method.Output}}]{
+            DummyServerStream: api.DummyServerStream{Ctx: ctx},
+            Msgs:              msgs,
+        }
+        err := s.srv.{{.Method.GoName}}(req, serverStream)
+        clientStream.ErrOnce.Do(func() { clientStream.Err = err })
+        close(msgs)
+    }()
+
+    return clientStream, nil
+}
+{{- else }}
 {{- .Method.Comments.Leading -}}
 func (s *{{.ProxyStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}, opts ...grpc.CallOption) (*{{type .Method.Output}}, error) {
 	// add correlation ID to outgoing RPC calls
@@ -206,7 +234,33 @@ func (s *{{.ProxyStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{ty
 	}
 	return res, nil
 }
+{{- end }}
 
+{{- if .Method.Desc.IsStreamingServer }}
+{{ .Method.Comments.Leading -}}
+ // streaming proxy Server to Client
+func (s *{{.ClientStructName}}) {{.Method.GoName}}(req *{{type .Method.Input}}, srv grpc.ServerStreamingServer[{{type .Method.Output}}]) error {
+	// 1) Dial out through the real gRPC client:
+    stream, err := s.remote.{{.Method.GoName}}(srv.Context(), req)
+    if err != nil {
+        return err
+    }
+
+    // 2) Pump responses back to the server stream:
+    for {
+        msg, err := stream.Recv()
+        if err != nil {
+            if err == io.EOF {
+                return nil
+            }
+            return err
+        }
+        if err := srv.Send(msg); err != nil {
+            return err
+        }
+    }
+}
+{{- else }}
 {{ .Method.Comments.Leading -}}
 func (s *{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}) (*{{type .Method.Output}}, error) {
 	// add correlation ID to outgoing RPC calls
@@ -217,7 +271,15 @@ func (s *{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{t
 	}
 	return res, nil
 }
+{{- end }}
 
+{{- if .Method.Desc.IsStreamingServer }}
+{{ .Method.Comments.Leading -}}
+ func (s *post{{.ClientStructName}}) {{.Method.GoName}}(req *{{type .Method.Input}}, res grpc.ServerStreamingServer[{{type .Method.Output}}]) error {
+ 	// not supported
+	return httperror.NewGrpc(codes.Unimplemented, "streaming not supported")
+}
+{{- else }}
 {{ .Method.Comments.Leading -}}
 func (s *post{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}) (*{{type .Method.Output}}, error) {
 	var res {{type .Method.Output}}
@@ -228,6 +290,7 @@ func (s *post{{.ClientStructName}}) {{.Method.GoName}}(ctx context.Context, req 
 	}
 	return &res, nil
 }
+{{- end }}
 
 `))
 )

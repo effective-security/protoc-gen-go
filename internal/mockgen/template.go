@@ -174,12 +174,21 @@ func (m *{{.StructName}}) next() proto.Message {
 	methodTemplate = template.Must(template.New("method").
 			Funcs(tempFuncs()).
 			Parse(`
-{{- .Method.Comments.Leading -}}
+{{ .Method.Comments.Leading -}}			
+{{- if .Method.Desc.IsStreamingServer }}
+func (m *{{.StructName}}) {{.Method.GoName}}(req *{{type .Method.Input}}, srv grpc.ServerStreamingServer[{{type .Method.Output}}]) error {
+	if m.Err != nil {
+		return m.Err
+	}
+	return nil
+}
+{{- else }}
 func (m *{{.StructName}}) {{.Method.GoName}}(ctx context.Context, req *{{type .Method.Input}}) (*{{type .Method.Output}}, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
 	return m.next().(*{{type .Method.Output}}), nil
 }
+{{- end }}	
 `))
 )

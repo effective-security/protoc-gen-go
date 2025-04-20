@@ -76,6 +76,10 @@ func applyServices(w io.Writer, svcs []*protogen.Service, opts Options) error {
 		}
 
 		for _, met := range svc.Methods {
+			if met.Desc.IsStreamingClient() || met.Desc.IsStreamingServer() {
+				// skip streaming methods
+				continue
+			}
 			if err := methodTemplate.Execute(w, tplMethod{
 				Service:   svc,
 				Method:    met,
