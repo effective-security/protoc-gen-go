@@ -8,9 +8,12 @@ import "google/protobuf/empty.proto";
 
 // E2E service provides a test
 service E2E {
-  // Hello returns a Basic
-  rpc Hello(Basic) returns (Basic) {}
+    // Hello returns a Basic
+    rpc Hello(Basic) returns (Basic) {}
 
-  // Goodbuy returns a Nested
-  rpc Goodbuy(google.protobuf.Empty) returns (Nested) {}
+    // HelloStream returns a stream of Basic
+    rpc HelloStream(Basic) returns (stream Basic) {}
+
+    // Goodbuy returns a Nested
+    rpc Goodbuy(google.protobuf.Empty) returns (Nested) {}
 }

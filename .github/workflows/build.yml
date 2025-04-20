@@ -166,7 +166,7 @@ jobs:
               paths:
                 - '.VERSION'
               backtracking: 1
-          
+
       - name: set-tag
         run: |
           VERSION=$(cat .VERSION).${{env.RUN_NUMBER}}

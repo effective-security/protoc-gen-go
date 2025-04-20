@@ -562,7 +562,7 @@ var (
 	// - `exclude` for fields that should not be included in the search results.
 	// - `facet` for fields that should be indexed as facet.
 	// - `store` for fields that should be stored.
-	// - `hidden` for fields that should be hidden in the search query by UI.
+	// - `hide` for fields that should be hidden in the search query by UI.
 	// - other values are define type:
 	// keyword|text|integer|float|double|boolean|date|geo_point|ip.
 	//
