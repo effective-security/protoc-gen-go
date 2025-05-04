@@ -25,34 +25,53 @@ const (
 type SearchOption_Enum int32
 
 const (
-	SearchOption_None     SearchOption_Enum = 0
-	SearchOption_Facet    SearchOption_Enum = 1
-	SearchOption_NoIndex  SearchOption_Enum = 2
-	SearchOption_Exclude  SearchOption_Enum = 4
-	SearchOption_Store    SearchOption_Enum = 8
+	// None is the default value.
+	SearchOption_None SearchOption_Enum = 0
+	// Facet is the option for the field to be indexed as facet.
+	SearchOption_Facet SearchOption_Enum = 1
+	// NoIndex is the option for the field to be not indexed.
+	SearchOption_NoIndex SearchOption_Enum = 2
+	// Exclude is the option for the field to be excluded from the search
+	// results.
+	SearchOption_Exclude SearchOption_Enum = 4
+	// Store is the option for the field to be stored.
+	SearchOption_Store SearchOption_Enum = 8
+	// Sortable is the option for the field to be sortable.
 	SearchOption_Sortable SearchOption_Enum = 16
-	SearchOption_Hidden   SearchOption_Enum = 32
+	// Hidden is the option for the field to be hidden in the search query
+	// builder or by UI.
+	SearchOption_Hidden SearchOption_Enum = 32
+	// WithKeyword is the option for text fields that also need
+	// keyword sub-index.
+	SearchOption_WithKeyword SearchOption_Enum = 64
+	// WithText is the option for keyword fields that also need text
+	// sub-index.
+	SearchOption_WithText SearchOption_Enum = 128
 )
 
 // Enum value maps for SearchOption_Enum.
 var (
 	SearchOption_Enum_name = map[int32]string{
-		0:  "None",
-		1:  "Facet",
-		2:  "NoIndex",
-		4:  "Exclude",
-		8:  "Store",
-		16: "Sortable",
-		32: "Hidden",
+		0:   "None",
+		1:   "Facet",
+		2:   "NoIndex",
+		4:   "Exclude",
+		8:   "Store",
+		16:  "Sortable",
+		32:  "Hidden",
+		64:  "WithKeyword",
+		128: "WithText",
 	}
 	SearchOption_Enum_value = map[string]int32{
-		"None":     0,
-		"Facet":    1,
-		"NoIndex":  2,
-		"Exclude":  4,
-		"Store":    8,
-		"Sortable": 16,
-		"Hidden":   32,
+		"None":        0,
+		"Facet":       1,
+		"NoIndex":     2,
+		"Exclude":     4,
+		"Store":       8,
+		"Sortable":    16,
+		"Hidden":      32,
+		"WithKeyword": 64,
+		"WithText":    128,
 	}
 )
 
@@ -563,6 +582,8 @@ var (
 	// - `facet` for fields that should be indexed as facet.
 	// - `store` for fields that should be stored.
 	// - `hide` for fields that should be hidden in the search query by UI.
+	// - `with_keyword` for text fields that also need keyword sub-index.
+	// - `with_text` for keyword fields that also need text sub-index.
 	// - other values are define type:
 	// keyword|text|integer|float|double|boolean|date|geo_point|ip.
 	//
@@ -629,8 +650,8 @@ const file_annotations_proto_rawDesc = "" +
 	"\bFullName\x18\x03 \x01(\tR\bFullName\x12\x18\n" +
 	"\aDisplay\x18\x04 \x01(\tR\aDisplay\x12$\n" +
 	"\rDocumentation\x18\x05 \x01(\tR\rDocumentation\x12\x12\n" +
-	"\x04Args\x18\x06 \x03(\tR\x04Args\"j\n" +
-	"\fSearchOption\"Z\n" +
+	"\x04Args\x18\x06 \x03(\tR\x04Args\"\x8a\x01\n" +
+	"\fSearchOption\"z\n" +
 	"\x04Enum\x12\b\n" +
 	"\x04None\x10\x00\x12\t\n" +
 	"\x05Facet\x10\x01\x12\v\n" +
@@ -639,7 +660,9 @@ const file_annotations_proto_rawDesc = "" +
 	"\x05Store\x10\b\x12\f\n" +
 	"\bSortable\x10\x10\x12\n" +
 	"\n" +
-	"\x06Hidden\x10 \"\xf6\x02\n" +
+	"\x06Hidden\x10 \x12\x0f\n" +
+	"\vWithKeyword\x10@\x12\r\n" +
+	"\bWithText\x10\x80\x01\"\xf6\x02\n" +
 	"\tFieldMeta\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x1a\n" +
 	"\bFullName\x18\x02 \x01(\tR\bFullName\x12\x18\n" +
