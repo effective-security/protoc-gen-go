@@ -21,6 +21,8 @@ extend google.protobuf.FieldOptions {
     // - `facet` for fields that should be indexed as facet.
     // - `store` for fields that should be stored.
     // - `hide` for fields that should be hidden in the search query by UI.
+    // - `with_keyword` for text fields that also need keyword sub-index.
+    // - `with_text` for keyword fields that also need text sub-index.
     // - other values are define type:
     // keyword|text|integer|float|double|boolean|date|geo_point|ip.
     string search = 51001;
@@ -67,13 +69,28 @@ message EnumMeta {
 
 message SearchOption {
     enum Enum {
-        None     = 0;
-        Facet    = 0x1;
-        NoIndex  = 0x2;
-        Exclude  = 0x4;
-        Store    = 0x8;
+        // None is the default value.
+        None = 0;
+        // Facet is the option for the field to be indexed as facet.
+        Facet = 0x1;
+        // NoIndex is the option for the field to be not indexed.
+        NoIndex = 0x2;
+        // Exclude is the option for the field to be excluded from the search
+        // results.
+        Exclude = 0x4;
+        // Store is the option for the field to be stored.
+        Store = 0x8;
+        // Sortable is the option for the field to be sortable.
         Sortable = 0x10;
-        Hidden   = 0x20;
+        // Hidden is the option for the field to be hidden in the search query
+        // builder or by UI.
+        Hidden = 0x20;
+        // WithKeyword is the option for text fields that also need
+        // keyword sub-index.
+        WithKeyword = 0x40;
+        // WithText is the option for keyword fields that also need text
+        // sub-index.
+        WithText = 0x80;
     }
 }
 
