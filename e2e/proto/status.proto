@@ -77,9 +77,10 @@ message CallerStatusResponse {
     option (es.api.generate_meta) = true;
 
     // Subject of the caller.
-    string Subject = 1 [json_name = "Subject"];
+    string Subject = 1
+        [json_name = "Subject", (es.api.search) = "keyword,with_text"];
     // Role of the caller.
-    string Role = 2 [json_name = "Role"];
+    string Role = 2 [json_name = "Role", (es.api.search) = "keyword,with_text"];
     // Claims from the token, json encoded map[string]interface{}
     bytes Claims = 3
         [json_name = "Claims", (es.api.search) = "no_index,exclude"];
