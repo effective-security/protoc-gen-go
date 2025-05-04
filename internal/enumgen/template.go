@@ -171,6 +171,12 @@ func tempFuncs() template.FuncMap {
 			if val&api.SearchOption_Hidden != 0 {
 				names = append(names, "api.SearchOption_Hidden")
 			}
+			if val&api.SearchOption_WithKeyword != 0 {
+				names = append(names, "api.SearchOption_WithKeyword")
+			}
+			if val&api.SearchOption_WithText != 0 {
+				names = append(names, "api.SearchOption_WithText")
+			}
 		}
 		if len(names) == 0 {
 			return "api.SearchOption_None"

@@ -47,7 +47,7 @@ func parseSearchOptions(searchOpts string, field *protogen.Field) (opts api.Sear
 
 	tokens := strings.Split(searchOpts, ",")
 	for _, token := range tokens {
-		switch token {
+		switch strings.ToLower(strings.TrimSpace(token)) {
 		case "no_index":
 			opts |= api.SearchOption_NoIndex
 		case "exclude":
