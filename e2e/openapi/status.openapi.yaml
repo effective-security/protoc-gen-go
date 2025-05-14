@@ -110,6 +110,9 @@ components:
                     type: string
                     description: StartedAt is the time when the server has started.
                     format: date-time
+                Status:
+                    type: integer
+                    format: enum
             description: ServerStatus provides server status information
         ServerStatusResponse:
             type: object
