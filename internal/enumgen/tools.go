@@ -12,9 +12,13 @@ import (
 
 // CreateEnumDescription convert enum descriptor to EnumMeta message
 func CreateEnumDescription(en *protogen.Enum, args Opts) *api.EnumDescription {
+	opts := en.Desc.Options().ProtoReflect()
+	isFlag := opts.Get(api.E_IsFlag.TypeDescriptor()).Bool()
+
 	res := &api.EnumDescription{
 		Name:          string(en.GoIdent.GoName),
 		Documentation: cleanComment(en.Comments.Leading.String()),
+		IsFlag:        isFlag,
 	}
 
 	for _, value := range en.Values {
