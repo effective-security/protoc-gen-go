@@ -34,6 +34,11 @@ extend google.protobuf.FieldOptions {
     string csv = 51004;
 }
 
+extend google.protobuf.EnumOptions {
+    // is_flag marks the enum as a bitflags/flags enum.
+    bool is_flag = 54001;
+}
+
 // Custom enum value option
 extend google.protobuf.EnumValueOptions {
     // args is the option for the field's arguments,
@@ -55,7 +60,7 @@ extend google.protobuf.MessageOptions {
     // message_display is the option for the message's Display Name in the UI.
     string message_display = 53002;
     // message_description is the option for the message's description.
-    string message_description = 52003;
+    string message_description = 53003;
 }
 
 message EnumMeta {
@@ -118,6 +123,7 @@ message EnumDescription {
     string Name             = 1 [json_name = "Name"];
     repeated EnumMeta Enums = 2 [json_name = "Enums"];
     string Documentation    = 3 [json_name = "Documentation"];
+    bool IsFlag             = 4 [json_name = "IsFlag"];
 }
 
 message MessageDescription {

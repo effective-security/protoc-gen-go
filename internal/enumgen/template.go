@@ -325,6 +325,7 @@ func (s {{.Enum.GoIdent.GoName}}) DisplayValues() []string {
 
 // DisplayValue returns display name of Enum value
 func (s {{.Enum.GoIdent.GoName}}) DisplayValue() string {
+	{{- if .Description.IsFlag }}
 	flags := enum.Flags(s)
 	count := len(flags)
 	if count == 0 {
@@ -338,6 +339,12 @@ func (s {{.Enum.GoIdent.GoName}}) DisplayValue() string {
 		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayValue[flag])
 	}
 	return strings.Join(names, ",")
+	{{- else }}
+	if val, ok := {{.Enum.GoIdent.GoName}}_DisplayValue[s]; ok {
+		return val
+	}
+	return s.String()
+	{{- end }}
 }
 
 // Meta returns Enum meta information
@@ -384,6 +391,7 @@ var {{.Enum.GoIdent.GoName}}_displayValue = map[int32]string {
 
 var {{.Enum.GoIdent.GoName}}_EnumDescription = &api.EnumDescription {
 	Name: "{{.Description.Name}}",
+	IsFlag: {{.Description.IsFlag}},
 	Enums: []*api.EnumMeta {
 	{{- with .Enum }}
 	{{- range $.Description.Enums }}
