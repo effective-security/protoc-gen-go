@@ -94,19 +94,6 @@ func tsTempFuncs() template.FuncMap {
 	m["enum_ts_parse_type"] = func(f *protogen.Enum) string {
 		return "string | " + f.GoIdent.GoName
 	}
-
-	m["names_same_as_display"] = func(desc *api.EnumDescription) bool {
-		if desc == nil || len(desc.Enums) == 0 {
-			return false
-		}
-		for _, enum := range desc.Enums {
-			if enum.Name != enum.Display {
-				return false
-			}
-		}
-		return true
-	}
-
 	return m
 }
 
@@ -165,7 +152,6 @@ export const {{ enum_ts_name .Enum }}Name: ITypeNameInterface = {
 {{- end }}
 }
 
-{{- if not (names_same_as_display $.Description) }}
 export const {{ enum_ts_name .Enum }}DisplayName: ITypeNameInterface = {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
@@ -173,7 +159,6 @@ export const {{ enum_ts_name .Enum }}DisplayName: ITypeNameInterface = {
 {{- end }}
 {{- end }}
 }
-{{- end }}
 
 export const {{ enum_ts_name .Enum }}NameEnum: INameEnumInterface = {
 {{- with .Enum }}
@@ -183,7 +168,6 @@ export const {{ enum_ts_name .Enum }}NameEnum: INameEnumInterface = {
 {{- end }}
 }
 
-{{- if not (names_same_as_display $.Description) }}
 export const {{ enum_ts_name .Enum }}DisplayNameEnum: INameEnumInterface = {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
@@ -191,7 +175,6 @@ export const {{ enum_ts_name .Enum }}DisplayNameEnum: INameEnumInterface = {
 {{- end }}
 {{- end }}
 }
-{{- end }}
 
 export function get{{ enum_ts_function_name .Enum "Name" }}(
     opt: {{ enum_ts_type .Enum }},
@@ -199,13 +182,11 @@ export function get{{ enum_ts_function_name .Enum "Name" }}(
     return {{ enum_ts_name .Enum }}Name[opt] || 'Unknown'
 }
 
-{{- if not (names_same_as_display $.Description) }}
 export function get{{ enum_ts_function_name .Enum "DisplayName" }}(
     opt: {{ enum_ts_type .Enum }},
 ): string {
     return {{ enum_ts_name .Enum }}DisplayName[opt] || 'Unknown'
 }
-{{- end }}
 
 export function parse{{ enum_ts_name .Enum }}(
     val: {{ enum_ts_parse_type .Enum }},
@@ -213,11 +194,7 @@ export function parse{{ enum_ts_name .Enum }}(
     if (typeof val === 'number') {
         return val
     }
-{{- if not (names_same_as_display $.Description) }}
     return {{ enum_ts_name .Enum }}NameEnum[val] || {{ enum_ts_name .Enum }}DisplayNameEnum[val] || 0
-{{- else }}
-    return {{ enum_ts_name .Enum }}NameEnum[val] || 0
-{{- end }}
 }
 
 `))
