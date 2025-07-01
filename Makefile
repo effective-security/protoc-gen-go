@@ -37,6 +37,7 @@ build:
 	echo "*** Building plugins"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-json ./cmd/protoc-gen-go-json
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-enum ./cmd/protoc-gen-go-enum
+	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-ts-enum ./cmd/protoc-gen-ts-enum
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-mock ./cmd/protoc-gen-go-mock
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-proxy ./cmd/protoc-gen-go-proxy
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-http ./cmd/protoc-gen-go-http
@@ -79,6 +80,7 @@ proto:
 		--go-allocator_out=logs=true:./.. \
 		--go-http_out=logs=true,pbpkg=e2e:./.. \
 		--csharp_out=./../cs \
+		--ts-enum_out=logs=true,import=src/services/foo/protogen:./../ts \
 		*.proto && \
 	cd ${PROJ_ROOT}/e2e && \
 	find . -name \*.go -exec sh -c "goimports -l -w {}" \;

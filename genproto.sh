@@ -6,18 +6,18 @@ set -e
 
 #
 # genproto.sh
-#   --dirs {dird}       - specifies dirs to build
-#   --i {path}          - specifies path for imports
-#   --oapi {path}       - specifies path for Open API output
-#   --json {path}       - specifies to generate --go-json_out
-#   --mock {path}       - specifies to generate --go-mock_out
-#   --proxy {path}      - specifies to generate --go-proxy_out
-#   --http {pkg} {path} - specifies to generate --go-http_out
-#   --methods {path}    - specifies to generate --go-allocator_out
-#   --python {path}     - specifies to generate --python_out
-#   --ts {path}         - specifies to generate --grpc-web_out
-#   --csharp {path}     - specifies to generate --csharp_out
-#   --out               - specifies to output folder, default is '.'
+#   --dirs {dird}               - specifies dirs to build
+#   --i {path}                  - specifies path for imports
+#   --oapi {path}               - specifies path for Open API output
+#   --json {path}               - specifies to generate --go-json_out
+#   --mock {path}               - specifies to generate --go-mock_out
+#   --proxy {path}              - specifies to generate --go-proxy_out
+#   --http {pkg} {path}         - specifies to generate --go-http_out
+#   --methods {path}            - specifies to generate --go-allocator_out
+#   --python {path}             - specifies to generate --python_out
+#   --ts-enum {import} {path}   - specifies to generate --ts-enum_out
+#   --csharp {path}             - specifies to generate --csharp_out
+#   --out                       - specifies to output folder, default is '.'
 
 POSITIONAL=()
 while [[ $# -gt 0 ]]
@@ -55,6 +55,12 @@ case $key in
     shift # past argument
     shift # past value
     ;;
+    --ts-enum)
+    TS="--ts-enum_out=logs=true,import=$2:$3"
+    shift # past argument
+    shift # past import value
+    shift # past path value
+    ;;
     --mock)
     MOCK="--go-mock_out=logs=true:$2"
     shift # past argument
@@ -83,11 +89,6 @@ case $key in
     ;;
     --python)
     PYTHON="--python_out=$2 --pyi_out=$2"
-    shift # past argument
-    shift # past value
-    ;;
-    --ts)
-    TS="--js_out=import_style=commonjs,binary:$2 --grpc-web_out=import_style=typescript,mode=grpcweb:$2"
     shift # past argument
     shift # past value
     ;;
