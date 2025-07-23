@@ -194,6 +194,11 @@ export function parse{{ enum_ts_name .Enum }}(
     if (typeof val === 'number') {
         return val
     }
+    // Try to parse as number first (for string representations like "0", "2", etc.)
+    const numVal = parseInt(val, 10)
+    if (!isNaN(numVal) && {{ enum_ts_name .Enum }}Name[numVal] !== undefined) {
+        return numVal
+    }
     return {{ enum_ts_name .Enum }}NameEnum[val] || {{ enum_ts_name .Enum }}DisplayNameEnum[val] || 0
 }
 
