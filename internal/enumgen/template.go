@@ -188,6 +188,13 @@ func tempFuncs() template.FuncMap {
 		}
 		return val
 	}
+	m["package_name"] = func(fullname, pack string) string {
+		pn := strings.Split(fullname, ".")[0]
+		if pn == pack {
+			return ""
+		}
+		return pn + "."
+	}
 	m["supported"] = func(f *protogen.Enum) string {
 		var names []string
 		for _, v := range f.Values {
@@ -445,6 +452,7 @@ var {{.Enum.GoIdent.GoName}}_displayValue = map[int32]string {
 
 var {{.Enum.GoIdent.GoName}}_EnumDescription = &api.EnumDescription {
 	Name: "{{.Description.Name}}",
+	FullName: "{{.Description.FullName}}",
 	IsBitmask: {{.Description.IsBitmask}},
 	Enums: []*api.EnumMeta {
 	{{- with .Enum }}
@@ -532,7 +540,7 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			Fields: {{trim_package .GoType $root.Package }}_MessageDescription.Fields,
 			{{- end }}
 			{{- if .EnumDescription }}
-			EnumDescription: {{.EnumDescription.Name}}_EnumDescription,
+			EnumDescription: {{package_name .EnumDescription.FullName $root.Package }}{{.EnumDescription.Name}}_EnumDescription,
 			{{- end }}
 		},
 	{{- end }}
