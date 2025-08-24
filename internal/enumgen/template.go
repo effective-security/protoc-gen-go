@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/format"
 	"io"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -28,7 +29,7 @@ type Opts struct {
 }
 
 // This function is called with a param which contains the entire definition of a method.
-func ApplyTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum, msgs []*protogen.Message) error {
+func ApplyEnumsTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum) error {
 	buf := &bytes.Buffer{}
 	if err := headerTemplate.Execute(buf, tplHeader{
 		Opts: opts,
@@ -36,18 +37,33 @@ func ApplyTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum,
 		return errors.Wrapf(err, "failed to execute template")
 	}
 
-	if len(enums) > 0 {
-		err := ApplyEnums(buf, opts, enums)
-		if err != nil {
-			return err
-		}
+	err := ApplyEnums(buf, opts, enums)
+	if err != nil {
+		return err
 	}
 
-	if len(msgs) > 0 {
-		err := ApplyMessages(buf, opts, msgs)
-		if err != nil {
-			return err
-		}
+	src := buf.Bytes()
+	code, err := format.Source(src)
+	if err != nil {
+		fmt.Printf("failed to format source:\n%s\n", string(src))
+		return errors.Wrapf(err, "failed to format source")
+	}
+	_, err = f.Write(code)
+	return err
+}
+
+// This function is called with a param which contains the entire definition of a method.
+func ApplyMessagesTemplate(f *protogen.GeneratedFile, opts Opts, msgs []*protogen.Message) error {
+	buf := &bytes.Buffer{}
+	if err := headerTemplate.Execute(buf, tplHeader{
+		Opts: opts,
+	}); err != nil {
+		return errors.Wrapf(err, "failed to execute template")
+	}
+
+	err := ApplyMessages(buf, opts, msgs)
+	if err != nil {
+		return err
 	}
 
 	src := buf.Bytes()
@@ -88,15 +104,35 @@ func ApplyEnums(w io.Writer, opts Opts, enums []*protogen.Enum) error {
 }
 
 func ApplyMessages(w io.Writer, opts Opts, msgs []*protogen.Message) error {
+	seen := make(map[string]bool)
+	mt := tplMessagesMap{
+		Opts:         opts,
+		Descriptions: make([]*api.MessageDescription, 0, len(msgs)),
+	}
 	for _, msg := range msgs {
+		fn := string(msg.Desc.FullName())
+		if _, ok := seen[fn]; ok {
+			continue
+		}
+		seen[fn] = true
 		logger.Infof("Processing %s", msg.GoIdent.GoName)
+		md := CreateMessageDescription(msg, opts)
+		mt.Descriptions = append(mt.Descriptions, md)
 		if err := descrMessageTemplate.Execute(w, tplMessage{
 			Opts:        opts,
 			Message:     msg,
-			Description: CreateMessageDescription(msg, opts),
+			Description: md,
 		}); err != nil {
 			return errors.Wrapf(err, "failed to execute template: %s", msg.GoIdent.GoName)
 		}
+	}
+
+	sort.Slice(mt.Descriptions, func(i, j int) bool {
+		return mt.Descriptions[i].FullName < mt.Descriptions[j].FullName
+	})
+
+	if err := messagesMapTemplate.Execute(w, mt); err != nil {
+		return errors.Wrapf(err, "failed to execute template")
 	}
 	return nil
 }
@@ -114,14 +150,27 @@ func GetEnums(msgs []*protogen.Message) []*protogen.Enum {
 	return enums
 }
 
-func GetMessagesToDescribe(msgs []*protogen.Message) []*protogen.Message {
+func GetMessagesToDescribe(msgs []*protogen.Message, services []*protogen.Service) []*protogen.Message {
 	var res []*protogen.Message
+	seen := make(map[string]bool)
 
+	// first add all service requests
+	for _, svc := range services {
+		for _, m := range svc.Methods {
+			if _, ok := seen[m.Input.GoIdent.GoName]; !ok {
+				res = append(res, m.Input)
+				seen[m.Input.GoIdent.GoName] = true
+			}
+		}
+	}
+
+	// then add optionally marked messages
 	for _, msg := range msgs {
 		opts := msg.Desc.Options().ProtoReflect()
 		describe := opts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
-		if describe {
+		if _, ok := seen[msg.GoIdent.GoName]; describe && !ok {
 			res = append(res, msg)
+			seen[msg.GoIdent.GoName] = true
 		}
 	}
 
@@ -226,6 +275,11 @@ type tplMessage struct {
 	Description *api.MessageDescription
 }
 
+type tplMessagesMap struct {
+	Opts
+	Descriptions []*api.MessageDescription
+}
+
 var (
 	headerTemplate = template.Must(template.New("header").
 			Funcs(tempFuncs()).
@@ -325,7 +379,7 @@ func (s {{.Enum.GoIdent.GoName}}) DisplayValues() []string {
 
 // DisplayValue returns display name of Enum value
 func (s {{.Enum.GoIdent.GoName}}) DisplayValue() string {
-	{{- if .Description.IsFlag }}
+	{{- if .Description.IsBitmask }}
 	flags := enum.Flags(s)
 	count := len(flags)
 	if count == 0 {
@@ -391,7 +445,7 @@ var {{.Enum.GoIdent.GoName}}_displayValue = map[int32]string {
 
 var {{.Enum.GoIdent.GoName}}_EnumDescription = &api.EnumDescription {
 	Name: "{{.Description.Name}}",
-	IsFlag: {{.Description.IsFlag}},
+	IsBitmask: {{.Description.IsBitmask}},
 	Enums: []*api.EnumMeta {
 	{{- with .Enum }}
 	{{- range $.Description.Enums }}
@@ -484,5 +538,17 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 	{{- end }}
 	},
 }
+`))
+
+	messagesMapTemplate = template.Must(template.New("messages_map").
+				Funcs(tempFuncs()).
+				Parse(`
+{{- $root := . }}				
+var MessageDescriptions = map[string]*api.MessageDescription {
+	{{- range .Descriptions }}
+	"{{.FullName}}": {{.Name}}_MessageDescription,
+	{{- end }}
+}
+
 `))
 )

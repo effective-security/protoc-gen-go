@@ -1,0 +1,97 @@
+syntax = "proto3";
+package es.api;
+
+option go_package = "github.com/effective-security/protoc-gen-go/api";
+
+import "annotations.proto";
+
+message APIResource {
+    // Service is the service name providing a resource.
+    string Service = 1 [json_name = "Service"];
+    // Name is the plural name of the resource.
+    string Name = 2 [json_name = "Name"];
+    // SingularName is the singular name of the resource.  This allows clients
+    // to handle plural and singular opaquely. The SingularName is more correct
+    // for reporting status on a single item and both singular and plural are
+    // allowed from the CLI interface.
+    string SingularName = 3 [json_name = "SingularName"];
+    // Kind is the type of resource.
+    string Kind = 4 [json_name = "Kind"];
+    // Scope is the scope of the resource.
+    string Scope = 5 [json_name = "Scope"];
+    // Verbs is the list of verbs that can be performed on the resource:
+    // Get, List, Create, Update, Delete
+    repeated string Verbs = 6 [json_name = "Verbs"];
+}
+
+message TableColumnDefinition {
+    // ID is the identifier for the column, corresponds to the resource field
+    // name
+    string ID = 1 [json_name = "ID"];
+    // Name is a human readable name for the column.
+    string Name = 2 [json_name = "Name"];
+    // Type is an OpenAPI type definition for this column, such as number,
+    // integer, string, or array. See
+    // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
+    // for more.
+    string Type = 3 [json_name = "Type"];
+    // Format is an optional OpenAPI type modifier for this column. A format
+    // modifies the type and imposes additional rules, like date or time
+    // formatting for a string. The 'name' format is applied to the primary
+    // identifier column which has type 'string' to assist in clients
+    // identifying column is the resource name. See
+    // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#data-types
+    // for more.
+    string Format = 4 [json_name = "Format"];
+    // Description is a human readable description of this column.
+    string Description = 5 [json_name = "Description"];
+
+    // SearchOptions is populated from es.api.search option.
+    SearchOption.Enum SearchOptions = 6 [json_name = "SearchOptions"];
+}
+
+// TableRow is an individual row in a table.
+message TableRow {
+    // Cells will be as wide as the column definitions array and contain string
+    // representation of basic types as:
+    // strings, numbers (float64 or int64), booleans, simple maps, lists, or
+    // null.
+    // See the type field of the column definition for a more detailed
+    // description.
+    repeated string Cells = 1 [json_name = "Cells"];
+}
+
+// ListMeta describes metadata that synthetic resources must have, including
+// lists and various status objects. A resource may have only one of
+// {ObjectMeta, ListMeta}.
+message ListMeta {
+    string NextCursor = 1 [json_name = "NextCursor"];
+    bool HasMore      = 2 [json_name = "HasMore"];
+    // TotalCount is the total number of items in the list,
+    // available for the responses from Search when facets exist.
+    // TotalCount may not be present in all responses, like from RDS.
+    int64 TotalCount = 3 [json_name = "TotalCount"];
+}
+
+message ObjectMeta {
+    // ID is the identifier for the resource, or empty if the resource is a list
+    string ID = 1 [json_name = "ID"];
+
+    // Kind is the type of resource this table represents.
+    string Kind = 2 [json_name = "Kind"];
+
+    // URI is the URI of the resource.
+    string URI = 3 [json_name = "URI"];
+}
+
+// Table is a generic table structure for representing tabular data.
+message Table {
+    // ObjectMeta is the metadata of the resource.
+    ObjectMeta ObjectMeta = 1 [json_name = "ObjectMeta"];
+    // ListMeta is the metadata of the list.
+    ListMeta ListMeta = 2 [json_name = "ListMeta"];
+    // Columns is an array of column definitions.
+    repeated TableColumnDefinition Columns = 3 [json_name = "Columns"];
+    // Rows is an array of rows.
+    repeated TableRow Rows = 4 [json_name = "Rows"];
+}

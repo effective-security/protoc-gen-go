@@ -15,6 +15,7 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go"
 var (
 	log        = flag.Bool("logs", false, "output logs")
 	out        = flag.String("out", "enums", "output file prefix")
+	outMsgs    = flag.String("out-msgs", "messages", "output messages")
 	importpath = flag.String("import", "", "go import path")
 	pkg        = flag.String("package", "", "go package name")
 )
@@ -57,7 +58,18 @@ func main() {
 			allEnums = append(allEnums, f.Enums...)
 			allEnums = append(allEnums, enumgen.GetEnums(f.Messages)...)
 
-			msgs = append(msgs, enumgen.GetMessagesToDescribe(f.Messages)...)
+			msgs = append(msgs, enumgen.GetMessagesToDescribe(f.Messages, f.Services)...)
+		}
+
+		if len(msgs) > 0 {
+			fn := fmt.Sprintf("%s.pb.go", *outMsgs)
+			logger.Infof("Generating %s\n", fn)
+
+			f := gp.NewGeneratedFile(fn, protogen.GoImportPath(*importpath))
+			err := enumgen.ApplyMessagesTemplate(f, opts, msgs)
+			if err != nil {
+				gp.Error(err)
+			}
 		}
 
 		if len(allEnums) > 0 || len(msgs) > 0 {
@@ -65,7 +77,7 @@ func main() {
 			logger.Infof("Generating %s\n", fn)
 
 			f := gp.NewGeneratedFile(fn, protogen.GoImportPath(*importpath))
-			err := enumgen.ApplyTemplate(f, opts, allEnums, msgs)
+			err := enumgen.ApplyEnumsTemplate(f, opts, allEnums)
 			if err != nil {
 				gp.Error(err)
 			}

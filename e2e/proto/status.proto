@@ -59,6 +59,9 @@ message ServerStatus {
     google.protobuf.Timestamp StartedAt = 5
         [json_name = "StartedAt", (es.api.display) = "Started At"];
 
+    // Status of the server.
+    // Can be one of:
+    // `Running`, `Failed`, `Stopped`.
     ServiceStatus.Enum Status = 6
         [json_name = "Status", (es.api.display) = "Status"];
 }
@@ -82,7 +85,7 @@ message CallerStatusResponse {
     // Subject of the caller.
     string Subject = 1
         [json_name = "Subject", (es.api.search) = "keyword,with_text"];
-    // Role of the caller.
+    // Role of the caller. Can be one of `Admin`, `User`.
     string Role = 2 [json_name = "Role", (es.api.search) = "text,with_keyword"];
     // Claims from the token, json encoded map[string]interface{}
     bytes Claims = 3
