@@ -349,7 +349,9 @@ type EnumDescription struct {
 	Name          string                 `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
 	Enums         []*EnumMeta            `protobuf:"bytes,2,rep,name=Enums,proto3" json:"Enums,omitempty"`
 	Documentation string                 `protobuf:"bytes,3,opt,name=Documentation,proto3" json:"Documentation,omitempty"`
-	IsBitmask     bool                   `protobuf:"varint,4,opt,name=IsBitmask,proto3" json:"IsBitmask,omitempty"`
+	// IsBitmask is the option for the enum to be a bitmask enum.
+	IsBitmask     bool   `protobuf:"varint,4,opt,name=IsBitmask,proto3" json:"IsBitmask,omitempty"`
+	FullName      string `protobuf:"bytes,5,opt,name=FullName,proto3" json:"FullName,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -410,6 +412,13 @@ func (x *EnumDescription) GetIsBitmask() bool {
 		return x.IsBitmask
 	}
 	return false
+}
+
+func (x *EnumDescription) GetFullName() string {
+	if x != nil {
+		return x.FullName
+	}
+	return ""
 }
 
 type MessageDescription struct {
@@ -707,12 +716,13 @@ const file_annotations_proto_rawDesc = "" +
 	"SearchType\x12?\n" +
 	"\rSearchOptions\x18\b \x01(\x0e2\x19.es.api.SearchOption.EnumR\rSearchOptions\x12)\n" +
 	"\x06Fields\x18\f \x03(\v2\x11.es.api.FieldMetaR\x06Fields\x12A\n" +
-	"\x0fEnumDescription\x18\r \x01(\v2\x17.es.api.EnumDescriptionR\x0fEnumDescription\"\x91\x01\n" +
+	"\x0fEnumDescription\x18\r \x01(\v2\x17.es.api.EnumDescriptionR\x0fEnumDescription\"\xad\x01\n" +
 	"\x0fEnumDescription\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12&\n" +
 	"\x05Enums\x18\x02 \x03(\v2\x10.es.api.EnumMetaR\x05Enums\x12$\n" +
 	"\rDocumentation\x18\x03 \x01(\tR\rDocumentation\x12\x1c\n" +
-	"\tIsBitmask\x18\x04 \x01(\bR\tIsBitmask\"\xaf\x01\n" +
+	"\tIsBitmask\x18\x04 \x01(\bR\tIsBitmask\x12\x1a\n" +
+	"\bFullName\x18\x05 \x01(\tR\bFullName\"\xaf\x01\n" +
 	"\x12MessageDescription\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x18\n" +
 	"\aDisplay\x18\x02 \x01(\tR\aDisplay\x12)\n" +

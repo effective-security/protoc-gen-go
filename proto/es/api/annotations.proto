@@ -123,7 +123,9 @@ message EnumDescription {
     string Name             = 1 [json_name = "Name"];
     repeated EnumMeta Enums = 2 [json_name = "Enums"];
     string Documentation    = 3 [json_name = "Documentation"];
-    bool IsBitmask          = 4 [json_name = "IsBitmask"];
+    // IsBitmask is the option for the enum to be a bitmask enum.
+    bool IsBitmask  = 4 [json_name = "IsBitmask"];
+    string FullName = 5 [json_name = "FullName"];
 }
 
 message MessageDescription {

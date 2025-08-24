@@ -19,6 +19,7 @@ func CreateEnumDescription(en *protogen.Enum, args Opts) *api.EnumDescription {
 		Name:          string(en.GoIdent.GoName),
 		Documentation: cleanComment(en.Comments.Leading.String()),
 		IsBitmask:     IsBitmask,
+		FullName:      string(en.Desc.FullName()),
 	}
 
 	for _, value := range en.Values {
