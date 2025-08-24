@@ -176,7 +176,7 @@ func (d *Describer) Describe(w io.Writer, msg proto.Message) {
 	vals := d.DescribeMessage(msg)
 	enc := yaml.NewEncoder(w)
 	_ = enc.Encode(vals)
-	enc.Close()
+	_ = enc.Close()
 }
 
 // GetEnumDisplayValue function to dynamically call DisplayName on an enum
@@ -218,35 +218,35 @@ func DocumentMessage(w io.Writer, dscr *MessageDescription, indent string) {
 		return
 	}
 
-	fmt.Fprintf(w, "%s:\n", dscr.Display)
+	_, _ = fmt.Fprintf(w, "%s:\n", dscr.Display)
 	print.Text(w, dscr.Documentation, indent, false)
 	nextIndent := indent + indent
 	fieldDocIndent := nextIndent + indent
 
-	fmt.Fprint(w, indent)
-	fmt.Fprint(w, "Fields:\n")
+	_, _ = fmt.Fprint(w, indent)
+	_, _ = fmt.Fprint(w, "Fields:\n")
 	for _, field := range dscr.Fields {
-		fmt.Fprint(w, nextIndent)
-		fmt.Fprintf(w, "- Field: %s\n", field.Name)
-		fmt.Fprint(w, nextIndent)
+		_, _ = fmt.Fprint(w, nextIndent)
+		_, _ = fmt.Fprintf(w, "- Field: %s\n", field.Name)
+		_, _ = fmt.Fprint(w, nextIndent)
 
-		fmt.Fprintf(w, "  Type: %s\n", field.SearchType)
+		_, _ = fmt.Fprintf(w, "  Type: %s\n", field.SearchType)
 		if field.EnumDescription != nil {
-			fmt.Fprint(w, nextIndent)
-			fmt.Fprint(w, "  Enum values: ")
+			_, _ = fmt.Fprint(w, nextIndent)
+			_, _ = fmt.Fprint(w, "  Enum values: ")
 			for idx, enum := range field.EnumDescription.Enums {
 				if idx > 0 {
-					fmt.Fprint(w, ", ")
+					_, _ = fmt.Fprint(w, ", ")
 				}
-				fmt.Fprintf(w, "%s (%d)", enum.Display, enum.Value)
+				_, _ = fmt.Fprintf(w, "%s (%d)", enum.Display, enum.Value)
 			}
-			fmt.Fprintln(w)
+			_, _ = fmt.Fprintln(w)
 		}
 		if field.Documentation != "" {
-			fmt.Fprint(w, nextIndent)
-			fmt.Fprint(w, "  Documentation: ")
+			_, _ = fmt.Fprint(w, nextIndent)
+			_, _ = fmt.Fprint(w, "  Documentation: ")
 			print.Text(w, field.Documentation, fieldDocIndent, true)
 		}
 	}
-	fmt.Fprintln(w)
+	_, _ = fmt.Fprintln(w)
 }

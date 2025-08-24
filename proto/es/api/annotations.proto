@@ -35,8 +35,8 @@ extend google.protobuf.FieldOptions {
 }
 
 extend google.protobuf.EnumOptions {
-    // is_flag marks the enum as a bitflags/flags enum.
-    bool is_flag = 54001;
+    // is_bitmask marks the enum as a bitmask enum.
+    bool is_bitmask = 54001;
 }
 
 // Custom enum value option
@@ -123,7 +123,7 @@ message EnumDescription {
     string Name             = 1 [json_name = "Name"];
     repeated EnumMeta Enums = 2 [json_name = "Enums"];
     string Documentation    = 3 [json_name = "Documentation"];
-    bool IsFlag             = 4 [json_name = "IsFlag"];
+    bool IsBitmask          = 4 [json_name = "IsBitmask"];
 }
 
 message MessageDescription {
@@ -131,4 +131,5 @@ message MessageDescription {
     string Display            = 2 [json_name = "Display"];
     repeated FieldMeta Fields = 3 [json_name = "Fields"];
     string Documentation      = 4 [json_name = "Documentation"];
+    string FullName           = 5 [json_name = "FullName"];
 }

@@ -37,7 +37,7 @@ message Nested {
 message JobStatus {
     // JobStatus provides status
     enum Enum {
-        option (es.api.is_flag) = true;
+        option (es.api.is_bitmask) = true;
 
         Unknown   = 0;
         Scheduled = 0x1;
@@ -52,7 +52,7 @@ message JobStatus {
 message ResourceType {
     // ResourceType provides status
     enum Enum {
-        option (es.api.is_flag) = true;
+        option (es.api.is_bitmask) = true;
 
         Unknown        = 0;
         EC2Instance    = 0x1;

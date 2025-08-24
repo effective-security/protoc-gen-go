@@ -13,12 +13,12 @@ import (
 // CreateEnumDescription convert enum descriptor to EnumMeta message
 func CreateEnumDescription(en *protogen.Enum, args Opts) *api.EnumDescription {
 	opts := en.Desc.Options().ProtoReflect()
-	isFlag := opts.Get(api.E_IsFlag.TypeDescriptor()).Bool()
+	IsBitmask := opts.Get(api.E_IsBitmask.TypeDescriptor()).Bool()
 
 	res := &api.EnumDescription{
 		Name:          string(en.GoIdent.GoName),
 		Documentation: cleanComment(en.Comments.Leading.String()),
-		IsFlag:        isFlag,
+		IsBitmask:     IsBitmask,
 	}
 
 	for _, value := range en.Values {
@@ -66,6 +66,7 @@ func CreateMessageDescription(msg *protogen.Message, args Opts) *api.MessageDesc
 
 	res := &api.MessageDescription{
 		Name:          string(msg.GoIdent.GoName),
+		FullName:      string(msg.Desc.FullName()),
 		Documentation: cleanComment(description),
 		Display:       display,
 	}
@@ -136,7 +137,7 @@ func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
 func cleanComment(comment string) string {
 	lines := strings.Split(comment, "\n")
 	for i, line := range lines {
-		lines[i] = strings.TrimSpace(strings.TrimPrefix(line, "//"))
+		lines[i] = strings.ReplaceAll(strings.TrimSpace(strings.TrimPrefix(line, "//")), "`", "'")
 	}
 	i := len(lines)
 	for i > 0 {
