@@ -19,6 +19,7 @@ build_log.txt
 e2e/ts
 e2e/cs
 !api/annotations.pb.go
+!api/resources.pb.go
 
 debug
 debug.test
