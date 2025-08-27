@@ -6,8 +6,8 @@ import (
 	"io"
 	"text/template"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 

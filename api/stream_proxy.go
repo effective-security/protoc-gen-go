@@ -5,7 +5,7 @@ import (
 	"io"
 	sync "sync"
 
-	"github.com/pkg/errors"
+	"github.com/cockroachdb/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
