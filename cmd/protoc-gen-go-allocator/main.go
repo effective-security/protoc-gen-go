@@ -11,9 +11,9 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/protoc-gen-go/api"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 )

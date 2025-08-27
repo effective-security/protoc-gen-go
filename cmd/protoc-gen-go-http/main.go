@@ -6,9 +6,9 @@ import (
 	"os"
 	"path"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/protoc-gen-go/internal/httpgen"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 

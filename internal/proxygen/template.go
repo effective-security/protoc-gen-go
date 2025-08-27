@@ -9,9 +9,9 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/porto/xhttp/httperror"
 	"github.com/effective-security/xlog"
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
