@@ -5,7 +5,7 @@ option go_package = "github.com/effective-security/protoc-gen-go/api";
 
 import "annotations.proto";
 
-message APIResource {
+message ResourceDefinition {
     // Service is the service name providing a resource.
     string Service = 1 [json_name = "Service"];
     // Name is the plural name of the resource.

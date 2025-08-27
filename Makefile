@@ -33,7 +33,7 @@ tools:
 	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 	# go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
-build:
+build: proto-es
 	echo "*** Building plugins"
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-json ./cmd/protoc-gen-go-json
 	go build ${BUILD_FLAGS} -o ${PROJ_ROOT}/bin/protoc-gen-go-enum ./cmd/protoc-gen-go-enum
@@ -52,11 +52,8 @@ proto-dbg:
 		--debug_out=".:." \
 		status.proto
 
-proto:
-	# TODO: install grpc-web plugin \
-	# --js_out=import_style=commonjs,binary:../ts \
-	# --grpc-web_out=import_style=typescript,mode=grpcweb:../ts \
-	echo "*** Building proto"
+proto-es:
+	echo "*** Building proto/es/api"
 	export PATH=${PROJ_ROOT}/bin:$$PATH && \
 	cd ${PROJ_ROOT}/proto/es/api && \
 	protoc \
@@ -64,7 +61,9 @@ proto:
 		-I=../../ \
 		--go_out=paths=source_relative:./../../../api \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./../../../api \
-		*.proto && \
+		*.proto
+
+proto:		
 	mkdir -p ${PROJ_ROOT}/e2e/ts ${PROJ_ROOT}/e2e/openapi ${PROJ_ROOT}/e2e/cs && \
     cd ${PROJ_ROOT}/e2e/proto && \
 	protoc \
@@ -74,7 +73,7 @@ proto:
 		--go_out=paths=source_relative:./.. \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./.. \
 		--go-json_out=logs=true,enums_as_ints=true,multiline=true,partial=true:./.. \
-		--go-enum_out=logs=true:./.. \
+		--go-enum_out=logs=true,skip-pkg=pb:./.. \
 		--go-mock_out=logs=true:./.. \
 		--go-proxy_out=logs=true:./.. \
 		--go-allocator_out=logs=true:./.. \

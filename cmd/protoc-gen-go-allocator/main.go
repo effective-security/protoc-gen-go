@@ -77,6 +77,8 @@ func generator(gp *protogen.Plugin) error {
 				headerProduced = true
 			}
 
+			cmdAliased := make(map[string]string, len(svc.Methods))
+
 			for _, mthd := range svc.Methods {
 				o := tplMethod{
 					Opts: Opts{
@@ -89,13 +91,24 @@ func generator(gp *protogen.Plugin) error {
 				exts := mthd.Desc.Options()
 				if exts != nil {
 					pr := exts.ProtoReflect()
+					o.CliCmd = proto.GetExtension(pr.Interface(), api.E_CliCmd).(string)
+
+					if o.CliCmd != "" {
+						if cmdAliased[o.CliCmd] != "" {
+							err := errors.Errorf("cli command %q is already aliased to %q", o.CliCmd, cmdAliased[o.CliCmd])
+							gp.Error(err)
+							return err
+						}
+						cmdAliased[o.CliCmd] = mthd.GoName
+					}
+
 					ext := proto.GetExtension(pr.Interface(), api.E_AllowedRoles).(string)
 					if ext != "" {
 						o.Roles = strings.Split(ext, ",")
 					}
 				}
 
-				if err := methodTemplate.Execute(buf, o); err != nil {
+				if err := allocatorTemplate.Execute(buf, o); err != nil {
 					gp.Error(err)
 					return errors.Wrapf(err, "failed to execute template: %s", *out)
 				}
@@ -164,6 +177,7 @@ type tplMethod struct {
 	Service *protogen.Service
 	Method  *protogen.Method
 	Roles   []string
+	CliCmd  string
 }
 
 var (
@@ -192,6 +206,7 @@ type CheckAccessFunc func(ctx context.Context, req any, action string) error
 type MethodInfo struct {
 	Allocator    RequestAllocator
 	AllowedRoles []string
+	CliCmd       string
 }
 
 // UnmarshalRequest unmarshals JSON body of HTTP request to protobuf request
@@ -217,6 +232,22 @@ func GetMethodInfo(method string) *MethodInfo {
 	return methods[method]
 }
 
+// GetMethodsInfo returns map of methods
+func GetMethodsInfo() map[string]*MethodInfo {
+	return methods
+}
+
+// GetMethodAliases returns map of method CLI commands to method names
+func GetMethodAliases() map[string]string {
+	res := make(map[string]string, len(methods))
+	for fn, method := range methods {
+		if method.CliCmd != "" {
+			res[method.CliCmd] = fn
+		}
+	}
+	return res
+}
+
 // methods defines map for routes
 var methods = map[string]*MethodInfo{
 `))
@@ -226,11 +257,14 @@ var methods = map[string]*MethodInfo{
 }
 `))
 
-	methodTemplate = template.Must(template.New("method").
-			Funcs(tempFuncs()).
-			Parse(`
+	allocatorTemplate = template.Must(template.New("allocator").
+				Funcs(tempFuncs()).
+				Parse(`
 	{{.Service.GoName}}_{{.Method.GoName}}_FullMethodName: {
 		Allocator: func() any { return new({{type .Package .Method.Input}}) },
+		{{- if .CliCmd }}
+		CliCmd: "{{.CliCmd}}",
+		{{- end }}
 		{{roles .Roles}}
 	},
 `))
