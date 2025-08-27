@@ -26,6 +26,8 @@ type fakeEnum = enum.Enum
 type Opts struct {
 	// Package provides package name
 	Package string
+	// SkipMessageDescriptionPackage is the package name to skip message description generation
+	SkipMessageDescriptionPackage string
 }
 
 // This function is called with a param which contains the entire definition of a method.
@@ -111,6 +113,9 @@ func ApplyMessages(w io.Writer, opts Opts, msgs []*protogen.Message) error {
 	}
 	for _, msg := range msgs {
 		fn := string(msg.Desc.FullName())
+		if opts.SkipMessageDescriptionPackage != "" && strings.HasPrefix(fn, opts.SkipMessageDescriptionPackage) {
+			continue
+		}
 		if _, ok := seen[fn]; ok {
 			continue
 		}
@@ -150,27 +155,41 @@ func GetEnums(msgs []*protogen.Message) []*protogen.Enum {
 	return enums
 }
 
-func GetMessagesToDescribe(msgs []*protogen.Message, services []*protogen.Service) []*protogen.Message {
+func GetMessagesToDescribe(opts Opts, msgs []*protogen.Message, services []*protogen.Service) []*protogen.Message {
 	var res []*protogen.Message
 	seen := make(map[string]bool)
 
 	// first add all service requests
 	for _, svc := range services {
 		for _, m := range svc.Methods {
-			if _, ok := seen[m.Input.GoIdent.GoName]; !ok {
-				res = append(res, m.Input)
-				seen[m.Input.GoIdent.GoName] = true
+			fni := string(m.Input.Desc.FullName())
+			if opts.SkipMessageDescriptionPackage == "" || !strings.HasPrefix(fni, opts.SkipMessageDescriptionPackage) {
+				if _, ok := seen[m.Input.GoIdent.GoName]; !ok {
+					res = append(res, m.Input)
+					seen[m.Input.GoIdent.GoName] = true
+				}
+			}
+
+			fno := string(m.Output.Desc.FullName())
+			if opts.SkipMessageDescriptionPackage == "" || !strings.HasPrefix(fno, opts.SkipMessageDescriptionPackage) {
+				if _, ok := seen[m.Output.GoIdent.GoName]; !ok {
+					res = append(res, m.Output)
+					seen[m.Output.GoIdent.GoName] = true
+				}
 			}
 		}
 	}
 
 	// then add optionally marked messages
 	for _, msg := range msgs {
-		opts := msg.Desc.Options().ProtoReflect()
-		describe := opts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
-		if _, ok := seen[msg.GoIdent.GoName]; describe && !ok {
-			res = append(res, msg)
-			seen[msg.GoIdent.GoName] = true
+		popts := msg.Desc.Options().ProtoReflect()
+		describe := popts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
+		fn := string(msg.Desc.FullName())
+		if opts.SkipMessageDescriptionPackage == "" || !strings.HasPrefix(fn, opts.SkipMessageDescriptionPackage) {
+			if _, ok := seen[msg.GoIdent.GoName]; describe && !ok {
+				res = append(res, msg)
+				seen[msg.GoIdent.GoName] = true
+			}
 		}
 	}
 
@@ -516,8 +535,15 @@ var EnumNameTypes = map[string]reflect.Type{
 var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 	Name: "{{.Description.Name}}",
 	Display: "{{.Description.Display}}",
+	FullName: "{{.Description.FullName}}",
 	{{- if .Description.Documentation }}
 	Documentation: ` + "`{{.Description.Documentation}}`" + `,
+	{{- end }}
+	{{- if .Description.TableSource }}
+	TableSource: "{{.Description.TableSource}}",
+	{{- end }}
+	{{- if .Description.TableHeader }}
+	TableHeader: {{list .Description.TableHeader}},
 	{{- end }}
 	Fields: []*api.FieldMeta {
 	{{- range .Description.Fields }}
@@ -541,6 +567,18 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			{{- end }}
 			{{- if .EnumDescription }}
 			EnumDescription: {{package_name .EnumDescription.FullName $root.Package }}{{.EnumDescription.Name}}_EnumDescription,
+			{{- end }}
+			{{- if .Required }}
+			Required: true,
+			{{- end }}
+			{{- if .RequiredOr }}
+			RequiredOr: {{list .RequiredOr}},
+			{{- end }}
+			{{- if .Min }}
+			Min: {{.Min}},
+			{{- end }}
+			{{- if .Max }}
+			Max: {{.Max}},
 			{{- end }}
 		},
 	{{- end }}

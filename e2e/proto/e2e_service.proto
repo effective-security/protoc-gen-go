@@ -5,6 +5,7 @@ option go_package = "github.com/effective-security/protoc-gen-go/e2e";
 
 import "e2e.proto";
 import "google/protobuf/empty.proto";
+import "es/api/annotations.proto";
 
 // E2E service provides a test
 service E2E {
@@ -16,4 +17,78 @@ service E2E {
 
     // Goodbuy returns a Nested
     rpc Goodbuy(google.protobuf.Empty) returns (Nested) {}
+
+    // GetAnnotation returns an item
+    rpc GetAnnotation(AnnotationRequest) returns (Annotation) {
+        option (es.api.allowed_roles) = "User";
+        option (es.api.cli_cmd)       = "e2e annotation get";
+    }
+
+    // ListAnnotations returns a list
+    rpc ListAnnotations(ListAnnotationsRequest) returns (AnnotationsResponse) {
+        option (es.api.allowed_roles) = "User";
+        option (es.api.cli_cmd)       = "e2e annotation list";
+    }
+}
+
+message AnnotationRequest {
+    string ID = 1 [
+        json_name         = "ID",
+        (es.api.required) = true,
+        (es.api.min)      = 9,
+        (es.api.max)      = 19
+    ];
+}
+
+message ListAnnotationsRequest {
+    string Name = 1 [
+        json_name         = "Name",
+        (es.api.required) = true,
+        (es.api.min)      = 4,
+        (es.api.max)      = 64
+    ];
+
+    string AssetID = 2 [
+        json_name            = "AssetID",
+        (es.api.required_or) = "ResourceID",
+        (es.api.min)         = 9,
+        (es.api.max)         = 19
+    ];
+
+    string ResourceID = 3 [
+        json_name            = "ResourceID",
+        (es.api.required_or) = "AssetID",
+        (es.api.min)         = 9,
+        (es.api.max)         = 19
+    ];
+
+    AnnotationType.Enum Type = 4 [json_name = "Type"];
+
+    uint32 Offset = 5 [json_name = "Offset", (es.api.max) = 1000];
+    uint32 Limit  = 6 [json_name = "Limit", (es.api.max) = 1000];
+}
+
+message Annotation {
+    string ID                = 1 [json_name = "ID"];
+    string Name              = 2 [json_name = "Name"];
+    AnnotationType.Enum Type = 3 [json_name = "Type"];
+}
+
+message AnnotationsResponse {
+    option (es.api.table_source) = "Annotations";
+    option (es.api.table_header) = "ID,Name,Type";
+
+    repeated Annotation Annotations = 1 [json_name = "Annotations"];
+    uint32 NextOffset               = 2 [json_name = "NextOffset"];
+}
+
+message AnnotationType {
+    // JobType define Job type constants
+    enum Enum {
+        option (es.api.is_bitmask) = true;
+
+        Unknown = 0;
+        Bar     = 1;
+        Foo     = 2;
+    }
 }

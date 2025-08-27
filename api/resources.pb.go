@@ -21,7 +21,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type APIResource struct {
+type ResourceDefinition struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Service is the service name providing a resource.
 	Service string `protobuf:"bytes,1,opt,name=Service,proto3" json:"Service,omitempty"`
@@ -43,20 +43,20 @@ type APIResource struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *APIResource) Reset() {
-	*x = APIResource{}
+func (x *ResourceDefinition) Reset() {
+	*x = ResourceDefinition{}
 	mi := &file_resources_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *APIResource) String() string {
+func (x *ResourceDefinition) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*APIResource) ProtoMessage() {}
+func (*ResourceDefinition) ProtoMessage() {}
 
-func (x *APIResource) ProtoReflect() protoreflect.Message {
+func (x *ResourceDefinition) ProtoReflect() protoreflect.Message {
 	mi := &file_resources_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -68,47 +68,47 @@ func (x *APIResource) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use APIResource.ProtoReflect.Descriptor instead.
-func (*APIResource) Descriptor() ([]byte, []int) {
+// Deprecated: Use ResourceDefinition.ProtoReflect.Descriptor instead.
+func (*ResourceDefinition) Descriptor() ([]byte, []int) {
 	return file_resources_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *APIResource) GetService() string {
+func (x *ResourceDefinition) GetService() string {
 	if x != nil {
 		return x.Service
 	}
 	return ""
 }
 
-func (x *APIResource) GetName() string {
+func (x *ResourceDefinition) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *APIResource) GetSingularName() string {
+func (x *ResourceDefinition) GetSingularName() string {
 	if x != nil {
 		return x.SingularName
 	}
 	return ""
 }
 
-func (x *APIResource) GetKind() string {
+func (x *ResourceDefinition) GetKind() string {
 	if x != nil {
 		return x.Kind
 	}
 	return ""
 }
 
-func (x *APIResource) GetScope() string {
+func (x *ResourceDefinition) GetScope() string {
 	if x != nil {
 		return x.Scope
 	}
 	return ""
 }
 
-func (x *APIResource) GetVerbs() []string {
+func (x *ResourceDefinition) GetVerbs() []string {
 	if x != nil {
 		return x.Verbs
 	}
@@ -472,8 +472,8 @@ var File_resources_proto protoreflect.FileDescriptor
 
 const file_resources_proto_rawDesc = "" +
 	"\n" +
-	"\x0fresources.proto\x12\x06es.api\x1a\x11annotations.proto\"\x9f\x01\n" +
-	"\vAPIResource\x12\x18\n" +
+	"\x0fresources.proto\x12\x06es.api\x1a\x11annotations.proto\"\xa6\x01\n" +
+	"\x12ResourceDefinition\x12\x18\n" +
 	"\aService\x18\x01 \x01(\tR\aService\x12\x12\n" +
 	"\x04Name\x18\x02 \x01(\tR\x04Name\x12\"\n" +
 	"\fSingularName\x18\x03 \x01(\tR\fSingularName\x12\x12\n" +
@@ -524,7 +524,7 @@ func file_resources_proto_rawDescGZIP() []byte {
 
 var file_resources_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_resources_proto_goTypes = []any{
-	(*APIResource)(nil),           // 0: es.api.APIResource
+	(*ResourceDefinition)(nil),    // 0: es.api.ResourceDefinition
 	(*TableColumnDefinition)(nil), // 1: es.api.TableColumnDefinition
 	(*TableRow)(nil),              // 2: es.api.TableRow
 	(*ListMeta)(nil),              // 3: es.api.ListMeta

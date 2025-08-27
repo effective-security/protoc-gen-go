@@ -4,11 +4,11 @@ go 1.24.4
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/effective-security/porto v0.35.348
-	github.com/effective-security/x v0.15.69
+	github.com/effective-security/porto v0.35.349
+	github.com/effective-security/x v0.15.70
 	github.com/effective-security/xlog v0.10.44
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20250818200422-3122310a409c
 	google.golang.org/grpc v1.75.0
 	google.golang.org/protobuf v1.36.8

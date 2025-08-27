@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	reflect "reflect"
+	"strings"
+	"unicode"
 
 	"github.com/effective-security/x/format"
 	"github.com/effective-security/x/print"
@@ -14,15 +16,33 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Describer is not thread safe.
+// It's assumed the registration will be done once at startup
+
+var DefaultDescriber = NewDescriber()
+
 type Describer struct {
 	EnumNameTypes map[string]reflect.Type
 
 	pbDisplayNameExtType protoreflect.ExtensionType
 }
 
-func NewDescriber(enumNameTypes map[string]reflect.Type) *Describer {
-	return &Describer{
-		EnumNameTypes: enumNameTypes,
+func NewDescriber(enumNameTypes ...map[string]reflect.Type) *Describer {
+	d := &Describer{
+		EnumNameTypes: make(map[string]reflect.Type),
+	}
+
+	// merge all enum name types
+	for _, enumNameTypes := range enumNameTypes {
+		d.RegisterEnumNameTypes(enumNameTypes)
+	}
+
+	return d
+}
+
+func (d *Describer) RegisterEnumNameTypes(enumNameTypes map[string]reflect.Type) {
+	for k, v := range enumNameTypes {
+		d.EnumNameTypes[k] = v
 	}
 }
 
@@ -93,6 +113,11 @@ func (d *Describer) protoKindValue(fd protoreflect.FieldDescriptor, v protorefle
 		displayValue = fmt.Sprintf("%v", value)
 	}
 	return displayValue
+}
+
+// DescribeMessage converts protobuf message to a human readable dictionary
+func DescribeMessage(msg proto.Message) values.MapAny {
+	return DefaultDescriber.DescribeMessage(msg)
 }
 
 // DescribeMessage converts protobuf message to a human readable dictionary
@@ -172,11 +197,22 @@ func (d *Describer) DescribeMessage(msg proto.Message) values.MapAny {
 	return values
 }
 
+// Describe prints protobuf message to a human readable text
+func Describe(w io.Writer, msg proto.Message) {
+	DefaultDescriber.Describe(w, msg)
+}
+
+// Describe prints protobuf message to a human readable text
 func (d *Describer) Describe(w io.Writer, msg proto.Message) {
 	vals := d.DescribeMessage(msg)
 	enc := yaml.NewEncoder(w)
 	_ = enc.Encode(vals)
 	_ = enc.Close()
+}
+
+// GetEnumDisplayValue function to dynamically call DisplayName on an enum
+func GetEnumDisplayValue(enumDescriptor protoreflect.EnumDescriptor, value int32) string {
+	return DefaultDescriber.GetEnumDisplayValue(enumDescriptor, value)
 }
 
 // GetEnumDisplayValue function to dynamically call DisplayName on an enum
@@ -249,4 +285,53 @@ func DocumentMessage(w io.Writer, dscr *MessageDescription, indent string) {
 		}
 	}
 	_, _ = fmt.Fprintln(w)
+}
+
+func Documentation(w io.Writer, doc string, indent string, noFirstIndent bool) {
+	if doc == "" {
+		return
+	}
+	parts := strings.Split(doc, "\n")
+	lines := 0
+	last := len(parts) - 1
+	for last > 0 && (parts[last] == "" || parts[last] == "\n") {
+		last--
+	}
+	for idx, part := range parts {
+		if idx > last {
+			break
+		}
+		if lines > 0 || !noFirstIndent {
+			_, _ = fmt.Fprint(w, indent)
+		}
+		_, _ = fmt.Fprintln(w, part)
+		lines++
+	}
+}
+
+func DocumentationOneLine(w io.Writer, doc string) {
+	if doc == "" {
+		return
+	}
+	parts := strings.Split(doc, "\n")
+	lines := 0
+	prevPartDot := false
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		size := len(part)
+		if size > 0 {
+			if lines > 0 {
+				if !prevPartDot && unicode.IsUpper(rune(part[0])) {
+					_, _ = fmt.Fprint(w, ".")
+				}
+				_, _ = fmt.Fprint(w, " ")
+			}
+			_, _ = fmt.Fprint(w, part)
+			prevPartDot = part[size-1] == '.'
+			lines++
+		}
+	}
+	if lines > 0 && !prevPartDot {
+		_, _ = fmt.Fprint(w, ".")
+	}
 }

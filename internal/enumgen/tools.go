@@ -57,6 +57,10 @@ func CreateMessageDescription(msg *protogen.Message, args Opts) *api.MessageDesc
 
 	display := opts.Get(api.E_MessageDisplay.TypeDescriptor()).String()
 	description := opts.Get(api.E_MessageDescription.TypeDescriptor()).String()
+
+	tableSource := opts.Get(api.E_TableSource.TypeDescriptor()).String()
+	tableHeader := opts.Get(api.E_TableHeader.TypeDescriptor()).String()
+
 	// Fallback to comments if description is empty
 	if description == "" {
 		description = strings.TrimSpace(msg.Comments.Leading.String())
@@ -70,6 +74,8 @@ func CreateMessageDescription(msg *protogen.Message, args Opts) *api.MessageDesc
 		FullName:      string(msg.Desc.FullName()),
 		Documentation: cleanComment(description),
 		Display:       display,
+		TableSource:   tableSource,
+		TableHeader:   nonEmptyStrings(strings.Split(tableHeader, ",")),
 	}
 
 	for _, field := range msg.Fields {
@@ -85,6 +91,10 @@ func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
 	display := opts.Get(api.E_Display.TypeDescriptor()).String()
 	description := opts.Get(api.E_Description.TypeDescriptor()).String()
 	search := opts.Get(api.E_Search.TypeDescriptor()).String()
+	required := opts.Get(api.E_Required.TypeDescriptor()).Bool()
+	requiredOr := opts.Get(api.E_RequiredOr.TypeDescriptor()).String()
+	min := opts.Get(api.E_Min.TypeDescriptor()).Uint()
+	max := opts.Get(api.E_Max.TypeDescriptor()).Uint()
 
 	// Fallback to comments if description is empty
 	if description == "" {
@@ -100,6 +110,10 @@ func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
 		FullName:      string(field.Desc.FullName()),
 		Documentation: cleanComment(description),
 		Display:       display,
+		Required:      required,
+		RequiredOr:    nonEmptyStrings(strings.Split(requiredOr, ",")),
+		Min:           int32(min),
+		Max:           int32(max),
 	}
 
 	fm.SearchOptions, fm.SearchType = parseSearchOptions(search, field)

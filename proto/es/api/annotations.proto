@@ -7,6 +7,7 @@ import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.MethodOptions {
     string allowed_roles = 1071;
+    string cli_cmd       = 1072;
 }
 
 extend google.protobuf.FieldOptions {
@@ -32,6 +33,17 @@ extend google.protobuf.FieldOptions {
     string description = 51003;
     // csv is the option for the field's Name in CSV header.
     string csv = 51004;
+    // required is the option for the field to be required.
+    bool required = 51005;
+    // required_or is the option for the field to be required, if one of the
+    // other values is provided.
+    string required_or = 51006;
+    // min is the option for the field minimum length for strings, and minimum
+    // value for numbers.
+    uint32 min = 51007;
+    // max is the option for the field maximum length for strings, and maximum
+    // value for numbers.
+    uint32 max = 51008;
 }
 
 extend google.protobuf.EnumOptions {
@@ -55,12 +67,18 @@ extend google.protobuf.EnumValueOptions {
 // Custom message option
 extend google.protobuf.MessageOptions {
     // generate_meta is the option for generating the message's meta
-    // information.
+    // information. By default, only for Request messages.
     bool generate_meta = 53001;
     // message_display is the option for the message's Display Name in the UI.
     string message_display = 53002;
     // message_description is the option for the message's description.
     string message_description = 53003;
+    // table_source is the option for the message's field name to populate
+    // table.
+    string table_source = 53004;
+    // table_header is the option for the default table header,
+    // it can be a comma-separated list of field names.
+    string table_header = 53005;
 }
 
 message EnumMeta {
@@ -112,11 +130,22 @@ message FieldMeta {
     string SearchType = 7 [json_name = "SearchType"];
     // SearchOptions is populated from es.api.search option.
     SearchOption.Enum SearchOptions = 8 [json_name = "SearchOptions"];
+    // Required is the option for the field to be required.
+    bool Required = 9 [json_name = "Required"];
+    // RequiredOr is the option for the field to be required, if one of the
+    // other values is provided.
+    repeated string RequiredOr = 10 [json_name = "RequiredOr"];
 
     // Fields is provided for nested messages
     repeated FieldMeta Fields = 12 [json_name = "Fields"];
     // EnumDescription is provided for enum fields
     EnumDescription EnumDescription = 13 [json_name = "EnumDescription"];
+    // Min is the option for the field minimum length for strings, and minimum
+    // value for numbers.
+    int32 Min = 14 [json_name = "Min"];
+    // Max is the option for the field maximum length for strings, and maximum
+    // value for numbers.
+    int32 Max = 15 [json_name = "Max"];
 }
 
 message EnumDescription {
@@ -134,4 +163,8 @@ message MessageDescription {
     repeated FieldMeta Fields = 3 [json_name = "Fields"];
     string Documentation      = 4 [json_name = "Documentation"];
     string FullName           = 5 [json_name = "FullName"];
+    // TableSource is the option for the message's table source.
+    string TableSource = 6 [json_name = "TableSource"];
+    // TableHeader is the option for the message's table header.
+    repeated string TableHeader = 7 [json_name = "TableHeader"];
 }
