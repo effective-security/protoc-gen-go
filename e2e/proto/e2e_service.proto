@@ -62,10 +62,12 @@ message ListAnnotationsRequest {
         (es.api.max)         = 19
     ];
 
-    AnnotationType.Enum Type = 4 [json_name = "Type"];
+    repeated string AssetIDs = 4 [json_name = "AssetIDs"];
 
-    uint32 Offset = 5 [json_name = "Offset", (es.api.max) = 1000];
-    uint32 Limit  = 6 [json_name = "Limit", (es.api.max) = 1000];
+    AnnotationType.Enum Type = 5 [json_name = "Type"];
+
+    uint32 Offset = 6 [json_name = "Offset", (es.api.max) = 1000];
+    uint32 Limit  = 7 [json_name = "Limit", (es.api.max) = 1000];
 }
 
 message Annotation {

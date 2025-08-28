@@ -4,17 +4,19 @@ import (
 	"testing"
 
 	"github.com/effective-security/protoc-gen-go/e2e"
+	"github.com/effective-security/x/format"
 	"github.com/stretchr/testify/assert"
 )
 
 func Test_FormatDisplayName(t *testing.T) {
-	assert.Equal(t, "Test", FormatDisplayName("Test"))
-	assert.Equal(t, "test", FormatDisplayName("test"))
-	assert.Equal(t, "test value", FormatDisplayName("test_value"))
-	assert.Equal(t, "Test Data", FormatDisplayName("TestData"))
-	assert.Equal(t, "AWS Name", FormatDisplayName("AWSName"))
-	assert.Equal(t, "S3 Location", FormatDisplayName("S3Location"))
-	assert.Equal(t, "EC2 Instance", FormatDisplayName("EC2Instance"))
+	assert.Equal(t, "Test", format.DisplayName("Test"))
+	assert.Equal(t, "test", format.DisplayName("test"))
+	assert.Equal(t, "Test Value", format.DisplayName("test_value"))
+	assert.Equal(t, "Test Data", format.DisplayName("TestData"))
+	assert.Equal(t, "AWS Name", format.DisplayName("AWSName"))
+	assert.Equal(t, "S3 Location", format.DisplayName("S3Location"))
+	assert.Equal(t, "EC2 Instance", format.DisplayName("EC2Instance"))
+	assert.Equal(t, "Asset IDs", format.DisplayName("AssetIDs"))
 }
 
 func Test_EnumDisplayValue(t *testing.T) {

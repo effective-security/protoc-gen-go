@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cockroachdb/errors v1.12.0
 	github.com/effective-security/porto v0.35.351
-	github.com/effective-security/x v0.15.70
+	github.com/effective-security/x v0.15.71
 	github.com/effective-security/xlog v0.10.45
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20250818200422-3122310a409c
