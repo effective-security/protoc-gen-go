@@ -5,9 +5,9 @@ go 1.24.4
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cockroachdb/errors v1.12.0
-	github.com/effective-security/porto v0.35.349
+	github.com/effective-security/porto v0.35.351
 	github.com/effective-security/x v0.15.70
-	github.com/effective-security/xlog v0.10.44
+	github.com/effective-security/xlog v0.10.45
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20250818200422-3122310a409c
 	google.golang.org/grpc v1.75.0
@@ -27,9 +27,9 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/effective-security/metrics v0.8.104 // indirect
+	github.com/effective-security/metrics v0.8.107 // indirect
 	github.com/effective-security/xdb v0.23.112 // indirect
-	github.com/effective-security/xpki v0.26.232 // indirect
+	github.com/effective-security/xpki v0.26.235 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/getsentry/sentry-go v0.27.0 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
@@ -77,6 +77,6 @@ require (
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 	golang.org/x/tools v0.35.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250811230008-5f3141c8851a // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250818200422-3122310a409c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
