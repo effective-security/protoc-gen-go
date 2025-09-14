@@ -40,10 +40,14 @@ extend google.protobuf.FieldOptions {
     string required_or = 51006;
     // min is the option for the field minimum length for strings, and minimum
     // value for numbers.
-    uint32 min = 51007;
+    int32 min = 51007;
     // max is the option for the field maximum length for strings, and maximum
     // value for numbers.
-    uint32 max = 51008;
+    int32 max = 51008;
+    // min_count is the option for the field minimum count for lists.
+    int32 min_count = 51009;
+    // max_count is the option for the field maximum count for lists.
+    int32 max_count = 51010;
 }
 
 extend google.protobuf.EnumOptions {
@@ -146,6 +150,10 @@ message FieldMeta {
     // Max is the option for the field maximum length for strings, and maximum
     // value for numbers.
     int32 Max = 15 [json_name = "Max"];
+    // MinCount is the option for the field minimum count for lists.
+    int32 MinCount = 16 [json_name = "MinCount"];
+    // MaxCount is the option for the field maximum count for lists.
+    int32 MaxCount = 17 [json_name = "MaxCount"];
 }
 
 message EnumDescription {

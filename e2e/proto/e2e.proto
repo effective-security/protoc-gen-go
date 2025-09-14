@@ -24,6 +24,10 @@ message Basic {
 
     JobStatus.Enum statuses          = 7;
     ResourceType.Enum resource_types = 8;
+
+    string name = 9 [json_name = "Name", (es.api.min) = 8, (es.api.max) = 64];
+    repeated string values = 10
+        [json_name = "Values", (es.api.min_count) = 1, (es.api.max_count) = 10];
 }
 
 // Nested for testing nested types

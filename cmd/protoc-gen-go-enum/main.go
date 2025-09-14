@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/effective-security/protoc-gen-go/internal/enumgen"
 	"github.com/effective-security/xlog"
@@ -19,7 +18,6 @@ var (
 	outMsgs    = flag.String("out-msgs", "messages", "output messages")
 	importpath = flag.String("import", "", "go import path")
 	pkg        = flag.String("package", "", "go package name")
-	skipPkg    = flag.String("skip-pkg", "", "skip message description generation for this package")
 )
 
 func main() {
@@ -40,16 +38,7 @@ func main() {
 		xlog.SetFormatter(formatter)
 
 		opts := enumgen.Opts{
-			Package:                       *pkg,
-			SkipMessageDescriptionPackage: *skipPkg,
-		}
-
-		if opts.SkipMessageDescriptionPackage != "" && !strings.HasSuffix(opts.SkipMessageDescriptionPackage, ".") {
-			if opts.SkipMessageDescriptionPackage == "none" {
-				opts.SkipMessageDescriptionPackage = ""
-			} else {
-				opts.SkipMessageDescriptionPackage += "."
-			}
+			Package: *pkg,
 		}
 
 		var allEnums []*protogen.Enum

@@ -20,12 +20,12 @@ COPY ./proto/ /third_party/
 
 RUN apt update && apt install -y curl zip
 
-RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v31.1/protoc-31.1-linux-x86_64.zip -o /tmp/protoc.zip
+RUN curl -L https://github.com/protocolbuffers/protobuf/releases/download/v32.0/protoc-32.0-linux-x86_64.zip -o /tmp/protoc.zip
 RUN unzip /tmp/protoc.zip -d /tmp/protoc3
 RUN mv /tmp/protoc3/bin/* /usr/local/bin/
 RUN cp -r /tmp/protoc3/include/ /usr/local/
 
-RUN curl -L https://github.com/protocolbuffers/protobuf-javascript/releases/download/v3.21.4/protobuf-javascript-3.21.4-linux-x86_64.zip -o /tmp/protobuf-javascript.zip
+RUN curl -L https://github.com/protocolbuffers/protobuf-javascript/releases/download/v4.0.0/protobuf-javascript-4.0.0-linux-x86_64.zip -o /tmp/protobuf-javascript.zip
 RUN unzip /tmp/protobuf-javascript.zip -d /tmp/protobuf-javascript
 RUN mv /tmp/protobuf-javascript/bin/* /tools/
 
@@ -33,7 +33,7 @@ RUN curl -sSL https://www.nuget.org/api/v2/package/Grpc.Tools/2.62.0 --output /t
 RUN unzip /tmp/GrpcTools.zip -d /tmp/GrpcTools
 RUN cp -r /tmp/GrpcTools/tools/linux_x64/grpc_csharp_plugin /usr/local/bin/
 
-RUN curl -L https://go.dev/dl/go1.24.4.linux-amd64.tar.gz -o /tmp/go.tar.gz
+RUN curl -L https://go.dev/dl/go1.24.7.linux-amd64.tar.gz -o /tmp/go.tar.gz
 RUN tar -C /usr/local -xzf /tmp/go.tar.gz
 
 RUN curl -L https://github.com/grpc/grpc-web/releases/download/1.5.0/protoc-gen-grpc-web-1.5.0-linux-x86_64 -o /tools/protoc-gen-grpc-web
