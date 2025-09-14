@@ -55,3 +55,18 @@ func Test_cleanComment(t *testing.T) {
 		assert.Equal(t, test.expected, result)
 	}
 }
+
+// func Test_CreateMessageDescription(t *testing.T) {
+// 	msg := &protogen.Message{
+// 		Desc: &descriptor.DescriptorProto{
+// 			Name: "Test",
+// 		},
+// 	}
+// 	md := CreateMessageDescription(msg, Opts{})
+// 	assert.Equal(t, "Test", md.Name)
+// 	assert.Equal(t, "Test", md.FullName)
+// 	assert.Equal(t, "Test", md.Documentation)
+// 	assert.Equal(t, "Test", md.Display)
+// 	assert.Equal(t, "Test", md.TableSource)
+// 	assert.Equal(t, []string{"Test"}, md.TableHeader)
+// }

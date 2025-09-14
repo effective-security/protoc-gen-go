@@ -51,7 +51,7 @@ func CreateEnumDescription(en *protogen.Enum, args Opts) *api.EnumDescription {
 }
 
 // CreateMessageDescription convert enum descriptor to EnumMeta message
-func CreateMessageDescription(msg *protogen.Message, args Opts) *api.MessageDescription {
+func CreateMessageDescription(msg *protogen.Message, args Opts) *MessageDescription {
 	opts := msg.Desc.Options().ProtoReflect()
 
 	display := opts.Get(api.E_MessageDisplay.TypeDescriptor()).String()
@@ -68,13 +68,16 @@ func CreateMessageDescription(msg *protogen.Message, args Opts) *api.MessageDesc
 		display = format.DisplayName(string(msg.Desc.Name()))
 	}
 
-	res := &api.MessageDescription{
+	res := &MessageDescription{
 		Name:          string(msg.GoIdent.GoName),
 		FullName:      string(msg.Desc.FullName()),
 		Documentation: cleanComment(description),
 		Display:       display,
 		TableSource:   tableSource,
 		TableHeader:   nonEmptyStrings(strings.Split(tableHeader, ",")),
+
+		ProtogenMessage: msg,
+		Package:         strings.Split(string(msg.Desc.FullName()), ".")[0],
 	}
 
 	for _, field := range msg.Fields {
@@ -84,7 +87,7 @@ func CreateMessageDescription(msg *protogen.Message, args Opts) *api.MessageDesc
 	return res
 }
 
-func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
+func fieldMeta(field *protogen.Field, args Opts) *FieldMeta {
 	opts := field.Desc.Options().ProtoReflect()
 
 	display := opts.Get(api.E_Display.TypeDescriptor()).String()
@@ -92,8 +95,10 @@ func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
 	search := opts.Get(api.E_Search.TypeDescriptor()).String()
 	required := opts.Get(api.E_Required.TypeDescriptor()).Bool()
 	requiredOr := opts.Get(api.E_RequiredOr.TypeDescriptor()).String()
-	min := opts.Get(api.E_Min.TypeDescriptor()).Uint()
-	max := opts.Get(api.E_Max.TypeDescriptor()).Uint()
+	min := opts.Get(api.E_Min.TypeDescriptor()).Int()
+	max := opts.Get(api.E_Max.TypeDescriptor()).Int()
+	minCount := opts.Get(api.E_MinCount.TypeDescriptor()).Int()
+	maxCount := opts.Get(api.E_MaxCount.TypeDescriptor()).Int()
 
 	// Fallback to comments if description is empty
 	if description == "" {
@@ -104,7 +109,7 @@ func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
 		display = format.DisplayName(string(field.Desc.Name()))
 	}
 
-	fm := &api.FieldMeta{
+	fm := &FieldMeta{
 		Name:          string(field.Desc.Name()),
 		FullName:      string(field.Desc.FullName()),
 		Documentation: cleanComment(description),
@@ -113,6 +118,10 @@ func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
 		RequiredOr:    nonEmptyStrings(strings.Split(requiredOr, ",")),
 		Min:           int32(min),
 		Max:           int32(max),
+		MinCount:      int32(minCount),
+		MaxCount:      int32(maxCount),
+
+		ProtogenField: field,
 	}
 
 	fm.SearchOptions, fm.SearchType = parseSearchOptions(search, field)
@@ -129,17 +138,20 @@ func fieldMeta(field *protogen.Field, args Opts) *api.FieldMeta {
 			fm.GoType = "map"
 		} else {
 			if fm.SearchType == "object" || fm.SearchType == "nested" {
-				msg := field.Message
-				for _, field := range msg.Fields {
-					fm.Fields = append(fm.Fields, fieldMeta(field, args))
+				msgDescr := CreateMessageDescription(field.Message, args)
+				fm.Fields = msgDescr.Fields
+				fm.GoType = "struct"
+				fm.FieldsDescriptionName = TrimLocalPackageName(field.Message.GoIdent.GoName, args.Package) + "_MessageDescription.Fields"
+				if args.Package != msgDescr.Package {
+					fm.FieldsDescriptionName = msgDescr.Package + "." + fm.FieldsDescriptionName
 				}
-				fm.GoType = args.Package + "." + msg.GoIdent.GoName
 			}
 		}
 	case field.Desc.Kind() == protoreflect.EnumKind:
 		enumDescr := CreateEnumDescription(field.Enum, args)
 		//fm.GoType = enumDescr.Name
 		fm.EnumDescription = enumDescr
+		fm.EnumDescriptionName = ExternalPackageName(enumDescr.FullName, args.Package) + enumDescr.Name + "_EnumDescription"
 	case field.Desc.IsList():
 		fm.GoType = "[]" + goTyp
 		fm.Type = "[]" + llmTyp
@@ -201,4 +213,57 @@ func mapScalarToTypes(kind protoreflect.Kind) (goType string, llmType string) {
 	default:
 		return "unknown", "unknown"
 	}
+}
+
+func TrimLocalPackageName(val, pack string) string {
+	if strings.HasPrefix(val, pack+".") {
+		return val[len(pack)+1:]
+	}
+	return val
+}
+
+func ExternalPackageName(fullname, pack string) string {
+	pn := strings.Split(fullname, ".")[0]
+	if pn == pack || len(pn) == 1 {
+		return ""
+	}
+	return pn + "."
+}
+
+type MessageDescription struct {
+	Name          string
+	Display       string
+	Fields        []*FieldMeta
+	Documentation string
+	FullName      string
+	TableSource   string
+	TableHeader   []string
+
+	// message is the original message descriptor
+	ProtogenMessage *protogen.Message
+	Package         string
+}
+
+type FieldMeta struct {
+	Name            string
+	FullName        string
+	Display         string
+	Documentation   string
+	Type            string
+	GoType          string
+	SearchType      string
+	SearchOptions   api.SearchOption_Enum
+	Required        bool
+	RequiredOr      []string
+	Fields          []*FieldMeta
+	EnumDescription *api.EnumDescription
+	Min             int32
+	Max             int32
+	MinCount        int32
+	MaxCount        int32
+
+	// field is the original field descriptor
+	ProtogenField         *protogen.Field
+	EnumDescriptionName   string
+	FieldsDescriptionName string
 }

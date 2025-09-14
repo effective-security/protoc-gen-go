@@ -15,6 +15,7 @@ import (
 	"github.com/effective-security/x/enum"
 	"github.com/effective-security/xlog"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "enumgen")
@@ -26,8 +27,6 @@ type fakeEnum = enum.Enum
 type Opts struct {
 	// Package provides package name
 	Package string
-	// SkipMessageDescriptionPackage is the package name to skip message description generation
-	SkipMessageDescriptionPackage string
 }
 
 // This function is called with a param which contains the entire definition of a method.
@@ -109,13 +108,10 @@ func ApplyMessages(w io.Writer, opts Opts, msgs []*protogen.Message) error {
 	seen := make(map[string]bool)
 	mt := tplMessagesMap{
 		Opts:         opts,
-		Descriptions: make([]*api.MessageDescription, 0, len(msgs)),
+		Descriptions: make([]*MessageDescription, 0, len(msgs)),
 	}
 	for _, msg := range msgs {
 		fn := string(msg.Desc.FullName())
-		if opts.SkipMessageDescriptionPackage != "" && strings.HasPrefix(fn, opts.SkipMessageDescriptionPackage) {
-			continue
-		}
 		if _, ok := seen[fn]; ok {
 			continue
 		}
@@ -123,6 +119,7 @@ func ApplyMessages(w io.Writer, opts Opts, msgs []*protogen.Message) error {
 		logger.Infof("Processing %s", msg.GoIdent.GoName)
 		md := CreateMessageDescription(msg, opts)
 		mt.Descriptions = append(mt.Descriptions, md)
+
 		if err := descrMessageTemplate.Execute(w, tplMessage{
 			Opts:        opts,
 			Message:     msg,
@@ -159,24 +156,27 @@ func GetMessagesToDescribe(opts Opts, msgs []*protogen.Message, services []*prot
 	var res []*protogen.Message
 	seen := make(map[string]bool)
 
+	checkMessage := func(msg *protogen.Message) {
+		if _, ok := seen[msg.GoIdent.GoName]; !ok {
+			res = append(res, msg)
+			seen[msg.GoIdent.GoName] = true
+		}
+
+		for _, field := range msg.Fields {
+			if field.Desc.Kind() == protoreflect.MessageKind {
+				if _, ok := seen[field.Message.GoIdent.GoName]; !ok {
+					res = append(res, field.Message)
+					seen[field.Message.GoIdent.GoName] = true
+				}
+			}
+		}
+	}
+
 	// first add all service requests
 	for _, svc := range services {
 		for _, m := range svc.Methods {
-			fni := string(m.Input.Desc.FullName())
-			if opts.SkipMessageDescriptionPackage == "" || !strings.HasPrefix(fni, opts.SkipMessageDescriptionPackage) {
-				if _, ok := seen[m.Input.GoIdent.GoName]; !ok {
-					res = append(res, m.Input)
-					seen[m.Input.GoIdent.GoName] = true
-				}
-			}
-
-			fno := string(m.Output.Desc.FullName())
-			if opts.SkipMessageDescriptionPackage == "" || !strings.HasPrefix(fno, opts.SkipMessageDescriptionPackage) {
-				if _, ok := seen[m.Output.GoIdent.GoName]; !ok {
-					res = append(res, m.Output)
-					seen[m.Output.GoIdent.GoName] = true
-				}
-			}
+			checkMessage(m.Input)
+			checkMessage(m.Output)
 		}
 	}
 
@@ -184,13 +184,10 @@ func GetMessagesToDescribe(opts Opts, msgs []*protogen.Message, services []*prot
 	for _, msg := range msgs {
 		popts := msg.Desc.Options().ProtoReflect()
 		describe := popts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
-		fn := string(msg.Desc.FullName())
-		if opts.SkipMessageDescriptionPackage == "" || !strings.HasPrefix(fn, opts.SkipMessageDescriptionPackage) {
-			if _, ok := seen[msg.GoIdent.GoName]; describe && !ok {
-				res = append(res, msg)
-				seen[msg.GoIdent.GoName] = true
-			}
+		if !describe {
+			continue
 		}
+		checkMessage(msg)
 	}
 
 	return res
@@ -201,19 +198,8 @@ func tempFuncs() template.FuncMap {
 	// m["type"] = func(f *protogen.Message) string {
 	// 	return path.Base(string(f.GoIdent.GoImportPath)) + "." + f.GoIdent.GoName
 	// }
-	m["trim_package"] = func(val, pack string) string {
-		if strings.HasPrefix(val, pack) {
-			return val[len(pack)+1:]
-		}
-		return val
-	}
-	m["package_name"] = func(fullname, pack string) string {
-		pn := strings.Split(fullname, ".")[0]
-		if pn == pack {
-			return ""
-		}
-		return pn + "."
-	}
+	m["trim_package"] = TrimLocalPackageName
+	m["package_name"] = ExternalPackageName
 	m["supported"] = func(f *protogen.Enum) string {
 		var names []string
 		for _, v := range f.Values {
@@ -298,12 +284,12 @@ type tplEnumDescriptions struct {
 type tplMessage struct {
 	Opts
 	Message     *protogen.Message
-	Description *api.MessageDescription
+	Description *MessageDescription
 }
 
 type tplMessagesMap struct {
 	Opts
-	Descriptions []*api.MessageDescription
+	Descriptions []*MessageDescription
 }
 
 var (
@@ -562,11 +548,11 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			{{- if .Documentation }}
 			Documentation: ` + "`{{.Documentation}}`" + `,
 			{{- end }}
-			{{- if .Fields }}
-			Fields: {{trim_package .GoType $root.Package }}_MessageDescription.Fields,
+			{{- if .FieldsDescriptionName }}
+			Fields: {{ .FieldsDescriptionName }},
 			{{- end }}
-			{{- if .EnumDescription }}
-			EnumDescription: {{package_name .EnumDescription.FullName $root.Package }}{{.EnumDescription.Name}}_EnumDescription,
+			{{- if .EnumDescriptionName }}
+			EnumDescription: {{ .EnumDescriptionName }},
 			{{- end }}
 			{{- if .Required }}
 			Required: true,
@@ -579,6 +565,12 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			{{- end }}
 			{{- if .Max }}
 			Max: {{.Max}},
+			{{- end }}
+			{{- if .MinCount }}
+			MinCount: {{.MinCount}},
+			{{- end }}
+			{{- if .MaxCount }}
+			MaxCount: {{.MaxCount}},
 			{{- end }}
 		},
 	{{- end }}

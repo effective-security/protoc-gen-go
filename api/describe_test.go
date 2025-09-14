@@ -123,6 +123,10 @@ func Test_DocumentMessage(t *testing.T) {
     - Field: resource_types
       Type: integer
       Enum values: Unknown (0), EC2 Instance (1), S3 Bucket (2), Lambda Function (4), All (2147483647)
+    - Field: name
+      Type: keyword
+    - Field: values
+      Type: keyword
 
 `
 	checkDoc(e2e.Basic_MessageDescription, "  ", exp1)
