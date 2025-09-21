@@ -1,11 +1,16 @@
 package enumgen
 
 import (
+	"os"
 	"testing"
 
 	"github.com/effective-security/protoc-gen-go/e2e"
 	"github.com/effective-security/x/format"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/proto"
+	pluginpb "google.golang.org/protobuf/types/pluginpb"
 )
 
 func Test_FormatDisplayName(t *testing.T) {
@@ -56,17 +61,44 @@ func Test_cleanComment(t *testing.T) {
 	}
 }
 
-// func Test_CreateMessageDescription(t *testing.T) {
-// 	msg := &protogen.Message{
-// 		Desc: &descriptor.DescriptorProto{
-// 			Name: "Test",
-// 		},
-// 	}
-// 	md := CreateMessageDescription(msg, Opts{})
-// 	assert.Equal(t, "Test", md.Name)
-// 	assert.Equal(t, "Test", md.FullName)
-// 	assert.Equal(t, "Test", md.Documentation)
-// 	assert.Equal(t, "Test", md.Display)
-// 	assert.Equal(t, "Test", md.TableSource)
-// 	assert.Equal(t, []string{"Test"}, md.TableHeader)
-// }
+func Test_GetMessageDescriptions(t *testing.T) {
+	descriptions := e2e.GetMessageDescriptions()
+	require.NotNil(t, descriptions)
+	for fn, md := range descriptions {
+		for _, field := range md.Fields {
+			if field.Type == "object" || field.Type == "[]object" {
+				assert.NotEmpty(t, field.StructName, "Field %s in %s", field.Name, fn)
+				//assert.NotEmpty(t, field.Fields, "Field %s in %s", field.Name, fn)
+			}
+		}
+	}
+}
+
+func Test_GetEnumsToDescribe(t *testing.T) {
+	p := loadPluginFromRequestBin(t, "testdata/code_generator_request.pb.bin")
+	opts := Opts{Package: "e2e"}
+
+	allEnums := GetEnumsDescriptions(p, opts)
+	assert.Equal(t, 2, len(allEnums))
+}
+
+func Test_CreateMessageDescription(t *testing.T) {
+	p := loadPluginFromRequestBin(t, "testdata/code_generator_request.pb.bin")
+
+	ops := Opts{Package: "e2e"}
+
+	descriptions := GetMessagesDescriptions(p, ops)
+	assert.Equal(t, 10, len(descriptions))
+}
+
+func loadPluginFromRequestBin(t *testing.T, path string) *protogen.Plugin {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	require.NoError(t, err)
+	req := &pluginpb.CodeGeneratorRequest{}
+	require.NoError(t, proto.Unmarshal(data, req))
+	opts := protogen.Options{}
+	p, err := opts.New(req)
+	require.NoError(t, err)
+	return p
+}

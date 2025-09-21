@@ -73,6 +73,8 @@ message Generic {
     message Message {
         string name = 1;
         string id   = 2;
+
+        Nested nested = 3;
     }
 
     // Generic is a generic message
@@ -89,4 +91,26 @@ message Generic {
     map<string, string> map         = 10;
     ResourceType.Enum resource_type = 11
         [json_name = "ResourceType", (es.api.display) = "Resource"];
+
+    Nested.Message nested = 12;
+}
+
+message VectorScore {
+    string Vector = 1 [json_name = "Vector"];
+    double Score  = 2 [json_name = "Score"];
+}
+
+message Cvss {
+    VectorScore V2 = 3 [json_name = "V2"];
+    VectorScore V3 = 4 [json_name = "V3"];
+    VectorScore V4 = 5 [json_name = "V4"];
+}
+
+message VendorSeverity {
+    string Vendor = 1 [json_name = "Vendor"];
+    Cvss Cvss     = 3 [json_name = "Cvss"];
+}
+
+message VendorsData {
+    repeated VendorSeverity Vendors = 1 [json_name = "Vendors"];
 }

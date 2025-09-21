@@ -3,9 +3,11 @@ package e2e;
 
 option go_package = "github.com/effective-security/protoc-gen-go/e2e";
 import "es/api/annotations.proto";
+import "google/protobuf/struct.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
+import "e2e.proto";
 
 service Status {
     // Version returns the server version.
@@ -28,6 +30,13 @@ service Status {
     rpc Caller(google.protobuf.Empty) returns (CallerStatusResponse) {
         option (google.api.http) = {
             get: "/v1/status/caller"
+        };
+    }
+
+    // Search is for testing nested and recursive types.
+    rpc Search(google.protobuf.Empty) returns (SearchResponse) {
+        option (google.api.http) = {
+            get: "/v1/search"
         };
     }
 }
@@ -76,6 +85,8 @@ message ServerStatusResponse {
     // Version of the server.
     ServerVersion Version = 2
         [json_name = "Version", (es.api.search) = "object"];
+
+    repeated ServerVersion Versions = 3 [json_name = "Versions"];
 }
 
 // CallerStatusResponse returns the caller information
@@ -90,6 +101,10 @@ message CallerStatusResponse {
     // Claims from the token, json encoded map[string]interface{}
     bytes Claims = 3
         [json_name = "Claims", (es.api.search) = "no_index,exclude"];
+
+    google.protobuf.Struct Properties = 4 [json_name = "Properties"];
+
+    map<string, Role> RoleMap = 5 [json_name = "RoleMap"];
 }
 
 // ServiceStatus provides status
@@ -124,4 +139,39 @@ enum Role {
         (es.api.enum_description) = "User role",
         (es.api.enum_display)     = "User"
     ];
+}
+
+message SearchResponse {
+    // Found specifies the total number of documents that match the search
+    // request.
+    uint32 Found = 1 [json_name = "Found"];
+    // Facets returns the requested aggregation information in facet format.
+    repeated Facet Facets = 4 [json_name = "Facets"];
+}
+
+// SearchBucket represents bucket
+message SearchBucket {
+    string Value       = 1 [json_name = "Value"];
+    uint32 Count       = 2 [json_name = "Count"];
+    string DisplayName = 3 [json_name = "DisplayName"];
+    // Facets is a list of sub-facets
+    repeated Facet Facets = 4 [json_name = "Facets"];
+}
+
+// Facet represents facet info
+message Facet {
+    string Name                   = 1 [json_name = "Name"];
+    repeated SearchBucket Buckets = 2 [json_name = "Buckets"];
+    string DisplayName            = 3 [json_name = "DisplayName"];
+    // Count is the count of documents in the facet matching the query
+    uint32 Count = 4 [json_name = "Count"];
+    // Facets is a list of sub-facets
+    repeated Facet Facets = 5 [json_name = "Facets"];
+}
+
+message WithGeneric {
+    option (es.api.generate_meta) = true;
+
+    Generic Generic         = 1 [json_name = "Generic"];
+    VendorsData VendorsData = 2 [json_name = "VendorsData"];
 }

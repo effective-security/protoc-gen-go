@@ -9,7 +9,6 @@ import (
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/cockroachdb/errors"
-	"github.com/effective-security/protoc-gen-go/api"
 	"google.golang.org/protobuf/compiler/protogen"
 )
 
@@ -22,7 +21,7 @@ type TSOpts struct {
 
 type FileEnumInfo struct {
 	FileName string
-	Enums    []*protogen.Enum
+	Enums    []*EnumDescription
 }
 
 // This function is called with a param which contains the entire definition of a method.
@@ -55,17 +54,14 @@ func ApplyTemplateTS(f *protogen.GeneratedFile, opts TSOpts, fileEnumInfos []Fil
 	return err
 }
 
-func ApplyTSEnums(w io.Writer, opts TSOpts, enums []*protogen.Enum) error {
+func ApplyTSEnums(w io.Writer, opts TSOpts, enums []*EnumDescription) error {
 	for _, en := range enums {
-		logger.Infof("Processing TypeScript enum %s", en.GoIdent.GoName)
-		desc := CreateEnumDescription(en, Opts{})
-
 		if err := tsEnumTemplate.Execute(w, tplTSEnum{
 			Opts:        opts,
-			Enum:        en,
-			Description: desc,
+			Enum:        en.ProtogenEnum,
+			Description: en,
 		}); err != nil {
-			return errors.Wrapf(err, "failed to execute enum template: %s", en.GoIdent.GoName)
+			return errors.Wrapf(err, "failed to execute enum template: %s", en.FullName)
 		}
 	}
 	return nil
@@ -107,7 +103,7 @@ type tplTSInterface struct{}
 type tplTSEnum struct {
 	Opts        TSOpts
 	Enum        *protogen.Enum
-	Description *api.EnumDescription
+	Description *EnumDescription
 }
 
 var (
@@ -118,7 +114,7 @@ var (
 
 {{- range .FileEnumInfos }}
 {{- if .Enums }}
-import { {{- range $i, $enum := .Enums }}{{ if $i }}, {{ end }}{{ enum_ts_import_name $enum }}{{- end }} } from '{{ $.Opts.BaseImportPath }}/{{ .FileName }}'
+import { {{- range $i, $enum := .Enums }}{{ if $i }}, {{ end }}{{ enum_ts_import_name $enum.ProtogenEnum }}{{- end }} } from '{{ $.Opts.BaseImportPath }}/{{ .FileName }}'
 {{- end }}
 {{- end }}
 

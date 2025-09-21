@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/protoc-gen-go/internal/enumgen"
 	"github.com/effective-security/xlog"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -37,36 +38,23 @@ func main() {
 		}
 		xlog.SetFormatter(formatter)
 
-		opts := enumgen.Opts{
+		dopts := enumgen.Opts{
 			Package: *pkg,
 		}
 
-		var allEnums []*protogen.Enum
-		var msgs []*protogen.Message
-
-		for _, name := range gp.Request.FileToGenerate {
-			f := gp.FilesByPath[name]
-			if len(f.Enums) == 0 && len(f.Messages) == 0 {
-				logger.Infof("Skipping %s, no enums", name)
-				continue
-			}
-
-			if opts.Package == "" {
-				opts.Package = string(f.GoPackageName)
-			}
-
-			allEnums = append(allEnums, f.Enums...)
-			allEnums = append(allEnums, enumgen.GetEnums(f.Messages)...)
-
-			msgs = append(msgs, enumgen.GetMessagesToDescribe(opts, f.Messages, f.Services)...)
+		if dopts.Package == "" {
+			return errors.Errorf("package is required")
 		}
+
+		allEnums := enumgen.GetEnumsDescriptions(gp, dopts)
+		msgs := enumgen.GetMessagesDescriptions(gp, dopts)
 
 		if len(msgs) > 0 {
 			fn := fmt.Sprintf("%s.pb.go", *outMsgs)
 			logger.Infof("Generating %s\n", fn)
 
 			f := gp.NewGeneratedFile(fn, protogen.GoImportPath(*importpath))
-			err := enumgen.ApplyMessagesTemplate(f, opts, msgs)
+			err := enumgen.ApplyMessagesTemplate(f, dopts, msgs)
 			if err != nil {
 				gp.Error(err)
 			}
@@ -77,7 +65,7 @@ func main() {
 			logger.Infof("Generating %s\n", fn)
 
 			f := gp.NewGeneratedFile(fn, protogen.GoImportPath(*importpath))
-			err := enumgen.ApplyEnumsTemplate(f, opts, allEnums)
+			err := enumgen.ApplyEnumsTemplate(f, dopts, allEnums)
 			if err != nil {
 				gp.Error(err)
 			}
