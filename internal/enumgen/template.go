@@ -30,7 +30,7 @@ type Opts struct {
 }
 
 // This function is called with a param which contains the entire definition of a method.
-func ApplyEnumsTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.Enum) error {
+func ApplyEnumsTemplate(f *protogen.GeneratedFile, opts Opts, enums []*EnumDescription) error {
 	buf := &bytes.Buffer{}
 	if err := headerTemplate.Execute(buf, tplHeader{
 		Opts: opts,
@@ -54,7 +54,7 @@ func ApplyEnumsTemplate(f *protogen.GeneratedFile, opts Opts, enums []*protogen.
 }
 
 // This function is called with a param which contains the entire definition of a method.
-func ApplyMessagesTemplate(f *protogen.GeneratedFile, opts Opts, msgs []*protogen.Message) error {
+func ApplyMessagesTemplate(f *protogen.GeneratedFile, opts Opts, msgs []*MessageDescription) error {
 	buf := &bytes.Buffer{}
 	if err := headerTemplate.Execute(buf, tplHeader{
 		Opts: opts,
@@ -77,19 +77,21 @@ func ApplyMessagesTemplate(f *protogen.GeneratedFile, opts Opts, msgs []*protoge
 	return err
 }
 
-func ApplyEnums(w io.Writer, opts Opts, enums []*protogen.Enum) error {
+func ApplyEnums(w io.Writer, opts Opts, enums []*EnumDescription) error {
 	var descriptions []tplEnum
 	for _, en := range enums {
-		logger.Infof("Processing %s", en.GoIdent.GoName)
-		desc := CreateEnumDescription(en, opts)
+		logger.Infof("Processing %s", en.FullName)
 		descriptions = append(descriptions, tplEnum{
-			Enum:        en,
-			Description: desc,
+			Enum:        en.ProtogenEnum,
+			Description: en,
 		})
 	}
 
+	sort.Slice(descriptions, func(i, j int) bool {
+		return descriptions[i].Description.FullName < descriptions[j].Description.FullName
+	})
+
 	if err := descrEnumsTemplate.Execute(w, tplEnumDescriptions{
-		Opts: opts,
 		Data: descriptions,
 	}); err != nil {
 		return errors.Wrapf(err, "failed to execute template")
@@ -104,24 +106,19 @@ func ApplyEnums(w io.Writer, opts Opts, enums []*protogen.Enum) error {
 	return nil
 }
 
-func ApplyMessages(w io.Writer, opts Opts, msgs []*protogen.Message) error {
-	seen := make(map[string]bool)
+func ApplyMessages(w io.Writer, opts Opts, msgs []*MessageDescription) error {
 	mt := tplMessagesMap{
-		Opts:         opts,
-		Descriptions: make([]*MessageDescription, 0, len(msgs)),
+		Descriptions: msgs,
 	}
-	for _, msg := range msgs {
-		fn := string(msg.Desc.FullName())
-		if _, ok := seen[fn]; ok {
-			continue
-		}
-		seen[fn] = true
-		logger.Infof("Processing %s", msg.GoIdent.GoName)
-		md := CreateMessageDescription(msg, opts)
-		mt.Descriptions = append(mt.Descriptions, md)
 
+	sort.Slice(mt.Descriptions, func(i, j int) bool {
+		return mt.Descriptions[i].FullName < mt.Descriptions[j].FullName
+	})
+
+	// Execute Templates
+	for _, md := range mt.Descriptions {
+		msg := md.ProtogenMessage
 		if err := descrMessageTemplate.Execute(w, tplMessage{
-			Opts:        opts,
 			Message:     msg,
 			Description: md,
 		}); err != nil {
@@ -129,68 +126,176 @@ func ApplyMessages(w io.Writer, opts Opts, msgs []*protogen.Message) error {
 		}
 	}
 
-	sort.Slice(mt.Descriptions, func(i, j int) bool {
-		return mt.Descriptions[i].FullName < mt.Descriptions[j].FullName
-	})
-
 	if err := messagesMapTemplate.Execute(w, mt); err != nil {
 		return errors.Wrapf(err, "failed to execute template")
 	}
 	return nil
 }
 
-func GetEnums(msgs []*protogen.Message) []*protogen.Enum {
-	var enums []*protogen.Enum
-	for _, msg := range msgs {
-		if len(msg.Enums) == 0 {
-			continue
-		}
-		for _, en := range msg.Enums {
-			enums = append(enums, en)
-		}
-	}
-	return enums
-}
-
-func GetMessagesToDescribe(opts Opts, msgs []*protogen.Message, services []*protogen.Service) []*protogen.Message {
-	var res []*protogen.Message
-	seen := make(map[string]bool)
+func GetEnumsDescriptions(gp *protogen.Plugin, opts Opts) []*EnumDescription {
+	seenEnums := make(map[string]*protogen.Enum)
+	seenMessages := make(map[string]bool)
+	msgsToDiscover := make(map[string]*protogen.Message)
 
 	checkMessage := func(msg *protogen.Message) {
-		if _, ok := seen[msg.GoIdent.GoName]; !ok {
-			res = append(res, msg)
-			seen[msg.GoIdent.GoName] = true
+		mfn := string(msg.Desc.FullName())
+		if _, ok := seenMessages[mfn]; ok {
+			return
 		}
+		seenMessages[mfn] = true
 
 		for _, field := range msg.Fields {
-			if field.Desc.Kind() == protoreflect.MessageKind {
-				if _, ok := seen[field.Message.GoIdent.GoName]; !ok {
-					res = append(res, field.Message)
-					seen[field.Message.GoIdent.GoName] = true
+			kind := field.Desc.Kind()
+			switch kind {
+			case protoreflect.MessageKind:
+				ffn := string(field.Message.Desc.FullName())
+				if _, ok := seenMessages[ffn]; !ok {
+					msgsToDiscover[ffn] = field.Message
+				}
+			case protoreflect.EnumKind:
+				efn := string(field.Enum.Desc.FullName())
+				if _, ok := seenEnums[efn]; !ok {
+					seenEnums[efn] = field.Enum
 				}
 			}
 		}
 	}
 
-	// first add all service requests
-	for _, svc := range services {
-		for _, m := range svc.Methods {
-			checkMessage(m.Input)
-			checkMessage(m.Output)
+	for _, name := range gp.Request.FileToGenerate {
+		f := gp.FilesByPath[name]
+
+		for _, en := range f.Enums {
+			fn := string(en.Desc.FullName())
+			if _, ok := seenEnums[fn]; !ok {
+				seenEnums[fn] = en
+			}
+		}
+
+		for _, msg := range f.Messages {
+			checkMessage(msg)
+			for _, en := range msg.Enums {
+				efn := string(en.Desc.FullName())
+				if _, ok := seenEnums[efn]; !ok {
+					seenEnums[efn] = en
+				}
+			}
+		}
+		for _, svc := range f.Services {
+			for _, m := range svc.Methods {
+				checkMessage(m.Input)
+				checkMessage(m.Output)
+				for _, en := range m.Input.Enums {
+					efn := string(en.Desc.FullName())
+					if _, ok := seenEnums[efn]; !ok {
+						seenEnums[efn] = en
+					}
+				}
+				for _, en := range m.Output.Enums {
+					efn := string(en.Desc.FullName())
+					if _, ok := seenEnums[efn]; !ok {
+						seenEnums[efn] = en
+					}
+				}
+			}
+		}
+
+		for i := 0; i < 3 && len(msgsToDiscover) > 0; i++ {
+			logger.Infof("[%d] *** Discovering nested messages: %d", i, len(msgsToDiscover))
+			prev := msgsToDiscover
+			msgsToDiscover = make(map[string]*protogen.Message)
+			for fn, msg := range prev {
+				checkMessage(msg)
+				logger.Infof("*** Discovered nested messages: %s", fn)
+			}
 		}
 	}
 
-	// then add optionally marked messages
-	for _, msg := range msgs {
-		popts := msg.Desc.Options().ProtoReflect()
-		describe := popts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
-		if !describe {
-			continue
+	var enums []*protogen.Enum
+	pkgPrefix := opts.Package + "."
+	for efn, en := range seenEnums {
+		if opts.Package == "" || strings.HasPrefix(efn, pkgPrefix) {
+			enums = append(enums, en)
 		}
-		checkMessage(msg)
+	}
+
+	sort.Slice(enums, func(i, j int) bool {
+		return enums[i].Desc.FullName() < enums[j].Desc.FullName()
+	})
+
+	var res []*EnumDescription
+	for _, en := range enums {
+		desc := CreateEnumDescription(en)
+		res = append(res, desc)
 	}
 
 	return res
+}
+
+func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescription {
+	seen := make(map[string]*protogen.Message)
+
+	checkMessage := func(msg *protogen.Message) {
+		fn := string(msg.Desc.FullName())
+		if _, ok := seen[fn]; !ok {
+			seen[fn] = msg
+
+			for _, field := range msg.Fields {
+				if field.Desc.Kind() == protoreflect.MessageKind {
+					fn := string(field.Message.Desc.FullName())
+					if _, ok := seen[fn]; !ok {
+						seen[fn] = field.Message
+					}
+				}
+			}
+		}
+	}
+
+	for _, name := range gp.Request.FileToGenerate {
+		f := gp.FilesByPath[name]
+
+		// first add all service requests
+		for _, svc := range f.Services {
+			for _, m := range svc.Methods {
+				checkMessage(m.Input)
+				checkMessage(m.Output)
+			}
+		}
+
+		// then add optionally marked messages
+		for _, msg := range f.Messages {
+			popts := msg.Desc.Options().ProtoReflect()
+			describe := popts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
+			if !describe {
+				continue
+			}
+			checkMessage(msg)
+		}
+	}
+
+	var list []*MessageDescription
+	msgsToDiscover := make(map[string]*protogen.Message)
+
+	for _, msg := range seen {
+		desc := CreateMessageDescription(msg, opts, msgsToDiscover)
+		list = append(list, desc)
+	}
+
+	for i := 0; i < 10 && len(msgsToDiscover) > 0; i++ {
+		logger.Infof("[%d] *** Discovering nested messages: %d", i, len(msgsToDiscover))
+		prev := msgsToDiscover
+		msgsToDiscover = make(map[string]*protogen.Message)
+		for fn, msg := range prev {
+			desc := CreateMessageDescription(msg, opts, msgsToDiscover)
+			list = append(list, desc)
+			logger.Infof("*** Discovered nested messages: %s", fn)
+		}
+	}
+
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].FullName < list[j].FullName
+	})
+
+	return list
 }
 
 func tempFuncs() template.FuncMap {
@@ -273,22 +378,19 @@ type tplHeader struct {
 
 type tplEnum struct {
 	Enum        *protogen.Enum
-	Description *api.EnumDescription
+	Description *EnumDescription
 }
 
 type tplEnumDescriptions struct {
-	Opts
 	Data []tplEnum
 }
 
 type tplMessage struct {
-	Opts
 	Message     *protogen.Message
 	Description *MessageDescription
 }
 
 type tplMessagesMap struct {
-	Opts
 	Descriptions []*MessageDescription
 }
 
@@ -509,7 +611,8 @@ const (
 
 var EnumNameTypes = map[string]reflect.Type{
 {{- range .Data }}
-    "{{$.Package}}.{{enum_dot_name .Enum}}": reflect.TypeOf({{.Enum.GoIdent.GoName}}(0)),
+{{- $root := . }}
+    "{{.Description.Package}}.{{enum_dot_name .Enum}}": reflect.TypeOf({{.Enum.GoIdent.GoName}}(0)),
 {{- end }}
 }
 `))
@@ -538,15 +641,14 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			FullName: "{{.FullName}}",
 			Display: "{{.Display}}",
 			Type: "{{.Type}}",
-			GoType: "{{.GoType}}",
-			{{- if .SearchOptions }}
-			SearchOptions: {{search_enum .SearchOptions}},
+			{{- if .StructName }}
+			StructName: "{{.StructName}}",
 			{{- end }}
 			{{- if .SearchType }}
 			SearchType: "{{.SearchType}}",
 			{{- end }}
-			{{- if .Documentation }}
-			Documentation: ` + "`{{.Documentation}}`" + `,
+			{{- if .SearchOptions }}
+			SearchOptions: {{search_enum .SearchOptions}},
 			{{- end }}
 			{{- if .FieldsDescriptionName }}
 			Fields: {{ .FieldsDescriptionName }},
@@ -572,6 +674,9 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			{{- if .MaxCount }}
 			MaxCount: {{.MaxCount}},
 			{{- end }}
+			{{- if .Documentation }}
+			Documentation: ` + "`{{.Documentation}}`" + `,
+			{{- end }}
 		},
 	{{- end }}
 	},
@@ -581,12 +686,40 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 	messagesMapTemplate = template.Must(template.New("messages_map").
 				Funcs(tempFuncs()).
 				Parse(`
+
+var (
+	initMessageDescriptionOnce sync.Once
+
 {{- $root := . }}				
-var MessageDescriptions = map[string]*api.MessageDescription {
+	messageDescriptions = map[string]*api.MessageDescription {
 	{{- range .Descriptions }}
 	"{{.FullName}}": {{.Name}}_MessageDescription,
 	{{- end }}
+  	}
+)
+
+func GetMessageDescriptions() map[string]*api.MessageDescription {
+	// Update the message Fields with the nested messages
+	initMessageDescriptionOnce.Do(func() {
+		for _, md := range messageDescriptions {
+			for _, field := range md.Fields {
+				if field.Fields == nil && (field.Type == "object" || field.Type == "[]object") {
+					if msgDescr, ok := messageDescriptions[field.StructName]; ok {
+						field.Fields = msgDescr.Fields
+					}
+				}
+			}	
+		}
+	})
+	return messageDescriptions
 }
 
+func GetMessageDescription(fullname string) *api.MessageDescription {
+	return GetMessageDescriptions()[fullname]
+}
+
+func init() {
+    _ = GetMessageDescriptions()
+}
 `))
 )

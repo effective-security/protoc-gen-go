@@ -229,7 +229,6 @@ type FieldMeta struct {
 	Display       string                 `protobuf:"bytes,3,opt,name=Display,proto3" json:"Display,omitempty"`
 	Documentation string                 `protobuf:"bytes,4,opt,name=Documentation,proto3" json:"Documentation,omitempty"`
 	Type          string                 `protobuf:"bytes,5,opt,name=Type,proto3" json:"Type,omitempty"`
-	GoType        string                 `protobuf:"bytes,6,opt,name=GoType,proto3" json:"GoType,omitempty"`
 	// SearchType is the type of search for the field.
 	// It can be one of the following:
 	// keyword|text|integer|float|double|boolean|date|geo_point|ip|object|nested|flat_object.
@@ -241,7 +240,10 @@ type FieldMeta struct {
 	// RequiredOr is the option for the field to be required, if one of the
 	// other values is provided.
 	RequiredOr []string `protobuf:"bytes,10,rep,name=RequiredOr,proto3" json:"RequiredOr,omitempty"`
-	// Fields is provided for nested messages
+	// StructName is the full name of the nested struct,
+	// for which Fields are provided.
+	StructName string `protobuf:"bytes,11,opt,name=StructName,proto3" json:"StructName,omitempty"`
+	// Fields is the list of fields for the nested struct.
 	Fields []*FieldMeta `protobuf:"bytes,12,rep,name=Fields,proto3" json:"Fields,omitempty"`
 	// EnumDescription is provided for enum fields
 	EnumDescription *EnumDescription `protobuf:"bytes,13,opt,name=EnumDescription,proto3" json:"EnumDescription,omitempty"`
@@ -324,13 +326,6 @@ func (x *FieldMeta) GetType() string {
 	return ""
 }
 
-func (x *FieldMeta) GetGoType() string {
-	if x != nil {
-		return x.GoType
-	}
-	return ""
-}
-
 func (x *FieldMeta) GetSearchType() string {
 	if x != nil {
 		return x.SearchType
@@ -357,6 +352,13 @@ func (x *FieldMeta) GetRequiredOr() []string {
 		return x.RequiredOr
 	}
 	return nil
+}
+
+func (x *FieldMeta) GetStructName() string {
+	if x != nil {
+		return x.StructName
+	}
+	return ""
 }
 
 func (x *FieldMeta) GetFields() []*FieldMeta {
@@ -807,7 +809,6 @@ var (
 	// optional int32 min_count = 51009;
 	E_MinCount = &file_annotations_proto_extTypes[10]
 	// max_count is the option for the field maximum count for lists.
-	// value for numbers.
 	//
 	// optional int32 max_count = 51010;
 	E_MaxCount = &file_annotations_proto_extTypes[11]
@@ -890,14 +891,13 @@ const file_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x06Hidden\x10 \x12\x0f\n" +
 	"\vWithKeyword\x10@\x12\r\n" +
-	"\bWithText\x10\x80\x01\"\x8e\x04\n" +
+	"\bWithText\x10\x80\x01\"\x96\x04\n" +
 	"\tFieldMeta\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x1a\n" +
 	"\bFullName\x18\x02 \x01(\tR\bFullName\x12\x18\n" +
 	"\aDisplay\x18\x03 \x01(\tR\aDisplay\x12$\n" +
 	"\rDocumentation\x18\x04 \x01(\tR\rDocumentation\x12\x12\n" +
-	"\x04Type\x18\x05 \x01(\tR\x04Type\x12\x16\n" +
-	"\x06GoType\x18\x06 \x01(\tR\x06GoType\x12\x1e\n" +
+	"\x04Type\x18\x05 \x01(\tR\x04Type\x12\x1e\n" +
 	"\n" +
 	"SearchType\x18\a \x01(\tR\n" +
 	"SearchType\x12?\n" +
@@ -906,7 +906,10 @@ const file_annotations_proto_rawDesc = "" +
 	"\n" +
 	"RequiredOr\x18\n" +
 	" \x03(\tR\n" +
-	"RequiredOr\x12)\n" +
+	"RequiredOr\x12\x1e\n" +
+	"\n" +
+	"StructName\x18\v \x01(\tR\n" +
+	"StructName\x12)\n" +
 	"\x06Fields\x18\f \x03(\v2\x11.es.api.FieldMetaR\x06Fields\x12A\n" +
 	"\x0fEnumDescription\x18\r \x01(\v2\x17.es.api.EnumDescriptionR\x0fEnumDescription\x12\x10\n" +
 	"\x03Min\x18\x0e \x01(\x05R\x03Min\x12\x10\n" +

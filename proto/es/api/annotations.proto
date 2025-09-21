@@ -127,7 +127,6 @@ message FieldMeta {
     string Display       = 3 [json_name = "Display"];
     string Documentation = 4 [json_name = "Documentation"];
     string Type          = 5 [json_name = "Type"];
-    string GoType        = 6 [json_name = "GoType"];
     // SearchType is the type of search for the field.
     // It can be one of the following:
     // keyword|text|integer|float|double|boolean|date|geo_point|ip|object|nested|flat_object.
@@ -140,7 +139,10 @@ message FieldMeta {
     // other values is provided.
     repeated string RequiredOr = 10 [json_name = "RequiredOr"];
 
-    // Fields is provided for nested messages
+    // StructName is the full name of the nested struct,
+    // for which Fields are provided.
+    string StructName = 11 [json_name = "StructName"];
+    // Fields is the list of fields for the nested struct.
     repeated FieldMeta Fields = 12 [json_name = "Fields"];
     // EnumDescription is provided for enum fields
     EnumDescription EnumDescription = 13 [json_name = "EnumDescription"];

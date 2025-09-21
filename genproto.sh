@@ -14,7 +14,7 @@ set -e
 #   --proxy {path}              - specifies to generate --go-proxy_out
 #   --http {pkg} {path}         - specifies to generate --go-http_out
 #   --methods {path}            - specifies to generate --go-allocator_out
-#   --enum {path}               - specifies to generate --go-enum_out
+#   --enum {pkg} {path}         - specifies to generate --go-enum_out
 #   --python {path}             - specifies to generate --python_out
 #   --ts-enum {import} {path}   - specifies to generate --ts-enum_out
 #   --csharp {path}             - specifies to generate --csharp_out
@@ -52,8 +52,9 @@ case $key in
     shift # past value
     ;;
     --enum)
-    ENUM="--go-enum_out=logs=true:$2"
+    ENUM="--go-enum_out=logs=true,package=$2:$3"
     shift # past argument
+    shift # past pkg value
     shift # past value
     ;;
     --ts-enum)

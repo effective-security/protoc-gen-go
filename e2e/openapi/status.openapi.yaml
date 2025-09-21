@@ -6,6 +6,25 @@ info:
     title: Status API
     version: 0.0.1
 paths:
+    /v1/search:
+        get:
+            tags:
+                - Status
+            description: Search is for testing nested and recursive types.
+            operationId: Status_Search
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SearchResponse'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /v1/status/caller:
         get:
             tags:
@@ -78,7 +97,35 @@ components:
                     type: string
                     description: Claims from the token, json encoded map[string]interface{}
                     format: bytes
+                Properties:
+                    type: object
+                RoleMap:
+                    type: object
+                    additionalProperties:
+                        type: integer
+                        format: enum
             description: CallerStatusResponse returns the caller information
+        Facet:
+            type: object
+            properties:
+                Name:
+                    type: string
+                Buckets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/SearchBucket'
+                DisplayName:
+                    type: string
+                Count:
+                    type: integer
+                    description: Count is the count of documents in the facet matching the query
+                    format: uint32
+                Facets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Facet'
+                    description: Facets is a list of sub-facets
+            description: Facet represents facet info
         GoogleProtobufAny:
             type: object
             properties:
@@ -87,6 +134,36 @@ components:
                     description: The type of the serialized message.
             additionalProperties: true
             description: Contains an arbitrary serialized message along with a @type that describes the type of the serialized message.
+        SearchBucket:
+            type: object
+            properties:
+                Value:
+                    type: string
+                Count:
+                    type: integer
+                    format: uint32
+                DisplayName:
+                    type: string
+                Facets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Facet'
+                    description: Facets is a list of sub-facets
+            description: SearchBucket represents bucket
+        SearchResponse:
+            type: object
+            properties:
+                Found:
+                    type: integer
+                    description: |-
+                        Found specifies the total number of documents that match the search
+                         request.
+                    format: uint32
+                Facets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Facet'
+                    description: Facets returns the requested aggregation information in facet format.
         ServerStatus:
             type: object
             properties:
@@ -129,6 +206,10 @@ components:
                     allOf:
                         - $ref: '#/components/schemas/ServerVersion'
                     description: Version of the server.
+                Versions:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ServerVersion'
             description: ServerStatusResponse returns status and version
         ServerVersion:
             type: object

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/effective-security/protoc-gen-go/internal/enumgen"
@@ -39,29 +40,30 @@ func main() {
 			BaseImportPath: *importpath,
 		}
 
+		enums := enumgen.GetEnumsDescriptions(gp, enumgen.Opts{})
+
+		grouped := map[string][]*enumgen.EnumDescription{}
+		for _, en := range enums {
+			fn := strings.TrimSuffix(en.FileName, ".proto")
+			grouped[fn] = append(grouped[fn], en)
+		}
+
 		var fileEnumInfos []enumgen.FileEnumInfo
+		for fn, enums := range grouped {
 
-		for _, name := range gp.Request.FileToGenerate {
-			f := gp.FilesByPath[name]
-			if len(f.Enums) == 0 && len(f.Messages) == 0 {
-				logger.Infof("Skipping %s, no enums", name)
-				continue
-			}
-
-			enums := enumgen.GetEnums(f.Messages)
-			enums = append(enums, f.Enums...)
-
-			tsname := strings.TrimSuffix(name, ".proto")
-			if len(enums) == 0 {
-				logger.Infof("Skipping %s, no enums", name)
-				continue
-			}
+			sort.Slice(enums, func(i, j int) bool {
+				return strings.ToLower(enums[i].FullName) < strings.ToLower(enums[j].FullName)
+			})
 
 			fileEnumInfos = append(fileEnumInfos, enumgen.FileEnumInfo{
-				FileName: tsname,
+				FileName: fn,
 				Enums:    enums,
 			})
 		}
+
+		sort.Slice(fileEnumInfos, func(i, j int) bool {
+			return fileEnumInfos[i].FileName < fileEnumInfos[j].FileName
+		})
 
 		if len(fileEnumInfos) > 0 {
 			logger.Infof("Generating %s\n", *out)

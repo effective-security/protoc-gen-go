@@ -1,6 +1,7 @@
 package enumgen
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/effective-security/protoc-gen-go/api"
@@ -9,16 +10,30 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
+var (
+	enumDescriptions    = make(map[string]*EnumDescription)
+	messageDescriptions = make(map[string]*MessageDescription)
+)
+
 // CreateEnumDescription convert enum descriptor to EnumMeta message
-func CreateEnumDescription(en *protogen.Enum, args Opts) *api.EnumDescription {
+func CreateEnumDescription(en *protogen.Enum) *EnumDescription {
+	fn := string(en.Desc.FullName())
+	if _, ok := enumDescriptions[fn]; ok {
+		return enumDescriptions[fn]
+	}
+
 	opts := en.Desc.Options().ProtoReflect()
 	IsBitmask := opts.Get(api.E_IsBitmask.TypeDescriptor()).Bool()
 
-	res := &api.EnumDescription{
+	res := &EnumDescription{
 		Name:          string(en.GoIdent.GoName),
 		Documentation: cleanComment(en.Comments.Leading.String()),
 		IsBitmask:     IsBitmask,
-		FullName:      string(en.Desc.FullName()),
+		FullName:      fn,
+
+		ProtogenEnum: en,
+		Package:      strings.Split(fn, ".")[0],
+		FileName:     en.Location.SourceFile,
 	}
 
 	for _, value := range en.Values {
@@ -47,11 +62,21 @@ func CreateEnumDescription(en *protogen.Enum, args Opts) *api.EnumDescription {
 
 		res.Enums = append(res.Enums, meta)
 	}
+
+	sort.Slice(res.Enums, func(i, j int) bool {
+		return res.Enums[i].Value < res.Enums[j].Value
+	})
+	enumDescriptions[fn] = res
 	return res
 }
 
 // CreateMessageDescription convert enum descriptor to EnumMeta message
-func CreateMessageDescription(msg *protogen.Message, args Opts) *MessageDescription {
+func CreateMessageDescription(msg *protogen.Message, args Opts, queueToDiscover map[string]*protogen.Message) *MessageDescription {
+	fn := string(msg.Desc.FullName())
+	if _, ok := messageDescriptions[fn]; ok {
+		return messageDescriptions[fn]
+	}
+
 	opts := msg.Desc.Options().ProtoReflect()
 
 	display := opts.Get(api.E_MessageDisplay.TypeDescriptor()).String()
@@ -70,24 +95,26 @@ func CreateMessageDescription(msg *protogen.Message, args Opts) *MessageDescript
 
 	res := &MessageDescription{
 		Name:          string(msg.GoIdent.GoName),
-		FullName:      string(msg.Desc.FullName()),
+		FullName:      fn,
 		Documentation: cleanComment(description),
 		Display:       display,
 		TableSource:   tableSource,
 		TableHeader:   nonEmptyStrings(strings.Split(tableHeader, ",")),
 
 		ProtogenMessage: msg,
-		Package:         strings.Split(string(msg.Desc.FullName()), ".")[0],
+		Package:         strings.Split(fn, ".")[0],
 	}
 
 	for _, field := range msg.Fields {
-		res.Fields = append(res.Fields, fieldMeta(field, args))
+		res.Fields = append(res.Fields, fieldMeta(field, args, queueToDiscover))
 	}
 
+	messageDescriptions[fn] = res
+	delete(queueToDiscover, fn)
 	return res
 }
 
-func fieldMeta(field *protogen.Field, args Opts) *FieldMeta {
+func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*protogen.Message) *FieldMeta {
 	opts := field.Desc.Options().ProtoReflect()
 
 	display := opts.Get(api.E_Display.TypeDescriptor()).String()
@@ -126,37 +153,37 @@ func fieldMeta(field *protogen.Field, args Opts) *FieldMeta {
 
 	fm.SearchOptions, fm.SearchType = parseSearchOptions(search, field)
 
-	goTyp, llmTyp := mapScalarToTypes(field.Desc.Kind())
-	fm.GoType = goTyp
+	kind := field.Desc.Kind()
+	isList := field.Desc.IsList()
+	isMap := field.Desc.IsMap()
+
+	_, llmTyp := mapScalarToTypes(kind)
+	//fm.GoType = goTyp
 	fm.Type = llmTyp
 
-	switch {
-	case field.Desc.Kind() == protoreflect.MessageKind:
-		if field.Desc.IsMap() {
-			fm.Type = "object"
-			// TODO: map
-			fm.GoType = "map"
-		} else {
-			if fm.SearchType == "object" || fm.SearchType == "nested" {
-				msgDescr := CreateMessageDescription(field.Message, args)
+	switch kind {
+	case protoreflect.MessageKind:
+		fm.Type = "object"
+		if fm.SearchType == "object" || fm.SearchType == "flat_object" || fm.SearchType == "nested" {
+			fm.StructName = string(field.Message.Desc.FullName())
+			if msgDescr, ok := messageDescriptions[fm.StructName]; ok {
 				fm.Fields = msgDescr.Fields
-				fm.GoType = "struct"
-				fm.FieldsDescriptionName = TrimLocalPackageName(field.Message.GoIdent.GoName, args.Package) + "_MessageDescription.Fields"
-				if args.Package != msgDescr.Package {
-					fm.FieldsDescriptionName = msgDescr.Package + "." + fm.FieldsDescriptionName
-				}
+			} else {
+				logger.Infof("*** Adding nested message to discover: %s", fm.StructName)
+				queueToDiscover[fm.StructName] = field.Message
 			}
 		}
-	case field.Desc.Kind() == protoreflect.EnumKind:
-		enumDescr := CreateEnumDescription(field.Enum, args)
-		//fm.GoType = enumDescr.Name
+	case protoreflect.EnumKind:
+		enumDescr := CreateEnumDescription(field.Enum)
 		fm.EnumDescription = enumDescr
-		fm.EnumDescriptionName = ExternalPackageName(enumDescr.FullName, args.Package) + enumDescr.Name + "_EnumDescription"
-	case field.Desc.IsList():
-		fm.GoType = "[]" + goTyp
-		fm.Type = "[]" + llmTyp
+		if !strings.HasPrefix(enumDescr.FullName, "google.") {
+			fm.EnumDescriptionName = ExternalPackageName(enumDescr.FullName, args.Package) + enumDescr.Name + "_EnumDescription"
+		}
 	}
 
+	if isList || isMap {
+		fm.Type = "[]" + llmTyp
+	}
 	return fm
 }
 
@@ -224,10 +251,22 @@ func TrimLocalPackageName(val, pack string) string {
 
 func ExternalPackageName(fullname, pack string) string {
 	pn := strings.Split(fullname, ".")[0]
-	if pn == pack || len(pn) == 1 {
+	if pn == "google" || pn == pack || len(pn) == 1 {
 		return ""
 	}
 	return pn + "."
+}
+
+type EnumDescription struct {
+	Name          string
+	Enums         []*api.EnumMeta
+	Documentation string
+	IsBitmask     bool
+	FullName      string
+
+	ProtogenEnum *protogen.Enum
+	Package      string
+	FileName     string
 }
 
 type MessageDescription struct {
@@ -250,13 +289,13 @@ type FieldMeta struct {
 	Display         string
 	Documentation   string
 	Type            string
-	GoType          string
 	SearchType      string
 	SearchOptions   api.SearchOption_Enum
 	Required        bool
 	RequiredOr      []string
+	StructName      string
 	Fields          []*FieldMeta
-	EnumDescription *api.EnumDescription
+	EnumDescription *EnumDescription
 	Min             int32
 	Max             int32
 	MinCount        int32
