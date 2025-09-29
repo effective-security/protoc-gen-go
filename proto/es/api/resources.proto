@@ -65,21 +65,24 @@ message TableRow {
 // lists and various status objects. A resource may have only one of
 // {ObjectMeta, ListMeta}.
 message ListMeta {
-    string NextCursor = 1 [json_name = "NextCursor"];
-    bool HasMore      = 2 [json_name = "HasMore"];
+    // Kind is the type of resource this table represents.
+    string Kind = 1 [json_name = "Kind"];
+    // URI is the URI of the resource.
+    string URI = 2 [json_name = "URI"];
+    // NextCursor is the cursor to the next page of results.
+    string NextCursor = 3 [json_name = "NextCursor"];
+    bool HasMore      = 4 [json_name = "HasMore"];
     // TotalCount is the total number of items in the list,
     // available for the responses from Search when facets exist.
     // TotalCount may not be present in all responses, like from RDS.
-    int64 TotalCount = 3 [json_name = "TotalCount"];
+    int64 TotalCount = 5 [json_name = "TotalCount"];
 }
 
 message ObjectMeta {
     // ID is the identifier for the resource, or empty if the resource is a list
     string ID = 1 [json_name = "ID"];
-
     // Kind is the type of resource this table represents.
     string Kind = 2 [json_name = "Kind"];
-
     // URI is the URI of the resource.
     string URI = 3 [json_name = "URI"];
 }
