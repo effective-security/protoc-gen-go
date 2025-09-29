@@ -81,3 +81,21 @@ func (e *EnumDescription) Parse(val any) int32 {
 
 	return res
 }
+
+func (m *MessageDescription) FindField(name string) *FieldMeta {
+	for _, field := range m.Fields {
+		if field.Name == name || field.FullName == name {
+			return field
+		}
+	}
+	return nil
+}
+
+func FindFieldMeta(fields []*FieldMeta, name string) *FieldMeta {
+	for _, field := range fields {
+		if field.Name == name || field.FullName == name {
+			return field
+		}
+	}
+	return nil
+}

@@ -270,13 +270,18 @@ func (x *TableRow) GetCells() []string {
 // lists and various status objects. A resource may have only one of
 // {ObjectMeta, ListMeta}.
 type ListMeta struct {
-	state      protoimpl.MessageState `protogen:"open.v1"`
-	NextCursor string                 `protobuf:"bytes,1,opt,name=NextCursor,proto3" json:"NextCursor,omitempty"`
-	HasMore    bool                   `protobuf:"varint,2,opt,name=HasMore,proto3" json:"HasMore,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Kind is the type of resource this table represents.
+	Kind string `protobuf:"bytes,1,opt,name=Kind,proto3" json:"Kind,omitempty"`
+	// URI is the URI of the resource.
+	URI string `protobuf:"bytes,2,opt,name=URI,proto3" json:"URI,omitempty"`
+	// NextCursor is the cursor to the next page of results.
+	NextCursor string `protobuf:"bytes,3,opt,name=NextCursor,proto3" json:"NextCursor,omitempty"`
+	HasMore    bool   `protobuf:"varint,4,opt,name=HasMore,proto3" json:"HasMore,omitempty"`
 	// TotalCount is the total number of items in the list,
 	// available for the responses from Search when facets exist.
 	// TotalCount may not be present in all responses, like from RDS.
-	TotalCount    int64 `protobuf:"varint,3,opt,name=TotalCount,proto3" json:"TotalCount,omitempty"`
+	TotalCount    int64 `protobuf:"varint,5,opt,name=TotalCount,proto3" json:"TotalCount,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -309,6 +314,20 @@ func (x *ListMeta) ProtoReflect() protoreflect.Message {
 // Deprecated: Use ListMeta.ProtoReflect.Descriptor instead.
 func (*ListMeta) Descriptor() ([]byte, []int) {
 	return file_resources_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *ListMeta) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *ListMeta) GetURI() string {
+	if x != nil {
+		return x.URI
+	}
+	return ""
 }
 
 func (x *ListMeta) GetNextCursor() string {
@@ -488,14 +507,16 @@ const file_resources_proto_rawDesc = "" +
 	"\vDescription\x18\x05 \x01(\tR\vDescription\x12?\n" +
 	"\rSearchOptions\x18\x06 \x01(\x0e2\x19.es.api.SearchOption.EnumR\rSearchOptions\" \n" +
 	"\bTableRow\x12\x14\n" +
-	"\x05Cells\x18\x01 \x03(\tR\x05Cells\"d\n" +
-	"\bListMeta\x12\x1e\n" +
+	"\x05Cells\x18\x01 \x03(\tR\x05Cells\"\x8a\x01\n" +
+	"\bListMeta\x12\x12\n" +
+	"\x04Kind\x18\x01 \x01(\tR\x04Kind\x12\x10\n" +
+	"\x03URI\x18\x02 \x01(\tR\x03URI\x12\x1e\n" +
 	"\n" +
-	"NextCursor\x18\x01 \x01(\tR\n" +
+	"NextCursor\x18\x03 \x01(\tR\n" +
 	"NextCursor\x12\x18\n" +
-	"\aHasMore\x18\x02 \x01(\bR\aHasMore\x12\x1e\n" +
+	"\aHasMore\x18\x04 \x01(\bR\aHasMore\x12\x1e\n" +
 	"\n" +
-	"TotalCount\x18\x03 \x01(\x03R\n" +
+	"TotalCount\x18\x05 \x01(\x03R\n" +
 	"TotalCount\"B\n" +
 	"\n" +
 	"ObjectMeta\x12\x0e\n" +
