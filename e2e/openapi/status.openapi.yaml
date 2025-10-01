@@ -25,6 +25,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /v1/search/old:
+        get:
+            tags:
+                - Status
+            description: Search is for testing nested and recursive types.
+            operationId: Status_SearchOld
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/SearchResponseOld'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /v1/status/caller:
         get:
             tags:
@@ -164,6 +183,18 @@ components:
                     items:
                         $ref: '#/components/schemas/Facet'
                     description: Facets returns the requested aggregation information in facet format.
+                NotUsed:
+                    type: string
+        SearchResponseOld:
+            type: object
+            properties:
+                Found:
+                    type: integer
+                    format: uint32
+                Facets:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Facet'
         ServerStatus:
             type: object
             properties:

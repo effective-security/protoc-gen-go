@@ -256,7 +256,9 @@ type FieldMeta struct {
 	// MinCount is the option for the field minimum count for lists.
 	MinCount int32 `protobuf:"varint,16,opt,name=MinCount,proto3" json:"MinCount,omitempty"`
 	// MaxCount is the option for the field maximum count for lists.
-	MaxCount      int32 `protobuf:"varint,17,opt,name=MaxCount,proto3" json:"MaxCount,omitempty"`
+	MaxCount int32 `protobuf:"varint,17,opt,name=MaxCount,proto3" json:"MaxCount,omitempty"`
+	// Deprecated is the option for the field to be deprecated.
+	Deprecated    bool `protobuf:"varint,18,opt,name=Deprecated,proto3" json:"Deprecated,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -403,6 +405,13 @@ func (x *FieldMeta) GetMaxCount() int32 {
 	return 0
 }
 
+func (x *FieldMeta) GetDeprecated() bool {
+	if x != nil {
+		return x.Deprecated
+	}
+	return false
+}
+
 type EnumDescription struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
@@ -490,7 +499,9 @@ type MessageDescription struct {
 	// TableSource is the option for the message's table source.
 	TableSource string `protobuf:"bytes,6,opt,name=TableSource,proto3" json:"TableSource,omitempty"`
 	// TableHeader is the option for the message's table header.
-	TableHeader   []string `protobuf:"bytes,7,rep,name=TableHeader,proto3" json:"TableHeader,omitempty"`
+	TableHeader []string `protobuf:"bytes,7,rep,name=TableHeader,proto3" json:"TableHeader,omitempty"`
+	// Deprecated is the option for the message to be deprecated.
+	Deprecated    bool `protobuf:"varint,8,opt,name=Deprecated,proto3" json:"Deprecated,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -572,6 +583,13 @@ func (x *MessageDescription) GetTableHeader() []string {
 		return x.TableHeader
 	}
 	return nil
+}
+
+func (x *MessageDescription) GetDeprecated() bool {
+	if x != nil {
+		return x.Deprecated
+	}
+	return false
 }
 
 var file_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
@@ -891,7 +909,7 @@ const file_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x06Hidden\x10 \x12\x0f\n" +
 	"\vWithKeyword\x10@\x12\r\n" +
-	"\bWithText\x10\x80\x01\"\x96\x04\n" +
+	"\bWithText\x10\x80\x01\"\xb6\x04\n" +
 	"\tFieldMeta\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x1a\n" +
 	"\bFullName\x18\x02 \x01(\tR\bFullName\x12\x18\n" +
@@ -915,13 +933,16 @@ const file_annotations_proto_rawDesc = "" +
 	"\x03Min\x18\x0e \x01(\x05R\x03Min\x12\x10\n" +
 	"\x03Max\x18\x0f \x01(\x05R\x03Max\x12\x1a\n" +
 	"\bMinCount\x18\x10 \x01(\x05R\bMinCount\x12\x1a\n" +
-	"\bMaxCount\x18\x11 \x01(\x05R\bMaxCount\"\xad\x01\n" +
+	"\bMaxCount\x18\x11 \x01(\x05R\bMaxCount\x12\x1e\n" +
+	"\n" +
+	"Deprecated\x18\x12 \x01(\bR\n" +
+	"Deprecated\"\xad\x01\n" +
 	"\x0fEnumDescription\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12&\n" +
 	"\x05Enums\x18\x02 \x03(\v2\x10.es.api.EnumMetaR\x05Enums\x12$\n" +
 	"\rDocumentation\x18\x03 \x01(\tR\rDocumentation\x12\x1c\n" +
 	"\tIsBitmask\x18\x04 \x01(\bR\tIsBitmask\x12\x1a\n" +
-	"\bFullName\x18\x05 \x01(\tR\bFullName\"\xf3\x01\n" +
+	"\bFullName\x18\x05 \x01(\tR\bFullName\"\x93\x02\n" +
 	"\x12MessageDescription\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x18\n" +
 	"\aDisplay\x18\x02 \x01(\tR\aDisplay\x12)\n" +
@@ -929,7 +950,10 @@ const file_annotations_proto_rawDesc = "" +
 	"\rDocumentation\x18\x04 \x01(\tR\rDocumentation\x12\x1a\n" +
 	"\bFullName\x18\x05 \x01(\tR\bFullName\x12 \n" +
 	"\vTableSource\x18\x06 \x01(\tR\vTableSource\x12 \n" +
-	"\vTableHeader\x18\a \x03(\tR\vTableHeader:D\n" +
+	"\vTableHeader\x18\a \x03(\tR\vTableHeader\x12\x1e\n" +
+	"\n" +
+	"Deprecated\x18\b \x01(\bR\n" +
+	"Deprecated:D\n" +
 	"\rallowed_roles\x12\x1e.google.protobuf.MethodOptions\x18\xaf\b \x01(\tR\fallowedRoles:8\n" +
 	"\acli_cmd\x12\x1e.google.protobuf.MethodOptions\x18\xb0\b \x01(\tR\x06cliCmd:7\n" +
 	"\x06search\x12\x1d.google.protobuf.FieldOptions\x18\xb9\x8e\x03 \x01(\tR\x06search:9\n" +

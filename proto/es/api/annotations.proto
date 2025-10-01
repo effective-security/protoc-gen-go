@@ -156,6 +156,8 @@ message FieldMeta {
     int32 MinCount = 16 [json_name = "MinCount"];
     // MaxCount is the option for the field maximum count for lists.
     int32 MaxCount = 17 [json_name = "MaxCount"];
+    // Deprecated is the option for the field to be deprecated.
+    bool Deprecated = 18 [json_name = "Deprecated"];
 }
 
 message EnumDescription {
@@ -177,4 +179,6 @@ message MessageDescription {
     string TableSource = 6 [json_name = "TableSource"];
     // TableHeader is the option for the message's table header.
     repeated string TableHeader = 7 [json_name = "TableHeader"];
+    // Deprecated is the option for the message to be deprecated.
+    bool Deprecated = 8 [json_name = "Deprecated"];
 }
