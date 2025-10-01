@@ -39,6 +39,14 @@ service Status {
             get: "/v1/search"
         };
     }
+
+    // Search is for testing nested and recursive types.
+    rpc SearchOld(google.protobuf.Empty) returns (SearchResponseOld) {
+        option (google.api.http) = {
+            get: "/v1/search/old"
+        };
+        option deprecated = true;
+    }
 }
 
 // ServerVersion provides server build and runtime version
@@ -146,6 +154,14 @@ message SearchResponse {
     // request.
     uint32 Found = 1 [json_name = "Found"];
     // Facets returns the requested aggregation information in facet format.
+    repeated Facet Facets = 4 [json_name = "Facets"];
+    string NotUsed        = 5 [json_name = "NotUsed", deprecated = true];
+}
+
+message SearchResponseOld {
+    option deprecated = true;
+
+    uint32 Found          = 1 [json_name = "Found"];
     repeated Facet Facets = 4 [json_name = "Facets"];
 }
 

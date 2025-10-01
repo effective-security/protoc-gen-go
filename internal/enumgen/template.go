@@ -634,6 +634,9 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 	{{- if .Description.TableHeader }}
 	TableHeader: {{list .Description.TableHeader}},
 	{{- end }}
+	{{- if .Description.Deprecated }}
+	Deprecated: true,
+	{{- end }}
 	Fields: []*api.FieldMeta {
 	{{- range .Description.Fields }}
 		{
@@ -673,6 +676,9 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			{{- end }}
 			{{- if .MaxCount }}
 			MaxCount: {{.MaxCount}},
+			{{- end }}
+			{{- if .Deprecated }}
+			Deprecated: true,
 			{{- end }}
 			{{- if .Documentation }}
 			Documentation: ` + "`{{.Documentation}}`" + `,

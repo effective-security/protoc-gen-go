@@ -79,7 +79,7 @@ func Test_GetEnumsToDescribe(t *testing.T) {
 	opts := Opts{Package: "e2e"}
 
 	allEnums := GetEnumsDescriptions(p, opts)
-	assert.Equal(t, 2, len(allEnums))
+	assert.Equal(t, 4, len(allEnums))
 }
 
 func Test_CreateMessageDescription(t *testing.T) {
@@ -88,7 +88,7 @@ func Test_CreateMessageDescription(t *testing.T) {
 	ops := Opts{Package: "e2e"}
 
 	descriptions := GetMessagesDescriptions(p, ops)
-	assert.Equal(t, 10, len(descriptions))
+	assert.Equal(t, 27, len(descriptions))
 }
 
 func loadPluginFromRequestBin(t *testing.T, path string) *protogen.Plugin {

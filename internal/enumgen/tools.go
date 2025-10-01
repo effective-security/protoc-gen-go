@@ -8,6 +8,7 @@ import (
 	"github.com/effective-security/x/format"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/descriptorpb"
 )
 
 var (
@@ -84,6 +85,11 @@ func CreateMessageDescription(msg *protogen.Message, args Opts, queueToDiscover 
 
 	tableSource := opts.Get(api.E_TableSource.TypeDescriptor()).String()
 	tableHeader := opts.Get(api.E_TableHeader.TypeDescriptor()).String()
+	deprecated := false
+	ro := msg.Desc.Options()
+	if mo, ok := ro.(*descriptorpb.MethodOptions); ok {
+		deprecated = mo.GetDeprecated()
+	}
 
 	// Fallback to comments if description is empty
 	if description == "" {
@@ -100,6 +106,7 @@ func CreateMessageDescription(msg *protogen.Message, args Opts, queueToDiscover 
 		Display:       display,
 		TableSource:   tableSource,
 		TableHeader:   nonEmptyStrings(strings.Split(tableHeader, ",")),
+		Deprecated:    deprecated,
 
 		ProtogenMessage: msg,
 		Package:         strings.Split(fn, ".")[0],
@@ -126,6 +133,10 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	max := opts.Get(api.E_Max.TypeDescriptor()).Int()
 	minCount := opts.Get(api.E_MinCount.TypeDescriptor()).Int()
 	maxCount := opts.Get(api.E_MaxCount.TypeDescriptor()).Int()
+	deprecated := false
+	if fo, ok := field.Desc.Options().(*descriptorpb.FieldOptions); ok {
+		deprecated = fo.GetDeprecated()
+	}
 
 	// Fallback to comments if description is empty
 	if description == "" {
@@ -147,6 +158,7 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 		Max:           int32(max),
 		MinCount:      int32(minCount),
 		MaxCount:      int32(maxCount),
+		Deprecated:    deprecated,
 
 		ProtogenField: field,
 	}
@@ -277,6 +289,7 @@ type MessageDescription struct {
 	FullName      string
 	TableSource   string
 	TableHeader   []string
+	Deprecated    bool
 
 	// message is the original message descriptor
 	ProtogenMessage *protogen.Message
@@ -300,6 +313,7 @@ type FieldMeta struct {
 	Max             int32
 	MinCount        int32
 	MaxCount        int32
+	Deprecated      bool
 
 	// field is the original field descriptor
 	ProtogenField         *protogen.Field
