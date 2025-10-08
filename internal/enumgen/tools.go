@@ -1,6 +1,7 @@
 package enumgen
 
 import (
+	"path"
 	"sort"
 	"strings"
 
@@ -109,7 +110,7 @@ func CreateMessageDescription(msg *protogen.Message, args Opts, queueToDiscover 
 		Deprecated:    deprecated,
 
 		ProtogenMessage: msg,
-		Package:         strings.Split(fn, ".")[0],
+		Package:         path.Base(string(msg.GoIdent.GoImportPath)),
 	}
 
 	for _, field := range msg.Fields {
@@ -161,6 +162,7 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 		Deprecated:    deprecated,
 
 		ProtogenField: field,
+		Package:       path.Base(string(field.GoIdent.GoImportPath)),
 	}
 
 	fm.SearchOptions, fm.SearchType = parseSearchOptions(search, field)
@@ -169,9 +171,9 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	isList := field.Desc.IsList()
 	isMap := field.Desc.IsMap()
 
-	_, llmTyp := mapScalarToTypes(kind)
+	goType, _ := mapScalarToTypes(kind)
 	//fm.GoType = goTyp
-	fm.Type = llmTyp
+	fm.Type = goType
 
 	switch kind {
 	case protoreflect.MessageKind:
@@ -193,8 +195,11 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 		}
 	}
 
-	if isList || isMap {
-		fm.Type = "[]" + llmTyp
+	if isMap {
+		fm.Type = "map"
+	}
+	if isList {
+		fm.Type = "[]" + goType
 	}
 	return fm
 }
@@ -254,16 +259,16 @@ func mapScalarToTypes(kind protoreflect.Kind) (goType string, llmType string) {
 	}
 }
 
-func TrimLocalPackageName(val, pack string) string {
-	if strings.HasPrefix(val, pack+".") {
-		return val[len(pack)+1:]
+func TrimLocalPackageName(name, pkg string) string {
+	if strings.HasPrefix(name, pkg+".") {
+		return name[len(pkg)+1:]
 	}
-	return val
+	return name
 }
 
-func ExternalPackageName(fullname, pack string) string {
+func ExternalPackageName(fullname, pkg string) string {
 	pn := strings.Split(fullname, ".")[0]
-	if pn == "google" || pn == pack || len(pn) == 1 {
+	if pn == "google" || pn == pkg || len(pn) == 1 {
 		return ""
 	}
 	return pn + "."
@@ -317,6 +322,7 @@ type FieldMeta struct {
 
 	// field is the original field descriptor
 	ProtogenField         *protogen.Field
+	Package               string
 	EnumDescriptionName   string
 	FieldsDescriptionName string
 }
