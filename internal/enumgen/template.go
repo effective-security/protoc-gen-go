@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/format"
 	"io"
+	"path"
 	"sort"
 	"strings"
 	"text/template"
@@ -108,6 +109,7 @@ func ApplyEnums(w io.Writer, opts Opts, enums []*EnumDescription) error {
 
 func ApplyMessages(w io.Writer, opts Opts, msgs []*MessageDescription) error {
 	mt := tplMessagesMap{
+		Package:      opts.Package,
 		Descriptions: msgs,
 	}
 
@@ -298,11 +300,43 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 	return list
 }
 
+func goName(importPath, name, thisPkg string) string {
+	goPkg := path.Base(importPath)
+	// If message is in the same package:
+	if importPath == thisPkg || goPkg == thisPkg {
+		return name
+	}
+
+	return fmt.Sprintf("%s.%s", goPkg, name)
+}
+
 func tempFuncs() template.FuncMap {
 	m := sprig.TxtFuncMap()
-	// m["type"] = func(f *protogen.Message) string {
-	// 	return path.Base(string(f.GoIdent.GoImportPath)) + "." + f.GoIdent.GoName
-	// }
+
+	m["allocation_func"] = func(thisPkg string, md *MessageDescription) string {
+		if md.ProtogenMessage.Desc.IsMapEntry() {
+			keyField := md.Fields[0]
+			valField := md.Fields[1]
+			valType := valField.Type
+
+			switch valField.Type {
+			case "object", "struct":
+				msg := messageDescriptions[valField.StructName].ProtogenMessage
+				valType = "*" + goName(string(msg.GoIdent.GoImportPath), msg.GoIdent.GoName, thisPkg)
+			case "[]object", "[]struct":
+				msg := messageDescriptions[valField.StructName].ProtogenMessage
+				valType = "[]*" + goName(string(msg.GoIdent.GoImportPath), msg.GoIdent.GoName, thisPkg)
+			case "int32":
+				if valField.EnumDescription != nil {
+					valType = valField.EnumDescription.Name
+				}
+			}
+			return "make(map[" + keyField.Type + "]" + valType + ")"
+		}
+
+		msg := md.ProtogenMessage
+		return "new(" + goName(string(msg.GoIdent.GoImportPath), msg.GoIdent.GoName, thisPkg) + ")"
+	}
 	m["trim_package"] = TrimLocalPackageName
 	m["package_name"] = ExternalPackageName
 	m["supported"] = func(f *protogen.Enum) string {
@@ -391,6 +425,7 @@ type tplMessage struct {
 }
 
 type tplMessagesMap struct {
+	Package      string
 	Descriptions []*MessageDescription
 }
 
@@ -406,6 +441,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	"github.com/effective-security/x/enum"
 	"github.com/effective-security/protoc-gen-go/api"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 `))
 
@@ -693,6 +731,10 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 				Funcs(tempFuncs()).
 				Parse(`
 
+
+// MessageAllocator defines constructor to allocate Protobuf message
+type MessageAllocator func() any
+
 var (
 	initMessageDescriptionOnce sync.Once
 
@@ -702,6 +744,12 @@ var (
 	"{{.FullName}}": {{.Name}}_MessageDescription,
 	{{- end }}
   	}
+
+	messageAllocators = map[string]MessageAllocator {
+	{{- range .Descriptions }}
+	"{{.FullName}}": func() any { return {{allocation_func $root.Package . }} },
+	{{- end }}
+	}
 )
 
 func GetMessageDescriptions() map[string]*api.MessageDescription {
@@ -709,7 +757,7 @@ func GetMessageDescriptions() map[string]*api.MessageDescription {
 	initMessageDescriptionOnce.Do(func() {
 		for _, md := range messageDescriptions {
 			for _, field := range md.Fields {
-				if field.Fields == nil && (field.Type == "object" || field.Type == "[]object") {
+				if field.Fields == nil && (field.Type == "struct" || field.Type == "[]struct" || field.Type == "object" || field.Type == "[]object") {
 					if msgDescr, ok := messageDescriptions[field.StructName]; ok {
 						field.Fields = msgDescr.Fields
 					}
@@ -719,6 +767,15 @@ func GetMessageDescriptions() map[string]*api.MessageDescription {
 	})
 	return messageDescriptions
 }
+
+func CreateMessage(fullname string) any {
+	allocator := messageAllocators[fullname]
+	if allocator == nil {
+		panic(fmt.Sprintf("allocator for %s not found", fullname))
+	}
+	return allocator()
+}
+
 
 func GetMessageDescription(fullname string) *api.MessageDescription {
 	return GetMessageDescriptions()[fullname]

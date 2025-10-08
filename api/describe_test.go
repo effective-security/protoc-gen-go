@@ -70,8 +70,14 @@ Version:
 			Enabled: true,
 			Value:   4.5,
 			Price:   5.5,
-			Map: map[string]string{
-				"key1": "value1",
+			Map1: map[string]e2e.ResourceType_Enum{
+				"key1": e2e.ResourceType_EC2Instance,
+			},
+			Map2: map[string]*e2e.Generic_Message{
+				"key1": {
+					Name: "test",
+					Id:   "test",
+				},
 			},
 			ResourceType: e2e.ResourceType_EC2Instance | e2e.ResourceType_S3Bucket,
 		}

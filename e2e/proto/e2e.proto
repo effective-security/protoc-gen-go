@@ -80,19 +80,21 @@ message Generic {
     // Generic is a generic message
     repeated Message messages = 1;
 
-    string name                     = 2;
-    uint64 id                       = 3;
-    uint32 count                    = 4;
-    int64 size                      = 5;
-    bool enabled                    = 6;
-    bytes data                      = 7;
-    float value                     = 8;
-    double price                    = 9;
-    map<string, string> map         = 10;
-    ResourceType.Enum resource_type = 11
+    string name                         = 2;
+    uint64 id                           = 3;
+    uint32 count                        = 4;
+    int64 size                          = 5;
+    bool enabled                        = 6;
+    bytes data                          = 7;
+    float value                         = 8;
+    double price                        = 9;
+    map<string, ResourceType.Enum> map1 = 10;
+    ResourceType.Enum resource_type     = 11
         [json_name = "ResourceType", (es.api.display) = "Resource"];
 
     Nested.Message nested = 12;
+
+    map<string, Generic.Message> map2 = 13;
 }
 
 message VectorScore {
