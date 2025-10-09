@@ -144,13 +144,32 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 		description = field.Comments.Leading.String()
 	}
 
+	name := string(field.Desc.Name())
+	fullname := string(field.Desc.FullName())
+
+	// Handle map fields, key and value
+	// we set required to true and Name to Key and Value to make it Exported
+	switch name {
+	case "key":
+		name = "Key"
+		required = true
+		if s, ok := strings.CutSuffix(fullname, ".key"); ok {
+			fullname = s + ".Key"
+		}
+	case "value":
+		required = true
+		name = "Value"
+		if s, ok := strings.CutSuffix(fullname, ".value"); ok {
+			fullname = s + ".Value"
+		}
+	}
 	if display == "" {
-		display = format.DisplayName(string(field.Desc.Name()))
+		display = format.DisplayName(name)
 	}
 
 	fm := &FieldMeta{
-		Name:          string(field.Desc.Name()),
-		FullName:      string(field.Desc.FullName()),
+		Name:          name,
+		FullName:      fullname,
 		Documentation: cleanComment(description),
 		Display:       display,
 		Required:      required,
@@ -177,7 +196,7 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 
 	switch kind {
 	case protoreflect.MessageKind:
-		fm.Type = "object"
+		fm.Type = "struct"
 		if fm.SearchType == "object" || fm.SearchType == "flat_object" || fm.SearchType == "nested" {
 			fm.StructName = string(field.Message.Desc.FullName())
 			if msgDescr, ok := messageDescriptions[fm.StructName]; ok {

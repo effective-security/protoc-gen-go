@@ -7,7 +7,7 @@ require (
 	github.com/cockroachdb/errors v1.12.0
 	github.com/effective-security/porto v0.35.356
 	github.com/effective-security/x v0.15.72
-	github.com/effective-security/xlog v0.10.46
+	github.com/effective-security/xlog v0.10.47
 	github.com/stretchr/testify v1.11.1
 	google.golang.org/genproto/googleapis/api v0.0.0-20251007200510-49b9836ed3ff
 	google.golang.org/grpc v1.76.0
