@@ -456,14 +456,19 @@ import (
 
 const {{.Enum.GoIdent.GoName}}_SupportedNamesHelp = "{{supported .Enum}}"
 
-// ValuesMap returns map of enum values
+// ValuesMap returns a map of enum values
 func (s {{.Enum.GoIdent.GoName}}) ValuesMap() map[string]int32 {
 	return {{.Enum.GoIdent.GoName}}_value
 }
 
-// NamesMap returns map of enum names	
+// NamesMap returns map of enum names 
 func (s {{.Enum.GoIdent.GoName}}) NamesMap() map[int32]string {
 	return {{.Enum.GoIdent.GoName}}_name
+}
+
+// DisplayNamesMap returns a map of enum display names	
+func (s {{.Enum.GoIdent.GoName}}) DisplayNamesMap() map[int32]string {
+	return {{.Enum.GoIdent.GoName}}_displayValue
 }
 
 // SupportedNames returns string of supported Enum name concatenated by ","	
