@@ -66,6 +66,8 @@ extend google.protobuf.EnumValueOptions {
     string enum_display = 52002;
     // enum_description is the option for the field's description.
     string enum_description = 52003;
+    // enum_group is the option for the field's group name.
+    string enum_group = 52004;
 }
 
 // Custom message option
@@ -92,6 +94,7 @@ message EnumMeta {
     string Display       = 4 [json_name = "Display"];
     string Documentation = 5 [json_name = "Documentation"];
     repeated string Args = 6 [json_name = "Args"];
+    string Group         = 7 [json_name = "Group"];
 }
 
 message SearchOption {
