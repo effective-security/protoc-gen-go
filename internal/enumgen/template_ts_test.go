@@ -143,8 +143,8 @@ func TestTSEnums(t *testing.T) {
 					FullName: "test.TestEnum",
 					Enums: []*api.EnumMeta{
 						{
-							Value: 0,
-							Name:  "Unknown",
+							Value: -1,
+							Name:  "Invalid",
 						},
 						{
 							Value:   0,
@@ -170,7 +170,79 @@ func TestTSEnums(t *testing.T) {
 					},
 				},
 			},
-			exp: "\n//\n// TestEnum\n//\n\nexport const TestEnumName: ITypeNameInterface = {\n    0: 'Unknown',\n    0: 'Unknown',\n    1: 'Active',\n}\n\nexport const TestEnumDisplayName: ITypeNameInterface = {\n    0: '',\n    0: 'Unknown',\n    1: 'Active Status',\n}\n\nexport const TestEnumGroup: ITypeNameInterface = {\n    0: '',\n    0: 'Unknown',\n    1: 'Status',\n}\n\nexport const TestEnumNameEnum: INameEnumInterface = {\n    'Unknown': 0,\n    'Unknown': 0,\n    'Active': 1,\n}\n\nexport const TestEnumDisplayNameEnum: INameEnumInterface = {\n    '': 0,\n    'Unknown': 0,\n    'Active Status': 1,\n}\n\nexport const TestEnumGroupEnum: INameEnumInterface = {\n    '': 0,\n    'Unknown': 0,\n    'Status': 1,\n}\n\nexport function getTestEnumName(\n    opt: TestEnum | string,\n): string {\n    return TestEnumName[opt] || 'Unknown'\n}\n\nexport function getTestEnumDisplayName(\n    opt: TestEnum | string,\n): string {\n    return TestEnumDisplayName[opt] || 'Unknown'\n}\n\nexport function getTestEnumGroup(\n    opt: TestEnum | string,\n): string {\n    return TestEnumGroup[opt] || 'Unknown'\n}\n\nexport function parseTestEnum(\n    val: string | TestEnum,\n): TestEnum {\n    if (typeof val === 'number') {\n        return val\n    }\n    // Try to parse as number first (for string representations like \"0\", \"2\", etc.)\n    const numVal = parseInt(val, 10)\n    if (!isNaN(numVal) && TestEnumName[numVal] !== undefined) {\n        return numVal\n    }\n    return TestEnumNameEnum[val] || TestEnumDisplayNameEnum[val] || TestEnumGroupEnum[val] || 0\n}\n\n",
+			exp: `
+//
+// TestEnum
+//
+
+export const TestEnumName: ITypeNameInterface = {
+    -1: 'Invalid',
+    0: 'Unknown',
+    1: 'Active',
+}
+
+export const TestEnumDisplayName: ITypeNameInterface = {
+    -1: '',
+    0: 'Unknown',
+    1: 'Active Status',
+}
+
+export const TestEnumGroup: ITypeNameInterface = {
+    -1: '',
+    0: 'Unknown',
+    1: 'Status',
+}
+
+export const TestEnumNameEnum: INameEnumInterface = {
+    'Invalid': -1,
+    'Unknown': 0,
+    'Active': 1,
+}
+
+export const TestEnumDisplayNameEnum: INameEnumInterface = {
+    '': -1,
+    'Unknown': 0,
+    'Active Status': 1,
+}
+
+export const TestEnumGroupEnum: INameEnumInterface = {
+    'Unknown': 0,
+    'Status': 1,
+}
+
+export function getTestEnumName(
+    opt: TestEnum | string,
+): string {
+    return TestEnumName[opt] || 'Unknown'
+}
+
+export function getTestEnumDisplayName(
+    opt: TestEnum | string,
+): string {
+    return TestEnumDisplayName[opt] || 'Unknown'
+}
+
+export function getTestEnumGroup(
+    opt: TestEnum | string,
+): string {
+    return TestEnumGroup[opt] || 'Unknown'
+}
+
+export function parseTestEnum(
+    val: string | TestEnum,
+): TestEnum {
+    if (typeof val === 'number') {
+        return val
+    }
+    // Try to parse as number first (for string representations like "0", "2", etc.)
+    const numVal = parseInt(val, 10)
+    if (!isNaN(numVal) && TestEnumName[numVal] !== undefined) {
+        return numVal
+    }
+    return TestEnumNameEnum[val] || TestEnumDisplayNameEnum[val] || TestEnumGroupEnum[val] || 0
+}
+
+`,
 		},
 	}
 
