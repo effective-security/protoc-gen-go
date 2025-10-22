@@ -618,6 +618,9 @@ var {{.Enum.GoIdent.GoName}}_EnumDescription = &api.EnumDescription {
 			{{- if .Documentation }}
 			Documentation: ` + "`{{.Documentation}}`" + `,
 			{{- end }}
+			{{- if .Group }}
+			Group: "{{.Group}}",
+			{{- end }}
 		},
 	{{- end }}
 	{{- end }}

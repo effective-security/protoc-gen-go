@@ -156,6 +156,14 @@ export const {{ enum_ts_name .Enum }}DisplayName: ITypeNameInterface = {
 {{- end }}
 }
 
+export const {{ enum_ts_name .Enum }}Group: ITypeNameInterface = {
+{{- with .Enum }}
+{{- range $.Description.Enums }}
+    {{ .Value }}: '{{ .Group }}',
+{{- end }}
+{{- end }}
+}
+
 export const {{ enum_ts_name .Enum }}NameEnum: INameEnumInterface = {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
@@ -172,6 +180,18 @@ export const {{ enum_ts_name .Enum }}DisplayNameEnum: INameEnumInterface = {
 {{- end }}
 }
 
+export const {{ enum_ts_name .Enum }}GroupEnum: INameEnumInterface = {
+{{- with .Enum }}
+{{- $seenGroups := dict }}
+{{- range $.Description.Enums }}
+{{- if and .Group (not (hasKey $seenGroups .Group)) }}
+    '{{ .Group }}': {{ .Value }},
+{{- $_ := set $seenGroups .Group true }}
+{{- end }}
+{{- end }}
+{{- end }}
+}
+
 export function get{{ enum_ts_function_name .Enum "Name" }}(
     opt: {{ enum_ts_type .Enum }},
 ): string {
@@ -182,6 +202,12 @@ export function get{{ enum_ts_function_name .Enum "DisplayName" }}(
     opt: {{ enum_ts_type .Enum }},
 ): string {
     return {{ enum_ts_name .Enum }}DisplayName[opt] || 'Unknown'
+}
+
+export function get{{ enum_ts_function_name .Enum "Group" }}(
+    opt: {{ enum_ts_type .Enum }},
+): string {
+    return {{ enum_ts_name .Enum }}Group[opt] || 'Unknown'
 }
 
 export function parse{{ enum_ts_name .Enum }}(
@@ -195,7 +221,7 @@ export function parse{{ enum_ts_name .Enum }}(
     if (!isNaN(numVal) && {{ enum_ts_name .Enum }}Name[numVal] !== undefined) {
         return numVal
     }
-    return {{ enum_ts_name .Enum }}NameEnum[val] || {{ enum_ts_name .Enum }}DisplayNameEnum[val] || 0
+    return {{ enum_ts_name .Enum }}NameEnum[val] || {{ enum_ts_name .Enum }}DisplayNameEnum[val] || {{ enum_ts_name .Enum }}GroupEnum[val] || 0
 }
 
 `))
