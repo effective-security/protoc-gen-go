@@ -141,11 +141,23 @@ enum Role {
     ];
     Admin = 0x2 [
         (es.api.enum_description) = "Administrator role",
-        (es.api.enum_display)     = "Administrator"
+        (es.api.enum_display)     = "Administrator",
+        (es.api.enum_group)       = "Admins"
+    ];
+    Owner = 0x4 [
+        (es.api.enum_description) = "Owner role",
+        (es.api.enum_display)     = "Owner",
+        (es.api.enum_group)       = "Admins"
     ];
     User = 0x10 [
         (es.api.enum_description) = "User role",
-        (es.api.enum_display)     = "User"
+        (es.api.enum_display)     = "User",
+        (es.api.enum_group)       = "Users"
+    ];
+    Viewer = 0x20 [
+        (es.api.enum_description) = "Viewer role",
+        (es.api.enum_display)     = "Viewer",
+        (es.api.enum_group)       = "Users"
     ];
 }
 
