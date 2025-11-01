@@ -228,8 +228,8 @@ func (d *Describer) GetEnumDisplayValue(enumDescriptor protoreflect.EnumDescript
 			enumValue := reflect.New(goEnumType).Elem()
 			enumValue.SetInt(int64(value))
 
-			// Try to call DisplayValue() if the method exists
-			method := enumValue.MethodByName("DisplayValue")
+			// Try to call DisplayName() if the method exists
+			method := enumValue.MethodByName("DisplayName")
 			if method.IsValid() {
 				result := method.Call(nil)
 				if len(result) == 1 && result[0].Kind() == reflect.String {

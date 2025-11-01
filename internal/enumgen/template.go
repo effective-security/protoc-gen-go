@@ -468,7 +468,7 @@ func (s {{.Enum.GoIdent.GoName}}) NamesMap() map[int32]string {
 
 // DisplayNamesMap returns a map of enum display names	
 func (s {{.Enum.GoIdent.GoName}}) DisplayNamesMap() map[int32]string {
-	return {{.Enum.GoIdent.GoName}}_displayValue
+	return {{.Enum.GoIdent.GoName}}_displayName
 }
 
 // SupportedNames returns string of supported Enum name concatenated by ","	
@@ -517,25 +517,25 @@ func (s *{{.Enum.GoIdent.GoName}}) UnmarshalYAML(unmarshal func(any) error) erro
 	return nil
 }
 
-// DisplayValues returns display names of Enum bitflag value
-func (s {{.Enum.GoIdent.GoName}}) DisplayValues() []string {
+// DisplayNames returns display names of Enum bitflag value
+func (s {{.Enum.GoIdent.GoName}}) DisplayNames() []string {
 	flags := enum.Flags(s)
 	count := len(flags)
 	if count == 0 {
 		return []string{s.String()}
 	}
 	if count == 1 {
-		return []string{ {{.Enum.GoIdent.GoName}}_DisplayValue[flags[0]] }
+		return []string{ {{.Enum.GoIdent.GoName}}_DisplayName[flags[0]] }
 	}
 	var names []string
 	for _, flag := range flags {
-		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayValue[flag])
+		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayName[flag])
 	}
 	return names
 }
 
-// DisplayValue returns display name of Enum value
-func (s {{.Enum.GoIdent.GoName}}) DisplayValue() string {
+// DisplayName returns display name of Enum value
+func (s {{.Enum.GoIdent.GoName}}) DisplayName() string {
 	{{- if .Description.IsBitmask }}
 	flags := enum.Flags(s)
 	count := len(flags)
@@ -543,15 +543,15 @@ func (s {{.Enum.GoIdent.GoName}}) DisplayValue() string {
 		return s.String()
 	}
 	if count == 1 {
-		return {{.Enum.GoIdent.GoName}}_DisplayValue[flags[0]]
+		return {{.Enum.GoIdent.GoName}}_DisplayName[flags[0]]
 	}
 	var names []string
 	for _, flag := range flags {
-		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayValue[flag])
+		names = append(names, {{.Enum.GoIdent.GoName}}_DisplayName[flag])
 	}
 	return strings.Join(names, ",")
 	{{- else }}
-	if val, ok := {{.Enum.GoIdent.GoName}}_DisplayValue[s]; ok {
+	if val, ok := {{.Enum.GoIdent.GoName}}_DisplayName[s]; ok {
 		return val
 	}
 	return s.String()
@@ -584,7 +584,7 @@ var {{.Enum.GoIdent.GoName}}_Value = map[string]{{.Enum.GoIdent.GoName}} {
 {{- end }}
 }
 
-var {{.Enum.GoIdent.GoName}}_DisplayValue = map[{{.Enum.GoIdent.GoName}}]string {
+var {{.Enum.GoIdent.GoName}}_DisplayName = map[{{.Enum.GoIdent.GoName}}]string {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
 	{{enum_name $.Enum .Name}}: Display_{{enum_name $.Enum .Name}},
@@ -592,7 +592,7 @@ var {{.Enum.GoIdent.GoName}}_DisplayValue = map[{{.Enum.GoIdent.GoName}}]string 
 {{- end }}
 }
 
-var {{.Enum.GoIdent.GoName}}_displayValue = map[int32]string {
+var {{.Enum.GoIdent.GoName}}_displayName = map[int32]string {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
 	{{.Value}}: Display_{{enum_name $.Enum .Name}},
