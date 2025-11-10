@@ -5,7 +5,7 @@ go 1.25.3
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cockroachdb/errors v1.12.0
-	github.com/effective-security/porto v0.35.363
+	github.com/effective-security/porto v0.35.364
 	github.com/effective-security/x v0.15.75
 	github.com/effective-security/xlog v0.10.48
 	github.com/stretchr/testify v1.11.1
