@@ -29,6 +29,50 @@ service E2E {
         option (es.api.allowed_roles) = "User";
         option (es.api.cli_cmd)       = "e2e annotation list";
     }
+
+    rpc UpdateAnnotation(Annotation) returns (Annotation) {
+        option (es.api.allowed_roles) = "User";
+        option (es.api.cli_cmd)       = "e2e annotation update";
+    }
+}
+
+// KVPair provides generic key-value pair
+message KVPair {
+    option (es.api.generate_meta) = true;
+
+    // Key is a key of the pair
+    string Key = 1 [
+        json_name         = "Key",
+        (es.api.search)   = "keyword,facet,store",
+        (es.api.required) = true
+    ];
+    // Value is a value of the pair
+    string Value = 2 [
+        json_name         = "Value",
+        (es.api.search)   = "keyword,store,hide",
+        (es.api.required) = true
+    ];
+}
+
+message Annotation {
+    string ID = 1 [
+        json_name         = "ID",
+        (es.api.required) = true,
+        (es.api.min)      = 9,
+        (es.api.max)      = 19
+    ];
+
+    string Name = 2 [json_name = "Name", (es.api.min) = 2, (es.api.max) = 12];
+    AnnotationType.Enum Type = 3 [json_name = "Type", (es.api.required) = true];
+
+    map<string, string> Map = 4
+        [json_name = "Map", (es.api.min_count) = 1, (es.api.max_count) = 3];
+
+    // Metadata is a list of internal metadata associated with the asset
+    repeated KVPair Metadata = 5
+        [json_name = "Metadata", (es.api.required) = true];
+
+    Basic Basic = 6;
 }
 
 message AnnotationRequest {
@@ -51,29 +95,28 @@ message ListAnnotationsRequest {
     string AssetID = 2 [
         json_name            = "AssetID",
         (es.api.required_or) = "ResourceID",
-        (es.api.min)         = 9,
         (es.api.max)         = 19
     ];
 
     string ResourceID = 3 [
         json_name            = "ResourceID",
         (es.api.required_or) = "AssetID",
-        (es.api.min)         = 9,
         (es.api.max)         = 19
     ];
 
-    repeated string AssetIDs = 4 [json_name = "AssetIDs"];
+    repeated string AssetIDs = 4 [
+        json_name          = "AssetIDs",
+        (es.api.min_count) = 1,
+        (es.api.max_count) = 3
+    ];
 
     AnnotationType.Enum Type = 5 [json_name = "Type"];
 
     uint32 Offset = 6 [json_name = "Offset", (es.api.max) = 1000];
     uint32 Limit  = 7 [json_name = "Limit", (es.api.max) = 1000];
-}
 
-message Annotation {
-    string ID                = 1 [json_name = "ID"];
-    string Name              = 2 [json_name = "Name"];
-    AnnotationType.Enum Type = 3 [json_name = "Type"];
+    string Display = 8
+        [json_name = "Display", (es.api.min) = 9, (es.api.max) = 19];
 }
 
 message AnnotationsResponse {

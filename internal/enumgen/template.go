@@ -205,9 +205,9 @@ func GetEnumsDescriptions(gp *protogen.Plugin, opts Opts) []*EnumDescription {
 			logger.Infof("[%d] *** Discovering nested messages: %d", i, len(msgsToDiscover))
 			prev := msgsToDiscover
 			msgsToDiscover = make(map[string]*protogen.Message)
-			for fn, msg := range prev {
+			for _, msg := range prev {
 				checkMessage(msg)
-				logger.Infof("*** Discovered nested messages: %s", fn)
+				//logger.Infof("*** Discovered nested messages: %s", fn)
 			}
 		}
 	}
@@ -235,12 +235,16 @@ func GetEnumsDescriptions(gp *protogen.Plugin, opts Opts) []*EnumDescription {
 
 func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescription {
 	seen := make(map[string]*protogen.Message)
+	inputMap := make(map[string]bool)
 
-	checkMessage := func(msg *protogen.Message) {
+	checkMessage := func(msg *protogen.Message, isInput bool) {
 		fn := string(msg.Desc.FullName())
+		if isInput {
+			logger.Infof("! Discovered Input messages: %s", fn)
+			inputMap[fn] = true
+		}
 		if _, ok := seen[fn]; !ok {
 			seen[fn] = msg
-
 			for _, field := range msg.Fields {
 				if field.Desc.Kind() == protoreflect.MessageKind {
 					fn := string(field.Message.Desc.FullName())
@@ -253,13 +257,17 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 	}
 
 	for _, name := range gp.Request.FileToGenerate {
+		//logger.Infof("> Parsing file: %s", name)
 		f := gp.FilesByPath[name]
 
 		// first add all service requests
 		for _, svc := range f.Services {
-			for _, m := range svc.Methods {
-				checkMessage(m.Input)
-				checkMessage(m.Output)
+			//logger.Infof("  >> [%d] Parsing service: %s", i, svc.GoName)
+			for j, m := range svc.Methods {
+				logger.Infof("   >>> [%d] Parsing input: %s", j, m.Input.GoIdent.GoName)
+				checkMessage(m.Input, true)
+				//logger.Infof("   >>> [%d] Parsing output: %s", j, m.Output.GoIdent.GoName)
+				checkMessage(m.Output, false)
 			}
 		}
 
@@ -270,26 +278,26 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 			if !describe {
 				continue
 			}
-			checkMessage(msg)
+			checkMessage(msg, false)
 		}
 	}
 
 	var list []*MessageDescription
 	msgsToDiscover := make(map[string]*protogen.Message)
 
-	for _, msg := range seen {
-		desc := CreateMessageDescription(msg, opts, msgsToDiscover)
+	for fn, msg := range seen {
+		desc := CreateMessageDescription(msg, inputMap[fn], opts, msgsToDiscover)
 		list = append(list, desc)
 	}
 
 	for i := 0; i < 10 && len(msgsToDiscover) > 0; i++ {
-		logger.Infof("[%d] *** Discovering nested messages: %d", i, len(msgsToDiscover))
+		//logger.Infof("[%d] *** Discovering nested messages: %d", i, len(msgsToDiscover))
 		prev := msgsToDiscover
 		msgsToDiscover = make(map[string]*protogen.Message)
 		for fn, msg := range prev {
-			desc := CreateMessageDescription(msg, opts, msgsToDiscover)
+			desc := CreateMessageDescription(msg, inputMap[fn], opts, msgsToDiscover)
 			list = append(list, desc)
-			logger.Infof("*** Discovered nested messages: %s", fn)
+			//logger.Infof("*** Discovered nested messages: %s", fn)
 		}
 	}
 
@@ -735,6 +743,11 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 }
 `))
 
+	// TODO: if needed
+	// func (m *{{.Name}}) GetMessageDescription() *api.MessageDescription {
+	// 	return {{.Name}}_MessageDescription
+	// }
+
 	messagesMapTemplate = template.Must(template.New("messages_map").
 				Funcs(tempFuncs()).
 				Parse(`
@@ -746,7 +759,7 @@ type MessageAllocator func() any
 var (
 	initMessageDescriptionOnce sync.Once
 
-{{- $root := . }}				
+{{- $root := . }}
 	messageDescriptions = map[string]*api.MessageDescription {
 	{{- range .Descriptions }}
 	"{{.FullName}}": {{.Name}}_MessageDescription,
@@ -759,6 +772,14 @@ var (
 	{{- end }}
 	}
 )
+
+{{- range .Descriptions }}
+{{- if and .IsInput (eq .Package $root.Package) }}
+func (m *{{.Name}}) Validate(ctx context.Context) error {
+	return api.ValidateRequest(ctx, m, {{.Name}}_MessageDescription)
+}
+{{- end }}
+{{- end }}
 
 func GetMessageDescriptions() map[string]*api.MessageDescription {
 	// Update the message Fields with the nested messages
