@@ -75,7 +75,7 @@ func CreateEnumDescription(en *protogen.Enum) *EnumDescription {
 }
 
 // CreateMessageDescription convert enum descriptor to EnumMeta message
-func CreateMessageDescription(msg *protogen.Message, args Opts, queueToDiscover map[string]*protogen.Message) *MessageDescription {
+func CreateMessageDescription(msg *protogen.Message, isInput bool, args Opts, queueToDiscover map[string]*protogen.Message) *MessageDescription {
 	fn := string(msg.Desc.FullName())
 	if _, ok := messageDescriptions[fn]; ok {
 		return messageDescriptions[fn]
@@ -110,6 +110,7 @@ func CreateMessageDescription(msg *protogen.Message, args Opts, queueToDiscover 
 		TableSource:   tableSource,
 		TableHeader:   nonEmptyStrings(strings.Split(tableHeader, ",")),
 		Deprecated:    deprecated,
+		IsInput:       isInput,
 
 		ProtogenMessage: msg,
 		Package:         path.Base(string(msg.GoIdent.GoImportPath)),
@@ -316,6 +317,8 @@ type MessageDescription struct {
 	TableSource   string
 	TableHeader   []string
 	Deprecated    bool
+	// IsInput is true if the message is an input message
+	IsInput bool
 
 	// message is the original message descriptor
 	ProtogenMessage *protogen.Message
