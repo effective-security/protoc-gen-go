@@ -19,7 +19,8 @@ message Basic {
         uint64 id  = 4;
     }
 
-    map<string, string> map           = 5;
+    map<string, string> map = 5
+        [json_name = "Map", (es.api.min_count) = 1, (es.api.max_count) = 2];
     google.protobuf.Timestamp created = 6;
 
     JobStatus.Enum statuses          = 7;

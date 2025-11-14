@@ -72,7 +72,49 @@ message Annotation {
     repeated KVPair Metadata = 5
         [json_name = "Metadata", (es.api.required) = true];
 
-    Basic Basic = 6;
+    Basic Basic = 6 [json_name = "Basic", (es.api.required) = true];
+
+    float FloatValue = 7 [
+        json_name         = "FloatValue",
+        (es.api.required) = true,
+        (es.api.min)      = 1,
+        (es.api.max)      = 3
+    ];
+
+    bytes BytesValue = 8 [
+        json_name         = "BytesValue",
+        (es.api.required) = true,
+        (es.api.min)      = 2,
+        (es.api.max)      = 10
+    ];
+
+    uint64 Uint64Value = 9 [
+        json_name         = "Uint64Value",
+        (es.api.required) = true,
+        (es.api.min)      = 1,
+        (es.api.max)      = 10
+    ];
+
+    int64 Int64Value = 10 [
+        json_name         = "Int64Value",
+        (es.api.required) = true,
+        (es.api.min)      = 1,
+        (es.api.max)      = 10
+    ];
+
+    uint32 Uint32Value = 11 [
+        json_name         = "Uint32Value",
+        (es.api.required) = true,
+        (es.api.min)      = 2,
+        (es.api.max)      = 10
+    ];
+
+    int32 Int32Value = 12 [
+        json_name         = "Int32Value",
+        (es.api.required) = true,
+        (es.api.min)      = 2,
+        (es.api.max)      = 10
+    ];
 }
 
 message AnnotationRequest {
