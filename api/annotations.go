@@ -12,6 +12,9 @@ type EnumLike interface {
 }
 
 func (e *EnumDescription) Parse(val any) int32 {
+	if val == nil {
+		return 0
+	}
 	var res int32
 
 	if v, ok := val.(EnumLike); ok {
