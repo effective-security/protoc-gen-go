@@ -1,34 +1,47 @@
 package api
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	reflect "reflect"
 	"strings"
 	"unicode"
 
+	"github.com/cockroachdb/errors"
 	"github.com/effective-security/x/format"
 	"github.com/effective-security/x/print"
 	"github.com/effective-security/x/values"
+	"github.com/olekukonko/tablewriter"
+	"github.com/olekukonko/tablewriter/renderer"
+	"github.com/olekukonko/tablewriter/tw"
 	"google.golang.org/protobuf/proto"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"gopkg.in/yaml.v3"
 )
 
-// Describer is not thread safe.
+// DefaultDescriber is not thread safe.
 // It's assumed the registration will be done once at startup
-
 var DefaultDescriber = NewDescriber()
 
-type Describer struct {
+// Describer is an interface that describes a protobuf message in human readable format.
+type Describer interface {
+	ConvertToMap(msg proto.Message) values.MapAny
+	Describe(w io.Writer, msg proto.Message)
+	GetEnumDisplayValue(enumDescriptor protoreflect.EnumDescriptor, value int32) string
+	GetTabularData(msg proto.Message) (*TabularData, error)
+	RegisterEnumNameTypes(enumNameTypes map[string]reflect.Type)
+}
+
+type describer struct {
 	EnumNameTypes map[string]reflect.Type
 
 	pbDisplayNameExtType protoreflect.ExtensionType
 }
 
-func NewDescriber(enumNameTypes ...map[string]reflect.Type) *Describer {
-	d := &Describer{
+func NewDescriber(enumNameTypes ...map[string]reflect.Type) Describer {
+	d := &describer{
 		EnumNameTypes: make(map[string]reflect.Type),
 	}
 
@@ -40,13 +53,13 @@ func NewDescriber(enumNameTypes ...map[string]reflect.Type) *Describer {
 	return d
 }
 
-func (d *Describer) RegisterEnumNameTypes(enumNameTypes map[string]reflect.Type) {
+func (d *describer) RegisterEnumNameTypes(enumNameTypes map[string]reflect.Type) {
 	for k, v := range enumNameTypes {
 		d.EnumNameTypes[k] = v
 	}
 }
 
-func (d *Describer) protoDisplayValue(fd protoreflect.FieldDescriptor, v protoreflect.Value) any {
+func (d *describer) protoDisplayValue(fd protoreflect.FieldDescriptor, v protoreflect.Value) any {
 	if !v.IsValid() {
 		return ""
 	}
@@ -73,12 +86,20 @@ func (d *Describer) protoDisplayValue(fd protoreflect.FieldDescriptor, v protore
 			}
 		}
 		return values
+	} else if fd.IsMap() {
+		m := v.Map()
+		mapVals := make(values.MapAny)
+		m.Range(func(key protoreflect.MapKey, value protoreflect.Value) bool {
+			mapVals[key.String()] = d.protoDisplayValue(fd, value)
+			return true
+		})
+		return mapVals
 	}
 
 	return d.protoKindValue(fd, v)
 }
 
-func (d *Describer) protoKindValue(fd protoreflect.FieldDescriptor, v protoreflect.Value) any {
+func (d *describer) protoKindValue(fd protoreflect.FieldDescriptor, v protoreflect.Value) any {
 	var displayValue any
 
 	value := v.Interface()
@@ -103,25 +124,27 @@ func (d *Describer) protoKindValue(fd protoreflect.FieldDescriptor, v protorefle
 		displayValue = value.(float64)
 	case protoreflect.BoolKind:
 		displayValue = value.(bool)
+	case protoreflect.BytesKind:
+		displayValue = base64.StdEncoding.EncodeToString(value.([]byte))
 	case protoreflect.EnumKind:
 		enumDesc := fd.Enum()
 		enumVal := value.(protoreflect.EnumNumber)
 		displayValue = d.GetEnumDisplayValue(enumDesc, int32(enumVal))
 	case protoreflect.MessageKind:
-		//skip
+		displayValue = d.ConvertToMap(v.Message().Interface())
 	default:
 		displayValue = fmt.Sprintf("%v", value)
 	}
 	return displayValue
 }
 
-// DescribeMessage converts protobuf message to a human readable dictionary
-func DescribeMessage(msg proto.Message) values.MapAny {
-	return DefaultDescriber.DescribeMessage(msg)
+// ConvertToMap converts protobuf message to a human readable dictionary
+func ConvertToMap(msg proto.Message) values.MapAny {
+	return DefaultDescriber.ConvertToMap(msg)
 }
 
-// DescribeMessage converts protobuf message to a human readable dictionary
-func (d *Describer) DescribeMessage(msg proto.Message) values.MapAny {
+// ConvertToMap converts protobuf message to a human readable dictionary
+func (d *describer) ConvertToMap(msg proto.Message) values.MapAny {
 	if msg == nil {
 		return nil
 	}
@@ -133,7 +156,7 @@ func (d *Describer) DescribeMessage(msg proto.Message) values.MapAny {
 	// Get the message reflection
 	msgReflect := msg.ProtoReflect()
 
-	values := make(values.MapAny)
+	vals := make(values.MapAny)
 
 	// Iterate over the fields
 	msgReflect.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
@@ -162,39 +185,45 @@ func (d *Describer) DescribeMessage(msg proto.Message) values.MapAny {
 					item := list.Get(i)
 
 					// Handle nested messages
-					vals := d.DescribeMessage(item.Message().Interface())
+					vals := d.ConvertToMap(item.Message().Interface())
 					if len(vals) > 0 {
 						listVals = append(listVals, vals)
 					}
 				}
 				if len(listVals) > 0 {
-					values[displayName] = listVals
+					vals[displayName] = listVals
 				}
 
 				return true
 			} else if fd.IsMap() {
-				// TODO:
-				// m := v.Map()
-				// if m.Len() == 0 {
-				// 	return true
-				// }
+				m := v.Map()
+				if m.Len() == 0 {
+					return true
+				}
+				mapVals := make(values.MapAny)
+				fdv := fd.MapValue()
+				m.Range(func(key protoreflect.MapKey, value protoreflect.Value) bool {
+					mapVals[key.String()] = d.protoDisplayValue(fdv, value)
+					return true
+				})
+				vals[displayName] = mapVals
 			} else {
 				// Handle nested messages
-				vals := d.DescribeMessage(v.Message().Interface())
-				if len(vals) > 0 {
-					values[displayName] = vals
+				nvals := d.ConvertToMap(v.Message().Interface())
+				if len(nvals) > 0 {
+					vals[displayName] = nvals
 				}
 			}
 		} else {
 			displayValue = d.protoDisplayValue(fd, v)
 			if displayValue != "" {
-				values[displayName] = displayValue
+				vals[displayName] = displayValue
 			}
 		}
 
 		return true
 	})
-	return values
+	return vals
 }
 
 // Describe prints protobuf message to a human readable text
@@ -203,8 +232,8 @@ func Describe(w io.Writer, msg proto.Message) {
 }
 
 // Describe prints protobuf message to a human readable text
-func (d *Describer) Describe(w io.Writer, msg proto.Message) {
-	vals := d.DescribeMessage(msg)
+func (d *describer) Describe(w io.Writer, msg proto.Message) {
+	vals := d.ConvertToMap(msg)
 	enc := yaml.NewEncoder(w)
 	_ = enc.Encode(vals)
 	_ = enc.Close()
@@ -216,7 +245,7 @@ func GetEnumDisplayValue(enumDescriptor protoreflect.EnumDescriptor, value int32
 }
 
 // GetEnumDisplayValue function to dynamically call DisplayName on an enum
-func (d *Describer) GetEnumDisplayValue(enumDescriptor protoreflect.EnumDescriptor, value int32) string {
+func (d *describer) GetEnumDisplayValue(enumDescriptor protoreflect.EnumDescriptor, value int32) string {
 	// Get the enum full name to locate the concrete Go type
 	enumFullName := enumDescriptor.FullName()
 
@@ -249,6 +278,7 @@ func (d *Describer) GetEnumDisplayValue(enumDescriptor protoreflect.EnumDescript
 	return string(enumValueDesc.Name())
 }
 
+// DocumentMessage prints the message description to a human readable text
 func DocumentMessage(w io.Writer, dscr *MessageDescription, indent string) {
 	if dscr == nil {
 		return
@@ -334,4 +364,247 @@ func DocumentationOneLine(w io.Writer, doc string) {
 	if lines > 0 && !prevPartDot {
 		_, _ = fmt.Fprint(w, ".")
 	}
+}
+
+type HasMessageDescription interface {
+	GetMessageDescription() *MessageDescription
+}
+
+func GetTabularData(msg proto.Message) (*TabularData, error) {
+	return DefaultDescriber.GetTabularData(msg)
+}
+
+func (d *describer) GetTabularData(msg proto.Message) (*TabularData, error) {
+	if msg == nil {
+		return nil, errors.New("message is nil")
+	}
+
+	var md *MessageDescription
+	if hms, ok := msg.(HasMessageDescription); ok {
+		md = hms.GetMessageDescription()
+	}
+	if md == nil {
+		return nil, errors.New("message description not found")
+	}
+
+	// Get the message reflection
+	msgReflect := msg.ProtoReflect()
+
+	tabularData := &TabularData{}
+
+	if len(md.ListSources) == 0 {
+		t := &Table{
+			ID:     md.Display,
+			Header: FilterPrintableFields(md.Fields, nil, nil),
+		}
+		rows := d.createRow(msgReflect, t.Header)
+		t.Rows = []*TableRow{rows}
+
+		tabularData.Tables = append(tabularData.Tables, t)
+	} else {
+
+		for _, source := range md.ListSources {
+			field := md.FindField(source)
+			if field == nil {
+				return nil, errors.New("field not found")
+			}
+			if field.ListOption == ListOption_Disable {
+				return nil, errors.New("invalid source for disabled field")
+			}
+			if field.Type != "[]struct" {
+				return nil, errors.New("invalid source for non-struct field")
+			}
+			t := &Table{
+				ID:     field.Display,
+				Header: FilterPrintableFields(field.Fields, nil, nil),
+			}
+			mfd := msgReflect.Descriptor().Fields().ByName(protoreflect.Name(field.Name))
+			if mfd == nil {
+				return nil, errors.Errorf("field not found in message: %s", field.Name)
+			}
+			fdv := msgReflect.Get(mfd)
+			rows, err := d.createRowsFromList(fdv, t.Header)
+			if err != nil {
+				return nil, err
+			}
+			t.Rows = rows
+
+			tabularData.Tables = append(tabularData.Tables, t)
+		}
+	}
+	return tabularData, nil
+}
+
+func (d *describer) createRowsFromList(sval protoreflect.Value, fields []*FieldMeta) ([]*TableRow, error) {
+	list := sval.List()
+	var rows []*TableRow
+
+	for i := 0; i < list.Len(); i++ {
+		item := list.Get(i)
+		rmsg := item.Message()
+		if rmsg == nil {
+			continue
+		}
+		row := d.createRow(rmsg, fields)
+
+		rows = append(rows, row)
+	}
+
+	return rows, nil
+}
+
+func (d *describer) createRow(rmsg protoreflect.Message, fields []*FieldMeta) *TableRow {
+	row := &TableRow{
+		RawValue: rmsg.Interface(),
+		Fields:   fields,
+	}
+
+	mfields := rmsg.Descriptor().Fields()
+	for _, field := range fields {
+		fd := mfields.ByName(protoreflect.Name(field.Name))
+		if fd == nil {
+			row.Cells = append(row.Cells, "")
+		}
+		fdv := rmsg.Get(fd)
+		val := d.rowValue(fd, fdv)
+		row.Cells = append(row.Cells, val)
+	}
+	return row
+}
+
+func (d *describer) rowValue(fd protoreflect.FieldDescriptor, v protoreflect.Value) string {
+	var displayValue string
+
+	value := v.Interface()
+	switch fd.Kind() {
+	case protoreflect.StringKind:
+		displayValue = value.(string)
+	case protoreflect.Int32Kind:
+		displayValue = fmt.Sprintf("%d", value.(int32))
+	case protoreflect.Int64Kind:
+		displayValue = fmt.Sprintf("%d", value.(int64))
+	case protoreflect.Uint32Kind:
+		displayValue = fmt.Sprintf("%d", value.(uint32))
+	case protoreflect.Uint64Kind:
+		displayValue = fmt.Sprintf("%d", value.(uint64))
+	case protoreflect.Sint32Kind:
+		displayValue = fmt.Sprintf("%d", value.(int32))
+	case protoreflect.Sint64Kind:
+		displayValue = fmt.Sprintf("%d", value.(int64))
+	case protoreflect.FloatKind:
+		displayValue = fmt.Sprintf("%f", value.(float32))
+	case protoreflect.DoubleKind:
+		displayValue = fmt.Sprintf("%f", value.(float64))
+	case protoreflect.BoolKind:
+		displayValue = fmt.Sprintf("%t", value.(bool))
+	case protoreflect.BytesKind:
+		displayValue = base64.StdEncoding.EncodeToString(value.([]byte))
+	case protoreflect.EnumKind:
+		enumDesc := fd.Enum()
+		enumVal := value.(protoreflect.EnumNumber)
+		displayValue = d.GetEnumDisplayValue(enumDesc, int32(enumVal))
+	case protoreflect.MessageKind:
+		displayValue = "..."
+	default:
+		displayValue = fmt.Sprintf("%v", value)
+	}
+	return displayValue
+}
+
+// TableRow is an individual row in a table.
+type TableRow struct {
+	// Cells will be as wide as the column definitions array and contain string
+	// representation of basic types as:
+	// strings, numbers (float64 or int64), booleans, simple maps, lists, or
+	// null.
+	// See the type field of the column definition for a more detailed
+	// description.
+	Cells []string
+
+	Fields   []*FieldMeta
+	RawValue any
+}
+
+type Table struct {
+	// ID is the identifier for the resource
+	ID string
+	// Header is the header row of the table.
+	Header []*FieldMeta
+	// Rows is an array of rows.
+	Rows []*TableRow
+}
+
+type TabularData struct {
+	// Tables is an array of tables.
+	Tables []*Table
+}
+
+func (r *TabularData) Print(w io.Writer) {
+	for _, table := range r.Tables {
+		if table.ID != "" {
+			_, _ = fmt.Fprintf(w, "%s:\n\n", table.ID)
+		}
+		table.Print(w)
+	}
+}
+
+func (r *Table) Print(w io.Writer) {
+	rc := len(r.Rows)
+	if rc > 1 {
+		table := createTable(w)
+		var header []string
+		for _, field := range r.Header {
+			header = append(header, field.Display)
+		}
+		table.Header(header)
+		for _, row := range r.Rows {
+			_ = table.Append(row.Cells)
+		}
+		_ = table.Render()
+	} else if rc == 1 {
+		table := createTableSimple(w)
+		for i, field := range r.Header {
+			_ = table.Append([]string{field.Display, r.Rows[0].Cells[i]})
+		}
+		_ = table.Render()
+	}
+	_, _ = fmt.Fprintln(w)
+}
+
+func createTable(w io.Writer) *tablewriter.Table {
+	return tablewriter.NewTable(w,
+		tablewriter.WithConfig(
+			tablewriter.Config{
+				Row: tw.CellConfig{
+					Formatting: tw.CellFormatting{
+						AutoWrap:  tw.WrapTruncate,
+						Alignment: tw.AlignLeft,
+					},
+					ColMaxWidths: tw.CellWidth{Global: 64},
+				},
+			},
+		))
+}
+
+func createTableSimple(w io.Writer) *tablewriter.Table {
+	return tablewriter.NewTable(w,
+		tablewriter.WithRenderer(renderer.NewBlueprint(tw.Rendition{
+			Borders: tw.BorderNone,
+			//Symbols: tw.NewSymbols(tw.StyleASCII),
+			Settings: tw.Settings{
+				Separators: tw.Separators{BetweenRows: tw.Off},
+				Lines:      tw.Lines{ShowFooterLine: tw.On, ShowHeaderLine: tw.On},
+			},
+		})),
+		tablewriter.WithConfig(
+			tablewriter.Config{
+				Row: tw.CellConfig{
+					Formatting: tw.CellFormatting{
+						AutoWrap:  tw.WrapTruncate,
+						Alignment: tw.AlignLeft,
+					},
+					ColMaxWidths: tw.CellWidth{Global: 128},
+				},
+			},
+		))
 }

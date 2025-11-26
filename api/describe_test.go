@@ -7,6 +7,7 @@ import (
 	"github.com/effective-security/protoc-gen-go/api"
 	"github.com/effective-security/protoc-gen-go/e2e"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -85,6 +86,12 @@ Version:
 count: 2
 enabled: true
 id: "1"
+map 1:
+    key1: EC2 Instance
+map 2:
+    key1:
+        id: test
+        name: test
 messages:
     - id: test
       name: test
@@ -92,6 +99,61 @@ name: test
 price: 5.5
 size: "3"
 value: 4.5
+`
+		checkEqual(val, exp)
+	})
+
+	t.Run("Annotation", func(t *testing.T) {
+		val := &e2e.Annotation{
+			ID:   "test",
+			Name: "test",
+			Type: e2e.AnnotationType_Bar,
+			Map: map[string]string{
+				"test1": "testv",
+				"test2": "testv2",
+			},
+			Metadata: []*e2e.KVPair{
+				{
+					Key:   "test",
+					Value: "test",
+				},
+			},
+			Basic: &e2e.Basic{
+				Values: []string{"v1", "v2"},
+				Map: map[string]string{
+					"k1": "v1",
+					"k2": "v2",
+				},
+			},
+			FloatValue:  1.23456,
+			BytesValue:  []byte("test"),
+			Uint64Value: 1,
+			Int64Value:  1,
+			Uint32Value: 1,
+			Int32Value:  1,
+		}
+		exp := `Basic:
+    map:
+        k1: v1
+        k2: v2
+    values:
+        - v1
+        - v2
+Bytes Value: dGVzdA==
+Float Value: 1.23456
+ID: test
+Int 32 Value: 1
+Int 64 Value: "1"
+Map:
+    test1: testv
+    test2: testv2
+Metadata:
+    - Key: test
+      Value: test
+Name: test
+Type: Bar
+Uint 32 Value: 1
+Uint 64 Value: "1"
 `
 		checkEqual(val, exp)
 	})
@@ -136,4 +198,158 @@ func Test_DocumentMessage(t *testing.T) {
 
 `
 	checkDoc(e2e.Basic_MessageDescription, "  ", exp1)
+
+	exp2 := `Annotation:
+  Fields:
+    - Field: ID
+      Type: keyword
+    - Field: Name
+      Type: keyword
+    - Field: Type
+      Type: integer
+      Enum values: Unknown (0), Bar (1), Foo (2)
+    - Field: Map
+      Type: flat_object
+    - Field: Metadata
+      Type: flat_object
+      Documentation: Metadata is a list of internal metadata associated with the asset
+    - Field: Basic
+      Type: flat_object
+    - Field: FloatValue
+      Type: float
+    - Field: BytesValue
+      Type: keyword
+    - Field: Uint64Value
+      Type: integer
+    - Field: Int64Value
+      Type: integer
+    - Field: Uint32Value
+      Type: integer
+    - Field: Int32Value
+      Type: integer
+
+`
+	checkDoc(e2e.Annotation_MessageDescription, "  ", exp2)
+
+	exp3 := `Annotations Response:
+  Fields:
+    - Field: Annotations
+      Type: flat_object
+    - Field: NextOffset
+      Type: integer
+
+`
+	checkDoc(e2e.AnnotationsResponse_MessageDescription, "  ", exp3)
+
+}
+
+func Test_GetTabularData(t *testing.T) {
+	t.Parallel()
+
+	a1 := &e2e.Annotation{
+		ID:   "1",
+		Name: "test1",
+		Type: e2e.AnnotationType_Bar,
+		Map: map[string]string{
+			"test1": "testv",
+			"test2": "testv2",
+		},
+		Metadata: []*e2e.KVPair{
+			{
+				Key:   "test",
+				Value: "test",
+			},
+		},
+		Basic: &e2e.Basic{
+			Values: []string{"v1", "v2"},
+			Map: map[string]string{
+				"k1": "v1",
+				"k2": "v2",
+			},
+		},
+		FloatValue:  1.23456,
+		BytesValue:  []byte("test"),
+		Uint64Value: 1,
+		Int64Value:  1,
+		Uint32Value: 1,
+		Int32Value:  1,
+	}
+	a2 := &e2e.Annotation{
+		ID:   "2",
+		Name: "test2",
+		Type: e2e.AnnotationType_Bar,
+		Map: map[string]string{
+			"test3": "testv3",
+			"test2": "testv2",
+		},
+		Metadata: []*e2e.KVPair{
+			{
+				Key:   "test5",
+				Value: "test6",
+			},
+		},
+		Basic: &e2e.Basic{
+			Values: []string{"v1", "v2"},
+			Map: map[string]string{
+				"k3": "v3",
+				"k2": "v2",
+			},
+		},
+		FloatValue:  2.23456,
+		BytesValue:  []byte("test2"),
+		Uint64Value: 2,
+		Int64Value:  3,
+		Uint32Value: 4,
+		Int32Value:  5,
+	}
+
+	ares := &e2e.AnnotationsResponse{
+		Annotations: []*e2e.Annotation{a1, a2},
+	}
+
+	td, err := api.GetTabularData(ares)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(td.Tables))
+	assert.Equal(t, "Annotations", td.Tables[0].ID)
+	assert.Equal(t, 8, len(td.Tables[0].Header))
+	assert.Equal(t, 2, len(td.Tables[0].Rows))
+
+	exp := `Annotations:
+
+┌────┬───────┬──────┬─────────────┬───────────────┬──────────────┬───────────────┬──────────────┐
+│ ID │ NAME  │ TYPE │ FLOAT VALUE │ UINT 64 VALUE │ INT 64 VALUE │ UINT 32 VALUE │ INT 32 VALUE │
+├────┼───────┼──────┼─────────────┼───────────────┼──────────────┼───────────────┼──────────────┤
+│ 1  │ test1 │ Bar  │ 1.234560    │ 1             │ 1            │ 1             │ 1            │
+│ 2  │ test2 │ Bar  │ 2.234560    │ 2             │ 3            │ 4             │ 5            │
+└────┴───────┴──────┴─────────────┴───────────────┴──────────────┴───────────────┴──────────────┘
+
+`
+	w := bytes.NewBuffer([]byte{})
+	td.Print(w)
+	assert.Equal(t, exp, w.String())
+
+	w.Reset()
+
+	td2, err := api.GetTabularData(a1)
+	require.NoError(t, err)
+	require.Equal(t, 1, len(td2.Tables))
+	assert.Equal(t, "Annotation", td2.Tables[0].ID)
+	assert.Equal(t, 8, len(td2.Tables[0].Header))
+	assert.Equal(t, 1, len(td2.Tables[0].Rows))
+
+	exp2 := `Annotation:
+
+ ID            │ 1        
+ Name          │ test1    
+ Type          │ Bar      
+ Float Value   │ 1.234560 
+ Uint 64 Value │ 1        
+ Int 64 Value  │ 1        
+ Uint 32 Value │ 1        
+ Int 32 Value  │ 1        
+
+`
+	td2.Print(w)
+	assert.Equal(t, exp2, w.String())
+
 }

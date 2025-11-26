@@ -86,12 +86,7 @@ func (e *EnumDescription) Parse(val any) int32 {
 }
 
 func (m *MessageDescription) FindField(name string) *FieldMeta {
-	for _, field := range m.Fields {
-		if field.Name == name || field.FullName == name {
-			return field
-		}
-	}
-	return nil
+	return FindFieldMeta(m.Fields, name)
 }
 
 func FindFieldMeta(fields []*FieldMeta, name string) *FieldMeta {
@@ -101,4 +96,39 @@ func FindFieldMeta(fields []*FieldMeta, name string) *FieldMeta {
 		}
 	}
 	return nil
+}
+
+var skipPrintableTypes = map[string]bool{
+	"[]struct": true,
+	"struct":   true,
+	"map":      true,
+	"[]byte":   true,
+}
+
+func (m *FieldMeta) IsPrintable() bool {
+	return !skipPrintableTypes[m.Type]
+}
+
+// FilterPrintableFields filters the fields by the names, and ListOptions
+func FilterPrintableFields(fields []*FieldMeta, include map[string]bool, exclude map[string]bool) []*FieldMeta {
+	var res []*FieldMeta
+	for _, field := range fields {
+		if field.ListOption == ListOption_Disable {
+			continue
+		}
+		if skipPrintableTypes[field.Type] {
+			continue
+		}
+		if exclude != nil && (exclude[field.Name] || exclude[field.FullName] || exclude[field.Display]) {
+			continue
+		}
+		if include != nil {
+			if include[field.Name] || include[field.FullName] || include[field.Display] {
+				res = append(res, field)
+			}
+		} else {
+			res = append(res, field)
+		}
+	}
+	return res
 }
