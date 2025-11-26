@@ -75,7 +75,7 @@ func CreateEnumDescription(en *protogen.Enum) *EnumDescription {
 }
 
 // CreateMessageDescription convert enum descriptor to EnumMeta message
-func CreateMessageDescription(msg *protogen.Message, isInput bool, args Opts, queueToDiscover map[string]*protogen.Message) *MessageDescription {
+func CreateMessageDescription(msg *protogen.Message, isInput, isOutput bool, args Opts, queueToDiscover map[string]*protogen.Message) *MessageDescription {
 	fn := string(msg.Desc.FullName())
 	if _, ok := messageDescriptions[fn]; ok {
 		return messageDescriptions[fn]
@@ -86,8 +86,7 @@ func CreateMessageDescription(msg *protogen.Message, isInput bool, args Opts, qu
 	display := opts.Get(api.E_MessageDisplay.TypeDescriptor()).String()
 	description := opts.Get(api.E_MessageDescription.TypeDescriptor()).String()
 
-	tableSource := opts.Get(api.E_TableSource.TypeDescriptor()).String()
-	tableHeader := opts.Get(api.E_TableHeader.TypeDescriptor()).String()
+	listSources := opts.Get(api.E_ListSources.TypeDescriptor()).String()
 	deprecated := false
 	ro := msg.Desc.Options()
 	if mo, ok := ro.(*descriptorpb.MethodOptions); ok {
@@ -107,10 +106,10 @@ func CreateMessageDescription(msg *protogen.Message, isInput bool, args Opts, qu
 		FullName:      fn,
 		Documentation: cleanComment(description),
 		Display:       display,
-		TableSource:   tableSource,
-		TableHeader:   nonEmptyStrings(strings.Split(tableHeader, ",")),
+		ListSources:   nonEmptyStrings(strings.Split(listSources, ",")),
 		Deprecated:    deprecated,
 		IsInput:       isInput,
+		IsOutput:      isOutput,
 
 		ProtogenMessage: msg,
 		Package:         path.Base(string(msg.GoIdent.GoImportPath)),
@@ -137,6 +136,7 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	max := opts.Get(api.E_Max.TypeDescriptor()).Int()
 	minCount := opts.Get(api.E_MinCount.TypeDescriptor()).Int()
 	maxCount := opts.Get(api.E_MaxCount.TypeDescriptor()).Int()
+	listOption := opts.Get(api.E_List.TypeDescriptor()).String()
 	deprecated := false
 	if fo, ok := field.Desc.Options().(*descriptorpb.FieldOptions); ok {
 		deprecated = fo.GetDeprecated()
@@ -188,6 +188,7 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	}
 
 	fm.SearchOptions, fm.SearchType = parseSearchOptions(search, field)
+	fm.ListOption = parseListOptions(listOption)
 
 	kind := field.Desc.Kind()
 	isList := field.Desc.IsList()
@@ -281,6 +282,19 @@ func mapScalarToTypes(kind protoreflect.Kind) (goType string, llmType string) {
 	}
 }
 
+func parseListOptions(listOpts string) api.ListOption_Enum {
+	tokens := strings.Split(listOpts, ",")
+	for _, token := range tokens {
+		switch strings.ToLower(strings.TrimSpace(token)) {
+		case "skip":
+			return api.ListOption_Skip
+		case "disable":
+			return api.ListOption_Disable
+		}
+	}
+	return api.ListOption_Default
+}
+
 func TrimLocalPackageName(name, pkg string) string {
 	if strings.HasPrefix(name, pkg+".") {
 		return name[len(pkg)+1:]
@@ -314,11 +328,12 @@ type MessageDescription struct {
 	Fields        []*FieldMeta
 	Documentation string
 	FullName      string
-	TableSource   string
-	TableHeader   []string
+	ListSources   []string
 	Deprecated    bool
 	// IsInput is true if the message is an input message
 	IsInput bool
+	// IsOutput is true if the message is an output message
+	IsOutput bool
 
 	// message is the original message descriptor
 	ProtogenMessage *protogen.Message
@@ -343,6 +358,7 @@ type FieldMeta struct {
 	MinCount        int32
 	MaxCount        int32
 	Deprecated      bool
+	ListOption      api.ListOption_Enum
 
 	// field is the original field descriptor
 	ProtogenField         *protogen.Field

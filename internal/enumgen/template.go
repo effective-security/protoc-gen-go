@@ -236,12 +236,17 @@ func GetEnumsDescriptions(gp *protogen.Plugin, opts Opts) []*EnumDescription {
 func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescription {
 	seen := make(map[string]*protogen.Message)
 	inputMap := make(map[string]bool)
+	outputMap := make(map[string]bool)
 
-	checkMessage := func(msg *protogen.Message, isInput bool) {
+	checkMessage := func(msg *protogen.Message, isInput, isOutput bool) {
 		fn := string(msg.Desc.FullName())
 		if isInput {
 			logger.Infof("! Discovered Input messages: %s", fn)
 			inputMap[fn] = true
+		}
+		if isOutput {
+			logger.Infof("! Discovered Output messages: %s", fn)
+			outputMap[fn] = true
 		}
 		if _, ok := seen[fn]; !ok {
 			seen[fn] = msg
@@ -265,9 +270,9 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 			//logger.Infof("  >> [%d] Parsing service: %s", i, svc.GoName)
 			for j, m := range svc.Methods {
 				logger.Infof("   >>> [%d] Parsing input: %s", j, m.Input.GoIdent.GoName)
-				checkMessage(m.Input, true)
+				checkMessage(m.Input, true, false)
 				//logger.Infof("   >>> [%d] Parsing output: %s", j, m.Output.GoIdent.GoName)
-				checkMessage(m.Output, false)
+				checkMessage(m.Output, false, true)
 			}
 		}
 
@@ -278,7 +283,7 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 			if !describe {
 				continue
 			}
-			checkMessage(msg, false)
+			checkMessage(msg, false, false)
 		}
 	}
 
@@ -286,7 +291,7 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 	msgsToDiscover := make(map[string]*protogen.Message)
 
 	for fn, msg := range seen {
-		desc := CreateMessageDescription(msg, inputMap[fn], opts, msgsToDiscover)
+		desc := CreateMessageDescription(msg, inputMap[fn], outputMap[fn], opts, msgsToDiscover)
 		list = append(list, desc)
 	}
 
@@ -295,7 +300,7 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 		prev := msgsToDiscover
 		msgsToDiscover = make(map[string]*protogen.Message)
 		for fn, msg := range prev {
-			desc := CreateMessageDescription(msg, inputMap[fn], opts, msgsToDiscover)
+			desc := CreateMessageDescription(msg, inputMap[fn], outputMap[fn], opts, msgsToDiscover)
 			list = append(list, desc)
 			//logger.Infof("*** Discovered nested messages: %s", fn)
 		}
@@ -353,6 +358,9 @@ func tempFuncs() template.FuncMap {
 			names = append(names, string(v.Desc.Name()))
 		}
 		return strings.Join(names, ",")
+	}
+	m["list_option"] = func(val api.ListOption_Enum) string {
+		return fmt.Sprintf("api.ListOption_%s", val.String())
 	}
 	m["search_enum"] = func(val api.SearchOption_Enum) string {
 		var names []string
@@ -682,11 +690,8 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 	{{- if .Description.Documentation }}
 	Documentation: ` + "`{{.Description.Documentation}}`" + `,
 	{{- end }}
-	{{- if .Description.TableSource }}
-	TableSource: "{{.Description.TableSource}}",
-	{{- end }}
-	{{- if .Description.TableHeader }}
-	TableHeader: {{list .Description.TableHeader}},
+	{{- if .Description.ListSources }}
+	ListSources: {{list .Description.ListSources}},
 	{{- end }}
 	{{- if .Description.Deprecated }}
 	Deprecated: true,
@@ -737,6 +742,9 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			{{- if .Documentation }}
 			Documentation: ` + "`{{.Documentation}}`" + `,
 			{{- end }}
+			{{- if .ListOption }}
+			ListOption: {{list_option .ListOption}},
+			{{- end }}
 		},
 	{{- end }}
 	},
@@ -777,6 +785,14 @@ var (
 {{- if and .IsInput (eq .Package $root.Package) }}
 func (m *{{.Name}}) Validate(ctx context.Context) error {
 	return api.ValidateRequest(ctx, m, {{.Name}}_MessageDescription)
+}
+{{- end }}
+{{- end }}
+
+{{- range .Descriptions }}
+{{- if and .IsOutput (eq .Package $root.Package) }}
+func (m *{{.Name}}) GetMessageDescription() *api.MessageDescription {
+	return {{.Name}}_MessageDescription
 }
 {{- end }}
 {{- end }}

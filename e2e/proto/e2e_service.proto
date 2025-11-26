@@ -65,14 +65,22 @@ message Annotation {
     string Name = 2 [json_name = "Name", (es.api.min) = 2, (es.api.max) = 12];
     AnnotationType.Enum Type = 3 [json_name = "Type", (es.api.required) = true];
 
-    map<string, string> Map = 4
-        [json_name = "Map", (es.api.min_count) = 1, (es.api.max_count) = 3];
+    map<string, string> Map = 4 [
+        json_name          = "Map",
+        (es.api.min_count) = 1,
+        (es.api.max_count) = 3,
+        (es.api.list)      = "skip"
+    ];
 
     // Metadata is a list of internal metadata associated with the asset
-    repeated KVPair Metadata = 5
-        [json_name = "Metadata", (es.api.required) = true];
+    repeated KVPair Metadata = 5 [
+        json_name         = "Metadata",
+        (es.api.required) = true,
+        (es.api.list)     = "skip"
+    ];
 
-    Basic Basic = 6 [json_name = "Basic", (es.api.required) = true];
+    Basic Basic = 6
+        [json_name = "Basic", (es.api.required) = true, (es.api.list) = "skip"];
 
     float FloatValue = 7 [
         json_name         = "FloatValue",
@@ -162,8 +170,7 @@ message ListAnnotationsRequest {
 }
 
 message AnnotationsResponse {
-    option (es.api.table_source) = "Annotations";
-    option (es.api.table_header) = "ID,Name,Type";
+    option (es.api.list_sources) = "Annotations";
 
     repeated Annotation Annotations = 1 [json_name = "Annotations"];
     uint32 NextOffset               = 2 [json_name = "NextOffset"];

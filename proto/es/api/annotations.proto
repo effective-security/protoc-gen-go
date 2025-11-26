@@ -31,12 +31,18 @@ extend google.protobuf.FieldOptions {
     string display = 51002;
     // description is the option for the field's description.
     string description = 51003;
-    // csv is the option for the field's Name in CSV header.
-    string csv = 51004;
+    // list is the option for the field's be a list of values: skip|disable
+    // - skip: skip the field if the list responses, if not requested
+    // explicitly.
+    // - disable: disable the field if the list responses.
+    // By default, the field is included in a list response.
+    string list = 51004;
     // required is the option for the field to be required.
     bool required = 51005;
     // required_or is the option for the field to be required, if one of the
     // other values is provided.
+    // Comma-separated list of field names that are required if this field is
+    // not provided. For example, "field1,field2" will be parsed as a list.
     string required_or = 51006;
     // min is the option for the field minimum length for strings, and minimum
     // value for numbers.
@@ -73,18 +79,15 @@ extend google.protobuf.EnumValueOptions {
 // Custom message option
 extend google.protobuf.MessageOptions {
     // generate_meta is the option for generating the message's meta
-    // information. By default, only for Request messages.
+    // information. By default, only for Request and Response messages.
     bool generate_meta = 53001;
     // message_display is the option for the message's Display Name in the UI.
     string message_display = 53002;
     // message_description is the option for the message's description.
     string message_description = 53003;
-    // table_source is the option for the message's field name to populate
-    // table.
-    string table_source = 53004;
-    // table_header is the option for the default table header,
-    // it can be a comma-separated list of field names.
-    string table_header = 53005;
+    // list_sources is the option for the message's field name to populate
+    // lists or tables.
+    string list_sources = 53004;
 }
 
 message EnumMeta {
@@ -121,6 +124,19 @@ message SearchOption {
         // WithText is the option for keyword fields that also need text
         // sub-index.
         WithText = 0x80;
+    }
+}
+
+message ListOption {
+    enum Enum {
+        // Default is the default behavior: be in a list.
+        Default = 0;
+        // Skip is the option for the field to be skipped if the list responses,
+        // if not requested explicitly.
+        Skip = 1;
+        // Disable is the option for the field to be disabled if the list
+        // responses.
+        Disable = 2;
     }
 }
 
@@ -161,6 +177,9 @@ message FieldMeta {
     int32 MaxCount = 17 [json_name = "MaxCount"];
     // Deprecated is the option for the field to be deprecated.
     bool Deprecated = 18 [json_name = "Deprecated"];
+    // ListOption is the option for the field to be a list of values:
+    // skip|disabled
+    ListOption.Enum ListOption = 19 [json_name = "ListOption"];
 }
 
 message EnumDescription {
@@ -178,10 +197,9 @@ message MessageDescription {
     repeated FieldMeta Fields = 3 [json_name = "Fields"];
     string Documentation      = 4 [json_name = "Documentation"];
     string FullName           = 5 [json_name = "FullName"];
-    // TableSource is the option for the message's table source.
-    string TableSource = 6 [json_name = "TableSource"];
-    // TableHeader is the option for the message's table header.
-    repeated string TableHeader = 7 [json_name = "TableHeader"];
+    // ListSources is the option for the message's field name to populate
+    // lists or tables.
+    repeated string ListSources = 6 [json_name = "ListSources"];
     // Deprecated is the option for the message to be deprecated.
     bool Deprecated = 8 [json_name = "Deprecated"];
 }
