@@ -534,6 +534,33 @@ func TestValidateRequest_Annotation(t *testing.T) {
 				Uint32Value: 10,
 				Int32Value:  10,
 			},
+			exp: "bad_request: Strings is required",
+		},
+		{
+			name: "good",
+			msg: &e2e.Annotation{
+				ID:   "123456789",
+				Name: "test",
+				Map:  map[string]string{"test": "test"},
+				Metadata: []*e2e.KVPair{
+					{
+						Key:   "test",
+						Value: "test",
+					},
+				},
+				Basic: &e2e.Basic{
+					Map:    map[string]string{"test": "test"},
+					Name:   "testaaaaaaaaaaaaaaa",
+					Values: []string{"test"},
+				},
+				FloatValue:  2.5,
+				BytesValue:  []byte("test"),
+				Uint64Value: 10,
+				Int64Value:  10,
+				Uint32Value: 10,
+				Int32Value:  10,
+				Strings:     []string{"test", "test2"},
+			},
 			exp: "",
 		},
 	}

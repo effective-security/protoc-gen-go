@@ -85,8 +85,6 @@ func CreateMessageDescription(msg *protogen.Message, isInput, isOutput bool, arg
 
 	display := opts.Get(api.E_MessageDisplay.TypeDescriptor()).String()
 	description := opts.Get(api.E_MessageDescription.TypeDescriptor()).String()
-
-	listSources := opts.Get(api.E_ListSources.TypeDescriptor()).String()
 	deprecated := false
 	ro := msg.Desc.Options()
 	if mo, ok := ro.(*descriptorpb.MethodOptions); ok {
@@ -106,7 +104,6 @@ func CreateMessageDescription(msg *protogen.Message, isInput, isOutput bool, arg
 		FullName:      fn,
 		Documentation: cleanComment(description),
 		Display:       display,
-		ListSources:   nonEmptyStrings(strings.Split(listSources, ",")),
 		Deprecated:    deprecated,
 		IsInput:       isInput,
 		IsOutput:      isOutput,
@@ -136,7 +133,6 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	max := opts.Get(api.E_Max.TypeDescriptor()).Int()
 	minCount := opts.Get(api.E_MinCount.TypeDescriptor()).Int()
 	maxCount := opts.Get(api.E_MaxCount.TypeDescriptor()).Int()
-	listOption := opts.Get(api.E_List.TypeDescriptor()).String()
 	deprecated := false
 	if fo, ok := field.Desc.Options().(*descriptorpb.FieldOptions); ok {
 		deprecated = fo.GetDeprecated()
@@ -188,7 +184,6 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	}
 
 	fm.SearchOptions, fm.SearchType = parseSearchOptions(search, field)
-	fm.ListOption = parseListOptions(listOption)
 
 	kind := field.Desc.Kind()
 	isList := field.Desc.IsList()
@@ -282,19 +277,6 @@ func mapScalarToTypes(kind protoreflect.Kind) (goType string, llmType string) {
 	}
 }
 
-func parseListOptions(listOpts string) api.ListOption_Enum {
-	tokens := strings.Split(listOpts, ",")
-	for _, token := range tokens {
-		switch strings.ToLower(strings.TrimSpace(token)) {
-		case "skip":
-			return api.ListOption_Skip
-		case "disable":
-			return api.ListOption_Disable
-		}
-	}
-	return api.ListOption_Default
-}
-
 func TrimLocalPackageName(name, pkg string) string {
 	if strings.HasPrefix(name, pkg+".") {
 		return name[len(pkg)+1:]
@@ -323,13 +305,13 @@ type EnumDescription struct {
 }
 
 type MessageDescription struct {
-	Name          string
-	Display       string
-	Fields        []*FieldMeta
-	Documentation string
-	FullName      string
-	ListSources   []string
-	Deprecated    bool
+	Name            string
+	Display         string
+	Fields          []*FieldMeta
+	Documentation   string
+	FullName        string
+	Deprecated      bool
+	RefreshInterval uint32
 	// IsInput is true if the message is an input message
 	IsInput bool
 	// IsOutput is true if the message is an output message
@@ -358,7 +340,6 @@ type FieldMeta struct {
 	MinCount        int32
 	MaxCount        int32
 	Deprecated      bool
-	ListOption      api.ListOption_Enum
 
 	// field is the original field descriptor
 	ProtogenField         *protogen.Field

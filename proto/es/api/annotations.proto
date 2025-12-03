@@ -6,8 +6,14 @@ option go_package = "github.com/effective-security/protoc-gen-go/api";
 import "google/protobuf/descriptor.proto";
 
 extend google.protobuf.MethodOptions {
+    // allowed_roles is the option for the method to be allowed for the given
+    // roles. It's comma-separated list of roles supported by the system.
     string allowed_roles = 1071;
-    string cli_cmd       = 1072;
+    // cli_cmd is the option for the method to be a CLI command.
+    string cli_cmd = 1072;
+    // refresh_interval is the option for the method to be refreshed, in
+    // seconds.
+    int32 refresh_interval = 1073;
 }
 
 extend google.protobuf.FieldOptions {
@@ -31,12 +37,6 @@ extend google.protobuf.FieldOptions {
     string display = 51002;
     // description is the option for the field's description.
     string description = 51003;
-    // list is the option for the field's be a list of values: skip|disable
-    // - skip: skip the field if the list responses, if not requested
-    // explicitly.
-    // - disable: disable the field if the list responses.
-    // By default, the field is included in a list response.
-    string list = 51004;
     // required is the option for the field to be required.
     bool required = 51005;
     // required_or is the option for the field to be required, if one of the
@@ -85,9 +85,6 @@ extend google.protobuf.MessageOptions {
     string message_display = 53002;
     // message_description is the option for the message's description.
     string message_description = 53003;
-    // list_sources is the option for the message's field name to populate
-    // lists or tables.
-    string list_sources = 53004;
 }
 
 message EnumMeta {
@@ -124,19 +121,6 @@ message SearchOption {
         // WithText is the option for keyword fields that also need text
         // sub-index.
         WithText = 0x80;
-    }
-}
-
-message ListOption {
-    enum Enum {
-        // Default is the default behavior: be in a list.
-        Default = 0;
-        // Skip is the option for the field to be skipped if the list responses,
-        // if not requested explicitly.
-        Skip = 1;
-        // Disable is the option for the field to be disabled if the list
-        // responses.
-        Disable = 2;
     }
 }
 
@@ -177,9 +161,6 @@ message FieldMeta {
     int32 MaxCount = 17 [json_name = "MaxCount"];
     // Deprecated is the option for the field to be deprecated.
     bool Deprecated = 18 [json_name = "Deprecated"];
-    // ListOption is the option for the field to be a list of values:
-    // skip|disabled
-    ListOption.Enum ListOption = 19 [json_name = "ListOption"];
 }
 
 message EnumDescription {
@@ -197,9 +178,6 @@ message MessageDescription {
     repeated FieldMeta Fields = 3 [json_name = "Fields"];
     string Documentation      = 4 [json_name = "Documentation"];
     string FullName           = 5 [json_name = "FullName"];
-    // ListSources is the option for the message's field name to populate
-    // lists or tables.
-    repeated string ListSources = 6 [json_name = "ListSources"];
     // Deprecated is the option for the message to be deprecated.
     bool Deprecated = 8 [json_name = "Deprecated"];
 }

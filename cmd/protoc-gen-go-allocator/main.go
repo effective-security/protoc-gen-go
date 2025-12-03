@@ -106,6 +106,10 @@ func generator(gp *protogen.Plugin) error {
 					if ext != "" {
 						o.Roles = strings.Split(ext, ",")
 					}
+					refresh := proto.GetExtension(pr.Interface(), api.E_RefreshInterval).(int32)
+					if refresh != 0 {
+						o.RefreshInterval = uint32(refresh)
+					}
 				}
 
 				if err := allocatorTemplate.Execute(buf, o); err != nil {
@@ -174,10 +178,11 @@ type tplHeader struct {
 type tplMethod struct {
 	Opts
 
-	Service *protogen.Service
-	Method  *protogen.Method
-	Roles   []string
-	CliCmd  string
+	Service         *protogen.Service
+	Method          *protogen.Method
+	Roles           []string
+	CliCmd          string
+	RefreshInterval uint32
 }
 
 var (
@@ -204,9 +209,10 @@ type CheckAccessFunc func(ctx context.Context, req any, action string) error
 
 // MethodInfo provides info about RPC method
 type MethodInfo struct {
-	Allocator    RequestAllocator
-	AllowedRoles []string
-	CliCmd       string
+	Allocator       RequestAllocator
+	AllowedRoles    []string
+	CliCmd          string
+	RefreshInterval uint32
 }
 
 // UnmarshalRequest unmarshals JSON body of HTTP request to protobuf request
@@ -264,6 +270,9 @@ var methods = map[string]*MethodInfo{
 		Allocator: func() any { return new({{type .Package .Method.Input}}) },
 		{{- if .CliCmd }}
 		CliCmd: "{{.CliCmd}}",
+		{{- end }}
+		{{- if .RefreshInterval }}
+		RefreshInterval: {{.RefreshInterval}},
 		{{- end }}
 		{{roles .Roles}}
 	},

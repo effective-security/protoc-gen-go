@@ -102,60 +102,6 @@ func (SearchOption_Enum) EnumDescriptor() ([]byte, []int) {
 	return file_annotations_proto_rawDescGZIP(), []int{1, 0}
 }
 
-type ListOption_Enum int32
-
-const (
-	// Default is the default behavior: be in a list.
-	ListOption_Default ListOption_Enum = 0
-	// Skip is the option for the field to be skipped if the list responses,
-	// if not requested explicitly.
-	ListOption_Skip ListOption_Enum = 1
-	// Disable is the option for the field to be disabled if the list
-	// responses.
-	ListOption_Disable ListOption_Enum = 2
-)
-
-// Enum value maps for ListOption_Enum.
-var (
-	ListOption_Enum_name = map[int32]string{
-		0: "Default",
-		1: "Skip",
-		2: "Disable",
-	}
-	ListOption_Enum_value = map[string]int32{
-		"Default": 0,
-		"Skip":    1,
-		"Disable": 2,
-	}
-)
-
-func (x ListOption_Enum) Enum() *ListOption_Enum {
-	p := new(ListOption_Enum)
-	*p = x
-	return p
-}
-
-func (x ListOption_Enum) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (ListOption_Enum) Descriptor() protoreflect.EnumDescriptor {
-	return file_annotations_proto_enumTypes[1].Descriptor()
-}
-
-func (ListOption_Enum) Type() protoreflect.EnumType {
-	return &file_annotations_proto_enumTypes[1]
-}
-
-func (x ListOption_Enum) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use ListOption_Enum.Descriptor instead.
-func (ListOption_Enum) EnumDescriptor() ([]byte, []int) {
-	return file_annotations_proto_rawDescGZIP(), []int{2, 0}
-}
-
 type EnumMeta struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Value         int32                  `protobuf:"varint,1,opt,name=Value,proto3" json:"Value,omitempty"`
@@ -284,42 +230,6 @@ func (*SearchOption) Descriptor() ([]byte, []int) {
 	return file_annotations_proto_rawDescGZIP(), []int{1}
 }
 
-type ListOption struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ListOption) Reset() {
-	*x = ListOption{}
-	mi := &file_annotations_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ListOption) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ListOption) ProtoMessage() {}
-
-func (x *ListOption) ProtoReflect() protoreflect.Message {
-	mi := &file_annotations_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ListOption.ProtoReflect.Descriptor instead.
-func (*ListOption) Descriptor() ([]byte, []int) {
-	return file_annotations_proto_rawDescGZIP(), []int{2}
-}
-
 type FieldMeta struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
@@ -356,17 +266,14 @@ type FieldMeta struct {
 	// MaxCount is the option for the field maximum count for lists.
 	MaxCount int32 `protobuf:"varint,17,opt,name=MaxCount,proto3" json:"MaxCount,omitempty"`
 	// Deprecated is the option for the field to be deprecated.
-	Deprecated bool `protobuf:"varint,18,opt,name=Deprecated,proto3" json:"Deprecated,omitempty"`
-	// ListOption is the option for the field to be a list of values:
-	// skip|disabled
-	ListOption    ListOption_Enum `protobuf:"varint,19,opt,name=ListOption,proto3,enum=es.api.ListOption_Enum" json:"ListOption,omitempty"`
+	Deprecated    bool `protobuf:"varint,18,opt,name=Deprecated,proto3" json:"Deprecated,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *FieldMeta) Reset() {
 	*x = FieldMeta{}
-	mi := &file_annotations_proto_msgTypes[3]
+	mi := &file_annotations_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -378,7 +285,7 @@ func (x *FieldMeta) String() string {
 func (*FieldMeta) ProtoMessage() {}
 
 func (x *FieldMeta) ProtoReflect() protoreflect.Message {
-	mi := &file_annotations_proto_msgTypes[3]
+	mi := &file_annotations_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -391,7 +298,7 @@ func (x *FieldMeta) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FieldMeta.ProtoReflect.Descriptor instead.
 func (*FieldMeta) Descriptor() ([]byte, []int) {
-	return file_annotations_proto_rawDescGZIP(), []int{3}
+	return file_annotations_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *FieldMeta) GetName() string {
@@ -513,13 +420,6 @@ func (x *FieldMeta) GetDeprecated() bool {
 	return false
 }
 
-func (x *FieldMeta) GetListOption() ListOption_Enum {
-	if x != nil {
-		return x.ListOption
-	}
-	return ListOption_Default
-}
-
 type EnumDescription struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=Name,proto3" json:"Name,omitempty"`
@@ -534,7 +434,7 @@ type EnumDescription struct {
 
 func (x *EnumDescription) Reset() {
 	*x = EnumDescription{}
-	mi := &file_annotations_proto_msgTypes[4]
+	mi := &file_annotations_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -546,7 +446,7 @@ func (x *EnumDescription) String() string {
 func (*EnumDescription) ProtoMessage() {}
 
 func (x *EnumDescription) ProtoReflect() protoreflect.Message {
-	mi := &file_annotations_proto_msgTypes[4]
+	mi := &file_annotations_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -559,7 +459,7 @@ func (x *EnumDescription) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnumDescription.ProtoReflect.Descriptor instead.
 func (*EnumDescription) Descriptor() ([]byte, []int) {
-	return file_annotations_proto_rawDescGZIP(), []int{4}
+	return file_annotations_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *EnumDescription) GetName() string {
@@ -604,9 +504,6 @@ type MessageDescription struct {
 	Fields        []*FieldMeta           `protobuf:"bytes,3,rep,name=Fields,proto3" json:"Fields,omitempty"`
 	Documentation string                 `protobuf:"bytes,4,opt,name=Documentation,proto3" json:"Documentation,omitempty"`
 	FullName      string                 `protobuf:"bytes,5,opt,name=FullName,proto3" json:"FullName,omitempty"`
-	// ListSources is the option for the message's field name to populate
-	// lists or tables.
-	ListSources []string `protobuf:"bytes,6,rep,name=ListSources,proto3" json:"ListSources,omitempty"`
 	// Deprecated is the option for the message to be deprecated.
 	Deprecated    bool `protobuf:"varint,8,opt,name=Deprecated,proto3" json:"Deprecated,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -615,7 +512,7 @@ type MessageDescription struct {
 
 func (x *MessageDescription) Reset() {
 	*x = MessageDescription{}
-	mi := &file_annotations_proto_msgTypes[5]
+	mi := &file_annotations_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -627,7 +524,7 @@ func (x *MessageDescription) String() string {
 func (*MessageDescription) ProtoMessage() {}
 
 func (x *MessageDescription) ProtoReflect() protoreflect.Message {
-	mi := &file_annotations_proto_msgTypes[5]
+	mi := &file_annotations_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -640,7 +537,7 @@ func (x *MessageDescription) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use MessageDescription.ProtoReflect.Descriptor instead.
 func (*MessageDescription) Descriptor() ([]byte, []int) {
-	return file_annotations_proto_rawDescGZIP(), []int{5}
+	return file_annotations_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *MessageDescription) GetName() string {
@@ -678,13 +575,6 @@ func (x *MessageDescription) GetFullName() string {
 	return ""
 }
 
-func (x *MessageDescription) GetListSources() []string {
-	if x != nil {
-		return x.ListSources
-	}
-	return nil
-}
-
 func (x *MessageDescription) GetDeprecated() bool {
 	if x != nil {
 		return x.Deprecated
@@ -710,6 +600,14 @@ var file_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "annotations.proto",
 	},
 	{
+		ExtendedType:  (*descriptorpb.MethodOptions)(nil),
+		ExtensionType: (*int32)(nil),
+		Field:         1073,
+		Name:          "es.api.refresh_interval",
+		Tag:           "varint,1073,opt,name=refresh_interval",
+		Filename:      "annotations.proto",
+	},
+	{
 		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
 		ExtensionType: (*string)(nil),
 		Field:         51001,
@@ -731,14 +629,6 @@ var file_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 		Field:         51003,
 		Name:          "es.api.description",
 		Tag:           "bytes,51003,opt,name=description",
-		Filename:      "annotations.proto",
-	},
-	{
-		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
-		ExtensionType: (*string)(nil),
-		Field:         51004,
-		Name:          "es.api.list",
-		Tag:           "bytes,51004,opt,name=list",
 		Filename:      "annotations.proto",
 	},
 	{
@@ -853,22 +743,24 @@ var file_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 		Tag:           "bytes,53003,opt,name=message_description",
 		Filename:      "annotations.proto",
 	},
-	{
-		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
-		ExtensionType: (*string)(nil),
-		Field:         53004,
-		Name:          "es.api.list_sources",
-		Tag:           "bytes,53004,opt,name=list_sources",
-		Filename:      "annotations.proto",
-	},
 }
 
 // Extension fields to descriptorpb.MethodOptions.
 var (
+	// allowed_roles is the option for the method to be allowed for the given
+	// roles. It's comma-separated list of roles supported by the system.
+	//
 	// optional string allowed_roles = 1071;
 	E_AllowedRoles = &file_annotations_proto_extTypes[0]
+	// cli_cmd is the option for the method to be a CLI command.
+	//
 	// optional string cli_cmd = 1072;
 	E_CliCmd = &file_annotations_proto_extTypes[1]
+	// refresh_interval is the option for the method to be refreshed, in
+	// seconds.
+	//
+	// optional int32 refresh_interval = 1073;
+	E_RefreshInterval = &file_annotations_proto_extTypes[2]
 )
 
 // Extension fields to descriptorpb.FieldOptions.
@@ -890,23 +782,15 @@ var (
 	// keyword|text|integer|float|double|boolean|date|geo_point|ip.
 	//
 	// optional string search = 51001;
-	E_Search = &file_annotations_proto_extTypes[2]
+	E_Search = &file_annotations_proto_extTypes[3]
 	// display is the option for the field's Display Name in the UI.
 	//
 	// optional string display = 51002;
-	E_Display = &file_annotations_proto_extTypes[3]
+	E_Display = &file_annotations_proto_extTypes[4]
 	// description is the option for the field's description.
 	//
 	// optional string description = 51003;
-	E_Description = &file_annotations_proto_extTypes[4]
-	// list is the option for the field's be a list of values: skip|disable
-	// - skip: skip the field if the list responses, if not requested
-	// explicitly.
-	// - disable: disable the field if the list responses.
-	// By default, the field is included in a list response.
-	//
-	// optional string list = 51004;
-	E_List = &file_annotations_proto_extTypes[5]
+	E_Description = &file_annotations_proto_extTypes[5]
 	// required is the option for the field to be required.
 	//
 	// optional bool required = 51005;
@@ -984,11 +868,6 @@ var (
 	//
 	// optional string message_description = 53003;
 	E_MessageDescription = &file_annotations_proto_extTypes[19]
-	// list_sources is the option for the message's field name to populate
-	// lists or tables.
-	//
-	// optional string list_sources = 53004;
-	E_ListSources = &file_annotations_proto_extTypes[20]
 )
 
 var File_annotations_proto protoreflect.FileDescriptor
@@ -1015,13 +894,7 @@ const file_annotations_proto_rawDesc = "" +
 	"\n" +
 	"\x06Hidden\x10 \x12\x0f\n" +
 	"\vWithKeyword\x10@\x12\r\n" +
-	"\bWithText\x10\x80\x01\"8\n" +
-	"\n" +
-	"ListOption\"*\n" +
-	"\x04Enum\x12\v\n" +
-	"\aDefault\x10\x00\x12\b\n" +
-	"\x04Skip\x10\x01\x12\v\n" +
-	"\aDisable\x10\x02\"\xef\x04\n" +
+	"\bWithText\x10\x80\x01\"\xb6\x04\n" +
 	"\tFieldMeta\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x1a\n" +
 	"\bFullName\x18\x02 \x01(\tR\bFullName\x12\x18\n" +
@@ -1048,32 +921,28 @@ const file_annotations_proto_rawDesc = "" +
 	"\bMaxCount\x18\x11 \x01(\x05R\bMaxCount\x12\x1e\n" +
 	"\n" +
 	"Deprecated\x18\x12 \x01(\bR\n" +
-	"Deprecated\x127\n" +
-	"\n" +
-	"ListOption\x18\x13 \x01(\x0e2\x17.es.api.ListOption.EnumR\n" +
-	"ListOption\"\xad\x01\n" +
+	"Deprecated\"\xad\x01\n" +
 	"\x0fEnumDescription\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12&\n" +
 	"\x05Enums\x18\x02 \x03(\v2\x10.es.api.EnumMetaR\x05Enums\x12$\n" +
 	"\rDocumentation\x18\x03 \x01(\tR\rDocumentation\x12\x1c\n" +
 	"\tIsBitmask\x18\x04 \x01(\bR\tIsBitmask\x12\x1a\n" +
-	"\bFullName\x18\x05 \x01(\tR\bFullName\"\xf1\x01\n" +
+	"\bFullName\x18\x05 \x01(\tR\bFullName\"\xcf\x01\n" +
 	"\x12MessageDescription\x12\x12\n" +
 	"\x04Name\x18\x01 \x01(\tR\x04Name\x12\x18\n" +
 	"\aDisplay\x18\x02 \x01(\tR\aDisplay\x12)\n" +
 	"\x06Fields\x18\x03 \x03(\v2\x11.es.api.FieldMetaR\x06Fields\x12$\n" +
 	"\rDocumentation\x18\x04 \x01(\tR\rDocumentation\x12\x1a\n" +
-	"\bFullName\x18\x05 \x01(\tR\bFullName\x12 \n" +
-	"\vListSources\x18\x06 \x03(\tR\vListSources\x12\x1e\n" +
+	"\bFullName\x18\x05 \x01(\tR\bFullName\x12\x1e\n" +
 	"\n" +
 	"Deprecated\x18\b \x01(\bR\n" +
 	"Deprecated:D\n" +
 	"\rallowed_roles\x12\x1e.google.protobuf.MethodOptions\x18\xaf\b \x01(\tR\fallowedRoles:8\n" +
-	"\acli_cmd\x12\x1e.google.protobuf.MethodOptions\x18\xb0\b \x01(\tR\x06cliCmd:7\n" +
+	"\acli_cmd\x12\x1e.google.protobuf.MethodOptions\x18\xb0\b \x01(\tR\x06cliCmd:J\n" +
+	"\x10refresh_interval\x12\x1e.google.protobuf.MethodOptions\x18\xb1\b \x01(\x05R\x0frefreshInterval:7\n" +
 	"\x06search\x12\x1d.google.protobuf.FieldOptions\x18\xb9\x8e\x03 \x01(\tR\x06search:9\n" +
 	"\adisplay\x12\x1d.google.protobuf.FieldOptions\x18\xba\x8e\x03 \x01(\tR\adisplay:A\n" +
-	"\vdescription\x12\x1d.google.protobuf.FieldOptions\x18\xbb\x8e\x03 \x01(\tR\vdescription:3\n" +
-	"\x04list\x12\x1d.google.protobuf.FieldOptions\x18\xbc\x8e\x03 \x01(\tR\x04list:;\n" +
+	"\vdescription\x12\x1d.google.protobuf.FieldOptions\x18\xbb\x8e\x03 \x01(\tR\vdescription:;\n" +
 	"\brequired\x12\x1d.google.protobuf.FieldOptions\x18\xbd\x8e\x03 \x01(\bR\brequired:@\n" +
 	"\vrequired_or\x12\x1d.google.protobuf.FieldOptions\x18\xbe\x8e\x03 \x01(\tR\n" +
 	"requiredOr:1\n" +
@@ -1090,8 +959,7 @@ const file_annotations_proto_rawDesc = "" +
 	"enum_group\x12!.google.protobuf.EnumValueOptions\x18\xa4\x96\x03 \x01(\tR\tenumGroup:F\n" +
 	"\rgenerate_meta\x12\x1f.google.protobuf.MessageOptions\x18\x89\x9e\x03 \x01(\bR\fgenerateMeta:J\n" +
 	"\x0fmessage_display\x12\x1f.google.protobuf.MessageOptions\x18\x8a\x9e\x03 \x01(\tR\x0emessageDisplay:R\n" +
-	"\x13message_description\x12\x1f.google.protobuf.MessageOptions\x18\x8b\x9e\x03 \x01(\tR\x12messageDescription:D\n" +
-	"\flist_sources\x12\x1f.google.protobuf.MessageOptions\x18\x8c\x9e\x03 \x01(\tR\vlistSourcesB1Z/github.com/effective-security/protoc-gen-go/apib\x06proto3"
+	"\x13message_description\x12\x1f.google.protobuf.MessageOptions\x18\x8b\x9e\x03 \x01(\tR\x12messageDescriptionB1Z/github.com/effective-security/protoc-gen-go/apib\x06proto3"
 
 var (
 	file_annotations_proto_rawDescOnce sync.Once
@@ -1105,56 +973,52 @@ func file_annotations_proto_rawDescGZIP() []byte {
 	return file_annotations_proto_rawDescData
 }
 
-var file_annotations_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_annotations_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_annotations_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_annotations_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_annotations_proto_goTypes = []any{
 	(SearchOption_Enum)(0),                // 0: es.api.SearchOption.Enum
-	(ListOption_Enum)(0),                  // 1: es.api.ListOption.Enum
-	(*EnumMeta)(nil),                      // 2: es.api.EnumMeta
-	(*SearchOption)(nil),                  // 3: es.api.SearchOption
-	(*ListOption)(nil),                    // 4: es.api.ListOption
-	(*FieldMeta)(nil),                     // 5: es.api.FieldMeta
-	(*EnumDescription)(nil),               // 6: es.api.EnumDescription
-	(*MessageDescription)(nil),            // 7: es.api.MessageDescription
-	(*descriptorpb.MethodOptions)(nil),    // 8: google.protobuf.MethodOptions
-	(*descriptorpb.FieldOptions)(nil),     // 9: google.protobuf.FieldOptions
-	(*descriptorpb.EnumOptions)(nil),      // 10: google.protobuf.EnumOptions
-	(*descriptorpb.EnumValueOptions)(nil), // 11: google.protobuf.EnumValueOptions
-	(*descriptorpb.MessageOptions)(nil),   // 12: google.protobuf.MessageOptions
+	(*EnumMeta)(nil),                      // 1: es.api.EnumMeta
+	(*SearchOption)(nil),                  // 2: es.api.SearchOption
+	(*FieldMeta)(nil),                     // 3: es.api.FieldMeta
+	(*EnumDescription)(nil),               // 4: es.api.EnumDescription
+	(*MessageDescription)(nil),            // 5: es.api.MessageDescription
+	(*descriptorpb.MethodOptions)(nil),    // 6: google.protobuf.MethodOptions
+	(*descriptorpb.FieldOptions)(nil),     // 7: google.protobuf.FieldOptions
+	(*descriptorpb.EnumOptions)(nil),      // 8: google.protobuf.EnumOptions
+	(*descriptorpb.EnumValueOptions)(nil), // 9: google.protobuf.EnumValueOptions
+	(*descriptorpb.MessageOptions)(nil),   // 10: google.protobuf.MessageOptions
 }
 var file_annotations_proto_depIdxs = []int32{
 	0,  // 0: es.api.FieldMeta.SearchOptions:type_name -> es.api.SearchOption.Enum
-	5,  // 1: es.api.FieldMeta.Fields:type_name -> es.api.FieldMeta
-	6,  // 2: es.api.FieldMeta.EnumDescription:type_name -> es.api.EnumDescription
-	1,  // 3: es.api.FieldMeta.ListOption:type_name -> es.api.ListOption.Enum
-	2,  // 4: es.api.EnumDescription.Enums:type_name -> es.api.EnumMeta
-	5,  // 5: es.api.MessageDescription.Fields:type_name -> es.api.FieldMeta
-	8,  // 6: es.api.allowed_roles:extendee -> google.protobuf.MethodOptions
-	8,  // 7: es.api.cli_cmd:extendee -> google.protobuf.MethodOptions
-	9,  // 8: es.api.search:extendee -> google.protobuf.FieldOptions
-	9,  // 9: es.api.display:extendee -> google.protobuf.FieldOptions
-	9,  // 10: es.api.description:extendee -> google.protobuf.FieldOptions
-	9,  // 11: es.api.list:extendee -> google.protobuf.FieldOptions
-	9,  // 12: es.api.required:extendee -> google.protobuf.FieldOptions
-	9,  // 13: es.api.required_or:extendee -> google.protobuf.FieldOptions
-	9,  // 14: es.api.min:extendee -> google.protobuf.FieldOptions
-	9,  // 15: es.api.max:extendee -> google.protobuf.FieldOptions
-	9,  // 16: es.api.min_count:extendee -> google.protobuf.FieldOptions
-	9,  // 17: es.api.max_count:extendee -> google.protobuf.FieldOptions
-	10, // 18: es.api.is_bitmask:extendee -> google.protobuf.EnumOptions
-	11, // 19: es.api.enum_args:extendee -> google.protobuf.EnumValueOptions
-	11, // 20: es.api.enum_display:extendee -> google.protobuf.EnumValueOptions
-	11, // 21: es.api.enum_description:extendee -> google.protobuf.EnumValueOptions
-	11, // 22: es.api.enum_group:extendee -> google.protobuf.EnumValueOptions
-	12, // 23: es.api.generate_meta:extendee -> google.protobuf.MessageOptions
-	12, // 24: es.api.message_display:extendee -> google.protobuf.MessageOptions
-	12, // 25: es.api.message_description:extendee -> google.protobuf.MessageOptions
-	12, // 26: es.api.list_sources:extendee -> google.protobuf.MessageOptions
-	27, // [27:27] is the sub-list for method output_type
-	27, // [27:27] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	6,  // [6:27] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	3,  // 1: es.api.FieldMeta.Fields:type_name -> es.api.FieldMeta
+	4,  // 2: es.api.FieldMeta.EnumDescription:type_name -> es.api.EnumDescription
+	1,  // 3: es.api.EnumDescription.Enums:type_name -> es.api.EnumMeta
+	3,  // 4: es.api.MessageDescription.Fields:type_name -> es.api.FieldMeta
+	6,  // 5: es.api.allowed_roles:extendee -> google.protobuf.MethodOptions
+	6,  // 6: es.api.cli_cmd:extendee -> google.protobuf.MethodOptions
+	6,  // 7: es.api.refresh_interval:extendee -> google.protobuf.MethodOptions
+	7,  // 8: es.api.search:extendee -> google.protobuf.FieldOptions
+	7,  // 9: es.api.display:extendee -> google.protobuf.FieldOptions
+	7,  // 10: es.api.description:extendee -> google.protobuf.FieldOptions
+	7,  // 11: es.api.required:extendee -> google.protobuf.FieldOptions
+	7,  // 12: es.api.required_or:extendee -> google.protobuf.FieldOptions
+	7,  // 13: es.api.min:extendee -> google.protobuf.FieldOptions
+	7,  // 14: es.api.max:extendee -> google.protobuf.FieldOptions
+	7,  // 15: es.api.min_count:extendee -> google.protobuf.FieldOptions
+	7,  // 16: es.api.max_count:extendee -> google.protobuf.FieldOptions
+	8,  // 17: es.api.is_bitmask:extendee -> google.protobuf.EnumOptions
+	9,  // 18: es.api.enum_args:extendee -> google.protobuf.EnumValueOptions
+	9,  // 19: es.api.enum_display:extendee -> google.protobuf.EnumValueOptions
+	9,  // 20: es.api.enum_description:extendee -> google.protobuf.EnumValueOptions
+	9,  // 21: es.api.enum_group:extendee -> google.protobuf.EnumValueOptions
+	10, // 22: es.api.generate_meta:extendee -> google.protobuf.MessageOptions
+	10, // 23: es.api.message_display:extendee -> google.protobuf.MessageOptions
+	10, // 24: es.api.message_description:extendee -> google.protobuf.MessageOptions
+	25, // [25:25] is the sub-list for method output_type
+	25, // [25:25] is the sub-list for method input_type
+	25, // [25:25] is the sub-list for extension type_name
+	5,  // [5:25] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_annotations_proto_init() }
@@ -1167,9 +1031,9 @@ func file_annotations_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_annotations_proto_rawDesc), len(file_annotations_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   6,
-			NumExtensions: 21,
+			NumEnums:      1,
+			NumMessages:   5,
+			NumExtensions: 20,
 			NumServices:   0,
 		},
 		GoTypes:           file_annotations_proto_goTypes,
