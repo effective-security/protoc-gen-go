@@ -23,7 +23,8 @@ service Status {
         option (google.api.http) = {
             get: "/v1/status/server"
         };
-        option (es.api.allowed_roles) = "user";
+        option (es.api.allowed_roles)    = "user";
+        option (es.api.refresh_interval) = 10;
     }
 
     // Caller returns the caller status.

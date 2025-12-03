@@ -4,6 +4,7 @@ package e2e;
 option go_package = "github.com/effective-security/protoc-gen-go/e2e";
 
 import "e2e.proto";
+import "status.proto";
 import "google/protobuf/empty.proto";
 import "es/api/annotations.proto";
 
@@ -33,6 +34,12 @@ service E2E {
     rpc UpdateAnnotation(Annotation) returns (Annotation) {
         option (es.api.allowed_roles) = "User";
         option (es.api.cli_cmd)       = "e2e annotation update";
+    }
+
+    // Search is for testing nested and recursive types.
+    rpc Search(google.protobuf.Empty) returns (AnnotationSearchResponse) {
+        option (es.api.allowed_roles) = "User";
+        option (es.api.cli_cmd)       = "e2e annotation search";
     }
 }
 
@@ -65,22 +72,14 @@ message Annotation {
     string Name = 2 [json_name = "Name", (es.api.min) = 2, (es.api.max) = 12];
     AnnotationType.Enum Type = 3 [json_name = "Type", (es.api.required) = true];
 
-    map<string, string> Map = 4 [
-        json_name          = "Map",
-        (es.api.min_count) = 1,
-        (es.api.max_count) = 3,
-        (es.api.list)      = "skip"
-    ];
+    map<string, string> Map = 4
+        [json_name = "Map", (es.api.min_count) = 1, (es.api.max_count) = 3];
 
     // Metadata is a list of internal metadata associated with the asset
-    repeated KVPair Metadata = 5 [
-        json_name         = "Metadata",
-        (es.api.required) = true,
-        (es.api.list)     = "skip"
-    ];
+    repeated KVPair Metadata = 5
+        [json_name = "Metadata", (es.api.required) = true];
 
-    Basic Basic = 6
-        [json_name = "Basic", (es.api.required) = true, (es.api.list) = "skip"];
+    Basic Basic = 6 [json_name = "Basic", (es.api.required) = true];
 
     float FloatValue = 7 [
         json_name         = "FloatValue",
@@ -123,6 +122,18 @@ message Annotation {
         (es.api.min)      = 2,
         (es.api.max)      = 10
     ];
+
+    repeated string Strings = 13 [
+        json_name          = "Strings",
+        (es.api.required)  = true,
+        (es.api.max_count) = 3
+    ];
+
+    repeated AnnotationType.Enum Types = 14 [json_name = "Types"];
+    repeated uint64 RefIDs             = 15 [json_name = "RefIDs"];
+    repeated int64 Hashes              = 16 [json_name = "Hashes"];
+    repeated uint32 Limits             = 17 [json_name = "Limits"];
+    repeated int32 Counts              = 18 [json_name = "Counts"];
 }
 
 message AnnotationRequest {
@@ -160,29 +171,49 @@ message ListAnnotationsRequest {
         (es.api.max_count) = 3
     ];
 
-    AnnotationType.Enum Type = 5 [json_name = "Type"];
-
     uint32 Offset = 6 [json_name = "Offset", (es.api.max) = 1000];
     uint32 Limit  = 7 [json_name = "Limit", (es.api.max) = 1000];
 
     string Display = 8
         [json_name = "Display", (es.api.min) = 9, (es.api.max) = 19];
+
+    // Filter specifies the filter to use (Type or Category, mutually exclusive)
+    oneof Filter {
+        AnnotationCategory.Enum Category = 9 [json_name = "Category"];
+        AnnotationType.Enum Type         = 10 [json_name = "Type"];
+    }
 }
 
 message AnnotationsResponse {
-    option (es.api.list_sources) = "Annotations";
-
     repeated Annotation Annotations = 1 [json_name = "Annotations"];
     uint32 NextOffset               = 2 [json_name = "NextOffset"];
 }
 
 message AnnotationType {
-    // JobType define Job type constants
+    // AnnotationType define Annotation type constants
     enum Enum {
-        option (es.api.is_bitmask) = true;
-
         Unknown = 0;
         Bar     = 1;
         Foo     = 2;
     }
+}
+
+message AnnotationCategory {
+    // AnnotationCategory define Annotation category constants
+    enum Enum {
+        option (es.api.is_bitmask) = true;
+
+        Unknown    = 0;
+        Internal   = 1;
+        Security   = 2;
+        Compliance = 4;
+        All        = 0x7fffffff;
+    }
+}
+
+message AnnotationSearchResponse {
+    uint32 Found            = 1 [json_name = "Found"];
+    repeated Facet Facets   = 2 [json_name = "Facets"];
+    repeated Annotation Foo = 3 [json_name = "Foo"];
+    repeated Annotation Bar = 4 [json_name = "Bar"];
 }

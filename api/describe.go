@@ -21,6 +21,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	maxListItems  = 3
+	maxCellLength = 64
+)
+
 // DefaultDescriber is not thread safe.
 // It's assumed the registration will be done once at startup
 var DefaultDescriber = NewDescriber()
@@ -80,8 +85,8 @@ func (d *describer) protoDisplayValue(fd protoreflect.FieldDescriptor, v protore
 			if dv != "" {
 				values = append(values, dv)
 			}
-			if i >= 8 {
-				// Limit the number of displayed items to 8
+			if i >= maxListItems {
+				// Limit the number of displayed items
 				break
 			}
 		}
@@ -374,6 +379,9 @@ func GetTabularData(msg proto.Message) (*TabularData, error) {
 	return DefaultDescriber.GetTabularData(msg)
 }
 
+// GetTabularData returns the tabular data for the message
+// The first table describes the message itself, with printable fields only.
+// The other tables describe the fields of the message that are lists or maps.
 func (d *describer) GetTabularData(msg proto.Message) (*TabularData, error) {
 	if msg == nil {
 		return nil, errors.New("message is nil")
@@ -387,51 +395,63 @@ func (d *describer) GetTabularData(msg proto.Message) (*TabularData, error) {
 		return nil, errors.New("message description not found")
 	}
 
+	mpval := reflect.ValueOf(msg)
+	if !mpval.IsValid() {
+		return nil, errors.New("message is not a valid value")
+	}
+
 	// Get the message reflection
 	msgReflect := msg.ProtoReflect()
 
 	tabularData := &TabularData{}
+	if len(md.Fields) == 0 {
+		return tabularData, nil
+	}
 
-	if len(md.ListSources) == 0 {
-		t := &Table{
-			ID:     md.Display,
-			Header: FilterPrintableFields(md.Fields, nil, nil),
+	// first top level fields
+	t := &Table{
+		ID:       md.Display,
+		Header:   md.Fields,
+		RawValue: mpval.Interface(),
+	}
+	rows := d.createRow(msgReflect, t.Header)
+	t.Rows = []*TableRow{rows}
+	tabularData.Tables = append(tabularData.Tables, t)
+
+	// after getting the raw value, we need to get the element value to access the fields
+	if mpval.Kind() == reflect.Ptr {
+		mpval = mpval.Elem()
+	}
+
+	for _, field := range md.Fields {
+		// TODO: maps?
+		if field.Type != "[]struct" {
+			continue
 		}
-		rows := d.createRow(msgReflect, t.Header)
-		t.Rows = []*TableRow{rows}
-
-		tabularData.Tables = append(tabularData.Tables, t)
-	} else {
-
-		for _, source := range md.ListSources {
-			field := md.FindField(source)
-			if field == nil {
-				return nil, errors.New("field not found")
-			}
-			if field.ListOption == ListOption_Disable {
-				return nil, errors.New("invalid source for disabled field")
-			}
-			if field.Type != "[]struct" {
-				return nil, errors.New("invalid source for non-struct field")
-			}
-			t := &Table{
-				ID:     field.Display,
-				Header: FilterPrintableFields(field.Fields, nil, nil),
-			}
-			mfd := msgReflect.Descriptor().Fields().ByName(protoreflect.Name(field.Name))
-			if mfd == nil {
-				return nil, errors.Errorf("field not found in message: %s", field.Name)
-			}
-			fdv := msgReflect.Get(mfd)
-			rows, err := d.createRowsFromList(fdv, t.Header)
-			if err != nil {
-				return nil, err
-			}
-			t.Rows = rows
-
+		t := &Table{
+			ID:     field.Display,
+			Header: FilterPrintableFields(field.Fields),
+		}
+		if len(t.Header) == 0 {
+			continue
+		}
+		mfd := msgReflect.Descriptor().Fields().ByName(protoreflect.Name(field.Name))
+		if mfd == nil {
+			return nil, errors.Errorf("field not found in message: %s", field.Name)
+		}
+		fdv := msgReflect.Get(mfd)
+		rows, err := d.createRowsFromList(fdv, t.Header)
+		if err != nil {
+			return nil, err
+		}
+		t.Rows = rows
+		if len(t.Rows) > 0 {
+			rv := mpval.FieldByName(field.Name)
+			t.RawValue = rv.Interface()
 			tabularData.Tables = append(tabularData.Tables, t)
 		}
 	}
+
 	return tabularData, nil
 }
 
@@ -464,18 +484,57 @@ func (d *describer) createRow(rmsg protoreflect.Message, fields []*FieldMeta) *T
 		fd := mfields.ByName(protoreflect.Name(field.Name))
 		if fd == nil {
 			row.Cells = append(row.Cells, "")
+			row.Values = append(row.Values, nil)
+			continue
 		}
+
 		fdv := rmsg.Get(fd)
-		val := d.rowValue(fd, fdv)
-		row.Cells = append(row.Cells, val)
+		pv := d.colValue(fd, fdv)
+		row.Cells = append(row.Cells, pv)
+		row.Values = append(row.Values, fdv.Interface())
 	}
 	return row
 }
 
-func (d *describer) rowValue(fd protoreflect.FieldDescriptor, v protoreflect.Value) string {
-	var displayValue string
+func (d *describer) colValue(fd protoreflect.FieldDescriptor, v protoreflect.Value) string {
+	if !v.IsValid() {
+		return ""
+	}
 
-	value := v.Interface()
+	if fd.IsList() {
+		list := v.List()
+		count := list.Len()
+		if count == 0 {
+			return ""
+		}
+		return fmt.Sprintf("%d items", count)
+		/*
+			if fd.Kind() == protoreflect.MessageKind {
+				return fmt.Sprintf("%d items", count)
+			}
+
+			item := list.Get(0)
+			s := d.colDisplayValue(fd, item.Interface())
+			if count > 1 {
+				s += fmt.Sprintf(", and %d more", count-1)
+			}
+			return s
+		*/
+	}
+	if fd.IsMap() {
+		m := v.Map()
+		count := m.Len()
+		if count == 0 {
+			return ""
+		}
+		return fmt.Sprintf("%d items", count)
+	}
+
+	return d.colDisplayValue(fd, v.Interface())
+}
+
+func (d *describer) colDisplayValue(fd protoreflect.FieldDescriptor, value any) string {
+	var displayValue string
 	switch fd.Kind() {
 	case protoreflect.StringKind:
 		displayValue = value.(string)
@@ -504,24 +563,24 @@ func (d *describer) rowValue(fd protoreflect.FieldDescriptor, v protoreflect.Val
 		enumVal := value.(protoreflect.EnumNumber)
 		displayValue = d.GetEnumDisplayValue(enumDesc, int32(enumVal))
 	case protoreflect.MessageKind:
-		displayValue = "..."
+		displayValue = "<object>"
 	default:
 		displayValue = fmt.Sprintf("%v", value)
 	}
-	return displayValue
+	return format.StringMax(maxCellLength, displayValue)
 }
 
 // TableRow is an individual row in a table.
 type TableRow struct {
 	// Cells will be as wide as the column definitions array and contain string
 	// representation of basic types as:
-	// strings, numbers (float64 or int64), booleans, simple maps, lists, or
-	// null.
-	// See the type field of the column definition for a more detailed
-	// description.
+	// strings, numbers (float64 or int64), booleans.
 	Cells []string
-
-	Fields   []*FieldMeta
+	// Values is the values corresponding to the Cells.
+	Values []any
+	// Fields is the fields corresponding to the Cells.
+	Fields []*FieldMeta
+	// RawValue is the raw value of the row.
 	RawValue any
 }
 
@@ -532,6 +591,9 @@ type Table struct {
 	Header []*FieldMeta
 	// Rows is an array of rows.
 	Rows []*TableRow
+
+	// RawValue is the raw value of the table.
+	RawValue any
 }
 
 type TabularData struct {
@@ -550,6 +612,15 @@ func (r *TabularData) Print(w io.Writer) {
 
 func (r *Table) Print(w io.Writer) {
 	rc := len(r.Rows)
+
+	if r.RawValue != nil {
+		custom, ok := print.FindRegisteredType(reflect.TypeOf(r.RawValue))
+		if ok {
+			custom(w, r.RawValue)
+			return
+		}
+	}
+
 	if rc > 1 {
 		table := createTable(w)
 		var header []string
@@ -564,7 +635,11 @@ func (r *Table) Print(w io.Writer) {
 	} else if rc == 1 {
 		table := createTableSimple(w)
 		for i, field := range r.Header {
-			_ = table.Append([]string{field.Display, r.Rows[0].Cells[i]})
+			val := r.Rows[0].Cells[i]
+			// skip empty values
+			if val != "" {
+				_ = table.Append([]string{field.Display, r.Rows[0].Cells[i]})
+			}
 		}
 		_ = table.Render()
 	}

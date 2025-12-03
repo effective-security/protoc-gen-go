@@ -359,9 +359,6 @@ func tempFuncs() template.FuncMap {
 		}
 		return strings.Join(names, ",")
 	}
-	m["list_option"] = func(val api.ListOption_Enum) string {
-		return fmt.Sprintf("api.ListOption_%s", val.String())
-	}
 	m["search_enum"] = func(val api.SearchOption_Enum) string {
 		var names []string
 		exclude := false
@@ -690,9 +687,6 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 	{{- if .Description.Documentation }}
 	Documentation: ` + "`{{.Description.Documentation}}`" + `,
 	{{- end }}
-	{{- if .Description.ListSources }}
-	ListSources: {{list .Description.ListSources}},
-	{{- end }}
 	{{- if .Description.Deprecated }}
 	Deprecated: true,
 	{{- end }}
@@ -741,9 +735,6 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 			{{- end }}
 			{{- if .Documentation }}
 			Documentation: ` + "`{{.Documentation}}`" + `,
-			{{- end }}
-			{{- if .ListOption }}
-			ListOption: {{list_option .ListOption}},
 			{{- end }}
 		},
 	{{- end }}
