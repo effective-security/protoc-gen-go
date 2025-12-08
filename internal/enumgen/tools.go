@@ -7,6 +7,7 @@ import (
 
 	"github.com/effective-security/protoc-gen-go/api"
 	"github.com/effective-security/x/format"
+	"github.com/effective-security/x/slices"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
@@ -60,7 +61,7 @@ func CreateEnumDescription(en *protogen.Enum) *EnumDescription {
 			FullName:      string(value.Desc.FullName()),
 			Display:       display,
 			Documentation: cleanComment(description),
-			Args:          nonEmptyStrings(strings.Split(args, ",")),
+			Args:          slices.StringsSafeSplit(args, ","),
 			Group:         group,
 		}
 
@@ -172,7 +173,7 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 		Documentation: cleanComment(description),
 		Display:       display,
 		Required:      required,
-		RequiredOr:    nonEmptyStrings(strings.Split(requiredOr, ",")),
+		RequiredOr:    slices.StringsSafeSplit(requiredOr, ","),
 		Min:           int32(min),
 		Max:           int32(max),
 		MinCount:      int32(minCount),
@@ -236,16 +237,6 @@ func cleanComment(comment string) string {
 	}
 
 	return strings.Join(lines[:i], "\n")
-}
-
-func nonEmptyStrings(items []string) []string {
-	var res []string
-	for _, item := range items {
-		if s := strings.TrimSpace(item); s != "" {
-			res = append(res, s)
-		}
-	}
-	return res
 }
 
 func mapScalarToTypes(kind protoreflect.Kind) (goType string, llmType string) {

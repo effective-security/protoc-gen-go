@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/effective-security/protoc-gen-go/api"
+	"github.com/effective-security/x/slices"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
 )
@@ -45,7 +46,7 @@ func parseSearchOptions(searchOpts string, field *protogen.Field) (opts api.Sear
 	kind := field.Desc.Kind()
 	typ = protoTypeToOpenSearchType[kind]
 
-	tokens := strings.Split(searchOpts, ",")
+	tokens := slices.StringsSafeSplit(searchOpts, ",")
 	for _, token := range tokens {
 		switch strings.ToLower(strings.TrimSpace(token)) {
 		case "no_index":

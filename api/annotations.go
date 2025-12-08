@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/effective-security/x/slices"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 )
 
@@ -35,9 +36,9 @@ func (e *EnumDescription) Parse(val any) int32 {
 	case string:
 		var tokens []string
 		if strings.Contains(v, ",") {
-			tokens = strings.Split(v, ",")
+			tokens = slices.StringsSafeSplit(v, ",")
 		} else if strings.Contains(v, "|") {
-			tokens = strings.Split(v, "|")
+			tokens = slices.StringsSafeSplit(v, "|")
 		} else {
 			tokens = []string{v}
 		}

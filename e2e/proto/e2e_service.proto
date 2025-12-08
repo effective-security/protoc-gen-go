@@ -23,23 +23,27 @@ service E2E {
     rpc GetAnnotation(AnnotationRequest) returns (Annotation) {
         option (es.api.allowed_roles) = "User";
         option (es.api.cli_cmd)       = "e2e annotation get";
+        option (es.api.scopes)        = "API:READ";
     }
 
     // ListAnnotations returns a list
     rpc ListAnnotations(ListAnnotationsRequest) returns (AnnotationsResponse) {
         option (es.api.allowed_roles) = "User";
         option (es.api.cli_cmd)       = "e2e annotation list";
+        option (es.api.scopes)        = "API:READ";
     }
 
     rpc UpdateAnnotation(Annotation) returns (Annotation) {
         option (es.api.allowed_roles) = "User";
         option (es.api.cli_cmd)       = "e2e annotation update";
+        option (es.api.scopes)        = "API:WRITE";
     }
 
     // Search is for testing nested and recursive types.
     rpc Search(google.protobuf.Empty) returns (AnnotationSearchResponse) {
         option (es.api.allowed_roles) = "User";
         option (es.api.cli_cmd)       = "e2e annotation search";
+        option (es.api.scopes)        = "API:READ";
     }
 }
 
