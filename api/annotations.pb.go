@@ -608,6 +608,14 @@ var file_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "annotations.proto",
 	},
 	{
+		ExtendedType:  (*descriptorpb.MethodOptions)(nil),
+		ExtensionType: (*string)(nil),
+		Field:         1074,
+		Name:          "es.api.scopes",
+		Tag:           "bytes,1074,opt,name=scopes",
+		Filename:      "annotations.proto",
+	},
+	{
 		ExtendedType:  (*descriptorpb.FieldOptions)(nil),
 		ExtensionType: (*string)(nil),
 		Field:         51001,
@@ -761,6 +769,14 @@ var (
 	//
 	// optional int32 refresh_interval = 1073;
 	E_RefreshInterval = &file_annotations_proto_extTypes[2]
+	// scopes is the option for the method to be allowed for the given
+	// scopes. It's comma-separated list of scopes supported by the system.
+	// Scopes are used to authorize the method call, similarly to OAuth 2.0
+	// scopes. Application may use scopes and/or allowed_roles to authorize the
+	// method call.
+	//
+	// optional string scopes = 1074;
+	E_Scopes = &file_annotations_proto_extTypes[3]
 )
 
 // Extension fields to descriptorpb.FieldOptions.
@@ -782,44 +798,44 @@ var (
 	// keyword|text|integer|float|double|boolean|date|geo_point|ip.
 	//
 	// optional string search = 51001;
-	E_Search = &file_annotations_proto_extTypes[3]
+	E_Search = &file_annotations_proto_extTypes[4]
 	// display is the option for the field's Display Name in the UI.
 	//
 	// optional string display = 51002;
-	E_Display = &file_annotations_proto_extTypes[4]
+	E_Display = &file_annotations_proto_extTypes[5]
 	// description is the option for the field's description.
 	//
 	// optional string description = 51003;
-	E_Description = &file_annotations_proto_extTypes[5]
+	E_Description = &file_annotations_proto_extTypes[6]
 	// required is the option for the field to be required.
 	//
 	// optional bool required = 51005;
-	E_Required = &file_annotations_proto_extTypes[6]
+	E_Required = &file_annotations_proto_extTypes[7]
 	// required_or is the option for the field to be required, if one of the
 	// other values is provided.
 	// Comma-separated list of field names that are required if this field is
 	// not provided. For example, "field1,field2" will be parsed as a list.
 	//
 	// optional string required_or = 51006;
-	E_RequiredOr = &file_annotations_proto_extTypes[7]
+	E_RequiredOr = &file_annotations_proto_extTypes[8]
 	// min is the option for the field minimum length for strings, and minimum
 	// value for numbers.
 	//
 	// optional int32 min = 51007;
-	E_Min = &file_annotations_proto_extTypes[8]
+	E_Min = &file_annotations_proto_extTypes[9]
 	// max is the option for the field maximum length for strings, and maximum
 	// value for numbers.
 	//
 	// optional int32 max = 51008;
-	E_Max = &file_annotations_proto_extTypes[9]
+	E_Max = &file_annotations_proto_extTypes[10]
 	// min_count is the option for the field minimum count for lists.
 	//
 	// optional int32 min_count = 51009;
-	E_MinCount = &file_annotations_proto_extTypes[10]
+	E_MinCount = &file_annotations_proto_extTypes[11]
 	// max_count is the option for the field maximum count for lists.
 	//
 	// optional int32 max_count = 51010;
-	E_MaxCount = &file_annotations_proto_extTypes[11]
+	E_MaxCount = &file_annotations_proto_extTypes[12]
 )
 
 // Extension fields to descriptorpb.EnumOptions.
@@ -827,7 +843,7 @@ var (
 	// is_bitmask marks the enum as a bitmask enum.
 	//
 	// optional bool is_bitmask = 54001;
-	E_IsBitmask = &file_annotations_proto_extTypes[12]
+	E_IsBitmask = &file_annotations_proto_extTypes[13]
 )
 
 // Extension fields to descriptorpb.EnumValueOptions.
@@ -838,19 +854,19 @@ var (
 	// For example, "arg1,arg2,arg3" will be parsed as a list of strings
 	//
 	// optional string enum_args = 52001;
-	E_EnumArgs = &file_annotations_proto_extTypes[13]
+	E_EnumArgs = &file_annotations_proto_extTypes[14]
 	// enum_display is the option for the field's Display Name in the UI.
 	//
 	// optional string enum_display = 52002;
-	E_EnumDisplay = &file_annotations_proto_extTypes[14]
+	E_EnumDisplay = &file_annotations_proto_extTypes[15]
 	// enum_description is the option for the field's description.
 	//
 	// optional string enum_description = 52003;
-	E_EnumDescription = &file_annotations_proto_extTypes[15]
+	E_EnumDescription = &file_annotations_proto_extTypes[16]
 	// enum_group is the option for the field's group name.
 	//
 	// optional string enum_group = 52004;
-	E_EnumGroup = &file_annotations_proto_extTypes[16]
+	E_EnumGroup = &file_annotations_proto_extTypes[17]
 )
 
 // Extension fields to descriptorpb.MessageOptions.
@@ -859,15 +875,15 @@ var (
 	// information. By default, only for Request and Response messages.
 	//
 	// optional bool generate_meta = 53001;
-	E_GenerateMeta = &file_annotations_proto_extTypes[17]
+	E_GenerateMeta = &file_annotations_proto_extTypes[18]
 	// message_display is the option for the message's Display Name in the UI.
 	//
 	// optional string message_display = 53002;
-	E_MessageDisplay = &file_annotations_proto_extTypes[18]
+	E_MessageDisplay = &file_annotations_proto_extTypes[19]
 	// message_description is the option for the message's description.
 	//
 	// optional string message_description = 53003;
-	E_MessageDescription = &file_annotations_proto_extTypes[19]
+	E_MessageDescription = &file_annotations_proto_extTypes[20]
 )
 
 var File_annotations_proto protoreflect.FileDescriptor
@@ -940,6 +956,7 @@ const file_annotations_proto_rawDesc = "" +
 	"\rallowed_roles\x12\x1e.google.protobuf.MethodOptions\x18\xaf\b \x01(\tR\fallowedRoles:8\n" +
 	"\acli_cmd\x12\x1e.google.protobuf.MethodOptions\x18\xb0\b \x01(\tR\x06cliCmd:J\n" +
 	"\x10refresh_interval\x12\x1e.google.protobuf.MethodOptions\x18\xb1\b \x01(\x05R\x0frefreshInterval:7\n" +
+	"\x06scopes\x12\x1e.google.protobuf.MethodOptions\x18\xb2\b \x01(\tR\x06scopes:7\n" +
 	"\x06search\x12\x1d.google.protobuf.FieldOptions\x18\xb9\x8e\x03 \x01(\tR\x06search:9\n" +
 	"\adisplay\x12\x1d.google.protobuf.FieldOptions\x18\xba\x8e\x03 \x01(\tR\adisplay:A\n" +
 	"\vdescription\x12\x1d.google.protobuf.FieldOptions\x18\xbb\x8e\x03 \x01(\tR\vdescription:;\n" +
@@ -997,27 +1014,28 @@ var file_annotations_proto_depIdxs = []int32{
 	6,  // 5: es.api.allowed_roles:extendee -> google.protobuf.MethodOptions
 	6,  // 6: es.api.cli_cmd:extendee -> google.protobuf.MethodOptions
 	6,  // 7: es.api.refresh_interval:extendee -> google.protobuf.MethodOptions
-	7,  // 8: es.api.search:extendee -> google.protobuf.FieldOptions
-	7,  // 9: es.api.display:extendee -> google.protobuf.FieldOptions
-	7,  // 10: es.api.description:extendee -> google.protobuf.FieldOptions
-	7,  // 11: es.api.required:extendee -> google.protobuf.FieldOptions
-	7,  // 12: es.api.required_or:extendee -> google.protobuf.FieldOptions
-	7,  // 13: es.api.min:extendee -> google.protobuf.FieldOptions
-	7,  // 14: es.api.max:extendee -> google.protobuf.FieldOptions
-	7,  // 15: es.api.min_count:extendee -> google.protobuf.FieldOptions
-	7,  // 16: es.api.max_count:extendee -> google.protobuf.FieldOptions
-	8,  // 17: es.api.is_bitmask:extendee -> google.protobuf.EnumOptions
-	9,  // 18: es.api.enum_args:extendee -> google.protobuf.EnumValueOptions
-	9,  // 19: es.api.enum_display:extendee -> google.protobuf.EnumValueOptions
-	9,  // 20: es.api.enum_description:extendee -> google.protobuf.EnumValueOptions
-	9,  // 21: es.api.enum_group:extendee -> google.protobuf.EnumValueOptions
-	10, // 22: es.api.generate_meta:extendee -> google.protobuf.MessageOptions
-	10, // 23: es.api.message_display:extendee -> google.protobuf.MessageOptions
-	10, // 24: es.api.message_description:extendee -> google.protobuf.MessageOptions
-	25, // [25:25] is the sub-list for method output_type
-	25, // [25:25] is the sub-list for method input_type
-	25, // [25:25] is the sub-list for extension type_name
-	5,  // [5:25] is the sub-list for extension extendee
+	6,  // 8: es.api.scopes:extendee -> google.protobuf.MethodOptions
+	7,  // 9: es.api.search:extendee -> google.protobuf.FieldOptions
+	7,  // 10: es.api.display:extendee -> google.protobuf.FieldOptions
+	7,  // 11: es.api.description:extendee -> google.protobuf.FieldOptions
+	7,  // 12: es.api.required:extendee -> google.protobuf.FieldOptions
+	7,  // 13: es.api.required_or:extendee -> google.protobuf.FieldOptions
+	7,  // 14: es.api.min:extendee -> google.protobuf.FieldOptions
+	7,  // 15: es.api.max:extendee -> google.protobuf.FieldOptions
+	7,  // 16: es.api.min_count:extendee -> google.protobuf.FieldOptions
+	7,  // 17: es.api.max_count:extendee -> google.protobuf.FieldOptions
+	8,  // 18: es.api.is_bitmask:extendee -> google.protobuf.EnumOptions
+	9,  // 19: es.api.enum_args:extendee -> google.protobuf.EnumValueOptions
+	9,  // 20: es.api.enum_display:extendee -> google.protobuf.EnumValueOptions
+	9,  // 21: es.api.enum_description:extendee -> google.protobuf.EnumValueOptions
+	9,  // 22: es.api.enum_group:extendee -> google.protobuf.EnumValueOptions
+	10, // 23: es.api.generate_meta:extendee -> google.protobuf.MessageOptions
+	10, // 24: es.api.message_display:extendee -> google.protobuf.MessageOptions
+	10, // 25: es.api.message_description:extendee -> google.protobuf.MessageOptions
+	26, // [26:26] is the sub-list for method output_type
+	26, // [26:26] is the sub-list for method input_type
+	26, // [26:26] is the sub-list for extension type_name
+	5,  // [5:26] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
 }
 
@@ -1033,7 +1051,7 @@ func file_annotations_proto_init() {
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_annotations_proto_rawDesc), len(file_annotations_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   5,
-			NumExtensions: 20,
+			NumExtensions: 21,
 			NumServices:   0,
 		},
 		GoTypes:           file_annotations_proto_goTypes,

@@ -7,12 +7,12 @@ import (
 	"go/format"
 	"os"
 	"path"
-	"strings"
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/cockroachdb/errors"
 	"github.com/effective-security/protoc-gen-go/api"
+	"github.com/effective-security/x/slices"
 	"github.com/effective-security/xlog"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
@@ -104,8 +104,14 @@ func generator(gp *protogen.Plugin) error {
 
 					ext := proto.GetExtension(pr.Interface(), api.E_AllowedRoles).(string)
 					if ext != "" {
-						o.Roles = strings.Split(ext, ",")
+						o.Roles = slices.StringsSafeSplit(ext, ",")
 					}
+
+					scopes := proto.GetExtension(pr.Interface(), api.E_Scopes).(string)
+					if scopes != "" {
+						o.Scopes = slices.StringsSafeSplit(scopes, ",")
+					}
+
 					refresh := proto.GetExtension(pr.Interface(), api.E_RefreshInterval).(int32)
 					if refresh != 0 {
 						o.RefreshInterval = uint32(refresh)
@@ -148,14 +154,32 @@ func tempFuncs() template.FuncMap {
 		return typ
 	}
 	m["roles"] = func(roles []string) string {
-		if len(roles) == 0 {
+		count := len(roles)
+		if count == 0 {
 			return ""
 		}
 
 		val := "AllowedRoles: []string{"
 		for i, r := range roles {
 			val += "\"" + r + "\""
-			if i+1 < len(r) {
+			if i+1 < count {
+				val += ","
+			}
+		}
+		val += "},"
+		return val
+	}
+
+	m["scopes"] = func(scopes []string) string {
+		count := len(scopes)
+		if count == 0 {
+			return ""
+		}
+
+		val := "Scopes: []string{"
+		for i, r := range scopes {
+			val += "\"" + r + "\""
+			if i+1 < count {
 				val += ","
 			}
 		}
@@ -181,6 +205,7 @@ type tplMethod struct {
 	Service         *protogen.Service
 	Method          *protogen.Method
 	Roles           []string
+	Scopes          []string
 	CliCmd          string
 	RefreshInterval uint32
 }
@@ -211,6 +236,7 @@ type CheckAccessFunc func(ctx context.Context, req any, action string) error
 type MethodInfo struct {
 	Allocator       RequestAllocator
 	AllowedRoles    []string
+	Scopes          []string
 	CliCmd          string
 	RefreshInterval uint32
 }
@@ -275,6 +301,7 @@ var methods = map[string]*MethodInfo{
 		RefreshInterval: {{.RefreshInterval}},
 		{{- end }}
 		{{roles .Roles}}
+		{{scopes .Scopes}}
 	},
 `))
 )

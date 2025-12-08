@@ -14,6 +14,12 @@ extend google.protobuf.MethodOptions {
     // refresh_interval is the option for the method to be refreshed, in
     // seconds.
     int32 refresh_interval = 1073;
+    // scopes is the option for the method to be allowed for the given
+    // scopes. It's comma-separated list of scopes supported by the system.
+    // Scopes are used to authorize the method call, similarly to OAuth 2.0
+    // scopes. Application may use scopes and/or allowed_roles to authorize the
+    // method call.
+    string scopes = 1074;
 }
 
 extend google.protobuf.FieldOptions {
