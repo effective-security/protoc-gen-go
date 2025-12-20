@@ -239,8 +239,10 @@ func Test_DocumentMessage(t *testing.T) {
     - Field: Types
       Type: integer
       Enum values: Unknown (0), Bar (1), Foo (2)
+      Documentation: Types are for testing enum types.
     - Field: RefIDs
       Type: integer
+      Documentation: RefIDs are for testing reference IDs.
     - Field: Hashes
       Type: integer
     - Field: Limits
