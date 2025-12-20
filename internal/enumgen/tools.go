@@ -225,18 +225,16 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 
 func cleanComment(comment string) string {
 	lines := strings.Split(comment, "\n")
-	for i, line := range lines {
-		lines[i] = strings.ReplaceAll(strings.TrimSpace(strings.TrimPrefix(line, "//")), "`", "'")
-	}
-	i := len(lines)
-	for i > 0 {
-		if lines[i-1] != "" {
-			break
-		}
-		i--
-	}
 
-	return strings.Join(lines[:i], "\n")
+	newLines := make([]string, 0, len(lines))
+	for _, line := range lines {
+		line = strings.ReplaceAll(strings.TrimSpace(strings.TrimPrefix(line, "//")), "`", "'")
+		if line == "" || strings.HasPrefix(line, "TODO") {
+			continue
+		}
+		newLines = append(newLines, line)
+	}
+	return strings.Join(newLines, "\n")
 }
 
 func mapScalarToTypes(kind protoreflect.Kind) (goType string, llmType string) {

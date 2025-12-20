@@ -336,6 +336,9 @@ func Documentation(w io.Writer, doc string, indent string, noFirstIndent bool) {
 		if idx > last {
 			break
 		}
+		if strings.HasPrefix(part, "TODO") {
+			continue
+		}
 		if lines > 0 || !noFirstIndent {
 			_, _ = fmt.Fprint(w, indent)
 		}
@@ -353,6 +356,9 @@ func DocumentationOneLine(w io.Writer, doc string) {
 	prevPartDot := false
 	for _, part := range parts {
 		part = strings.TrimSpace(part)
+		if strings.HasPrefix(part, "TODO") {
+			continue
+		}
 		size := len(part)
 		if size > 0 {
 			if lines > 0 {

@@ -80,6 +80,7 @@ message Annotation {
         [json_name = "Map", (es.api.min_count) = 1, (es.api.max_count) = 3];
 
     // Metadata is a list of internal metadata associated with the asset
+    // TODO: this line should NOT be included in the documentation.
     repeated KVPair Metadata = 5
         [json_name = "Metadata", (es.api.required) = true];
 
@@ -133,11 +134,14 @@ message Annotation {
         (es.api.max_count) = 3
     ];
 
+    // Types are for testing enum types.
+    // TODO: this line should NOT be included in the documentation.
     repeated AnnotationType.Enum Types = 14 [json_name = "Types"];
-    repeated uint64 RefIDs             = 15 [json_name = "RefIDs"];
-    repeated int64 Hashes              = 16 [json_name = "Hashes"];
-    repeated uint32 Limits             = 17 [json_name = "Limits"];
-    repeated int32 Counts              = 18 [json_name = "Counts"];
+    // RefIDs are for testing reference IDs.
+    repeated uint64 RefIDs = 15 [json_name = "RefIDs"];
+    repeated int64 Hashes  = 16 [json_name = "Hashes"];
+    repeated uint32 Limits = 17 [json_name = "Limits"];
+    repeated int32 Counts  = 18 [json_name = "Counts"];
 }
 
 message AnnotationRequest {

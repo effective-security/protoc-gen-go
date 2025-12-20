@@ -51,7 +51,8 @@ func Test_cleanComment(t *testing.T) {
 		{"// This is a comment\n", "This is a comment"},
 		{"// This is a comment\n// Another line", "This is a comment\nAnother line"},
 		{"// This is a comment\n\n", "This is a comment"},
-		{"// A\n\nB\n\n\n", "A\n\nB"},
+		{"// This is a comment\n//TODO: this line should NOT be included in the documentation.\n", "This is a comment"},
+		{"// A\n\nB\n\n\n", "A\nB"},
 		{"// \n\n\n\n\n", ""},
 	}
 
