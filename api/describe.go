@@ -289,7 +289,7 @@ func DocumentMessage(w io.Writer, dscr *MessageDescription, indent string) {
 		return
 	}
 
-	_, _ = fmt.Fprintf(w, "%s:\n", dscr.Display)
+	_, _ = fmt.Fprintf(w, "%s:\n", dscr.GetDisplayName())
 	print.Text(w, dscr.Documentation, indent, false)
 	nextIndent := indent + indent
 	fieldDocIndent := nextIndent + indent
@@ -309,7 +309,7 @@ func DocumentMessage(w io.Writer, dscr *MessageDescription, indent string) {
 				if idx > 0 {
 					_, _ = fmt.Fprint(w, ", ")
 				}
-				_, _ = fmt.Fprintf(w, "%s (%d)", enum.Display, enum.Value)
+				_, _ = fmt.Fprintf(w, "%s (%d)", enum.GetDisplayName(), enum.Value)
 			}
 			_, _ = fmt.Fprintln(w)
 		}
@@ -416,7 +416,7 @@ func (d *describer) GetTabularData(msg proto.Message) (*TabularData, error) {
 
 	// first top level fields
 	t := &Table{
-		ID:       md.Display,
+		ID:       md.GetDisplayName(),
 		Header:   md.Fields,
 		RawValue: mpval.Interface(),
 	}
@@ -435,7 +435,7 @@ func (d *describer) GetTabularData(msg proto.Message) (*TabularData, error) {
 			continue
 		}
 		t := &Table{
-			ID:     field.Display,
+			ID:     field.GetDisplayName(),
 			Header: FilterPrintableFields(field.Fields),
 		}
 		if len(t.Header) == 0 {
@@ -631,7 +631,7 @@ func (r *Table) Print(w io.Writer) {
 		table := createTable(w)
 		var header []string
 		for _, field := range r.Header {
-			header = append(header, field.Display)
+			header = append(header, field.GetDisplayName())
 		}
 		table.Header(header)
 		for _, row := range r.Rows {
@@ -644,7 +644,7 @@ func (r *Table) Print(w io.Writer) {
 			val := r.Rows[0].Cells[i]
 			// skip empty values
 			if val != "" {
-				_ = table.Append([]string{field.Display, r.Rows[0].Cells[i]})
+				_ = table.Append([]string{field.GetDisplayName(), r.Rows[0].Cells[i]})
 			}
 		}
 		_ = table.Render()

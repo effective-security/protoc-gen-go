@@ -59,12 +59,13 @@ func CreateEnumDescription(en *protogen.Enum) *EnumDescription {
 			Value:         int32(value.Desc.Number()),
 			Name:          string(value.Desc.Name()),
 			FullName:      string(value.Desc.FullName()),
-			Display:       display,
 			Documentation: cleanComment(description),
 			Args:          slices.StringsSafeSplit(args, ","),
 			Group:         group,
 		}
-
+		if display != meta.Name {
+			meta.Display = display
+		}
 		res.Enums = append(res.Enums, meta)
 	}
 
@@ -104,13 +105,16 @@ func CreateMessageDescription(msg *protogen.Message, isInput, isOutput bool, arg
 		Name:          string(msg.GoIdent.GoName),
 		FullName:      fn,
 		Documentation: cleanComment(description),
-		Display:       display,
-		Deprecated:    deprecated,
-		IsInput:       isInput,
-		IsOutput:      isOutput,
+
+		Deprecated: deprecated,
+		IsInput:    isInput,
+		IsOutput:   isOutput,
 
 		ProtogenMessage: msg,
 		Package:         path.Base(string(msg.GoIdent.GoImportPath)),
+	}
+	if display != res.Name {
+		res.Display = display
 	}
 
 	for _, field := range msg.Fields {
@@ -125,6 +129,7 @@ func CreateMessageDescription(msg *protogen.Message, isInput, isOutput bool, arg
 func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*protogen.Message) *FieldMeta {
 	opts := field.Desc.Options().ProtoReflect()
 
+	alias := opts.Get(api.E_Alias.TypeDescriptor()).String()
 	display := opts.Get(api.E_Display.TypeDescriptor()).String()
 	description := opts.Get(api.E_Description.TypeDescriptor()).String()
 	search := opts.Get(api.E_Search.TypeDescriptor()).String()
@@ -170,8 +175,8 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	fm := &FieldMeta{
 		Name:          name,
 		FullName:      fullname,
+		Alias:         alias,
 		Documentation: cleanComment(description),
-		Display:       display,
 		Required:      required,
 		RequiredOr:    slices.StringsSafeSplit(requiredOr, ","),
 		Min:           int32(min),
@@ -183,7 +188,9 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 		ProtogenField: field,
 		Package:       path.Base(string(field.GoIdent.GoImportPath)),
 	}
-
+	if display != fm.Name {
+		fm.Display = display
+	}
 	fm.SearchOptions, fm.SearchType = parseSearchOptions(search, field)
 
 	kind := field.Desc.Kind()
@@ -329,6 +336,7 @@ type FieldMeta struct {
 	MinCount        int32
 	MaxCount        int32
 	Deprecated      bool
+	Alias           string
 
 	// field is the original field descriptor
 	ProtogenField         *protogen.Field
