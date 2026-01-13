@@ -86,6 +86,27 @@ func (e *EnumDescription) Parse(val any) int32 {
 	return res
 }
 
+func (m *FieldMeta) GetDisplayName() string {
+	if m.Display != "" {
+		return m.Display
+	}
+	return m.Name
+}
+
+func (m *EnumMeta) GetDisplayName() string {
+	if m.Display != "" {
+		return m.Display
+	}
+	return m.Name
+}
+
+func (m *MessageDescription) GetDisplayName() string {
+	if m.Display != "" {
+		return m.Display
+	}
+	return m.Name
+}
+
 func (m *MessageDescription) FindField(name string) *FieldMeta {
 	return FindFieldMeta(m.Fields, name)
 }

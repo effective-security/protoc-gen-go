@@ -60,6 +60,8 @@ extend google.protobuf.FieldOptions {
     int32 min_count = 51009;
     // max_count is the option for the field maximum count for lists.
     int32 max_count = 51010;
+    // alias is the option for the field alias name for the search query.
+    string alias = 51011;
 }
 
 extend google.protobuf.EnumOptions {
@@ -167,6 +169,8 @@ message FieldMeta {
     int32 MaxCount = 17 [json_name = "MaxCount"];
     // Deprecated is the option for the field to be deprecated.
     bool Deprecated = 18 [json_name = "Deprecated"];
+    // Alias is the option for the field alias name for the search query.
+    string Alias = 19 [json_name = "Alias"];
 }
 
 message EnumDescription {

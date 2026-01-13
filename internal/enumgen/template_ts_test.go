@@ -182,7 +182,7 @@ export const TestEnumName: ITypeNameInterface = {
 }
 
 export const TestEnumDisplayName: ITypeNameInterface = {
-    -1: '',
+    -1: 'Invalid',
     0: 'Unknown',
     1: 'Active Status',
 }
@@ -200,7 +200,7 @@ export const TestEnumNameEnum: INameEnumInterface = {
 }
 
 export const TestEnumDisplayNameEnum: INameEnumInterface = {
-    '': -1,
+    'Invalid': -1,
     'Unknown': 0,
     'Active Status': 1,
 }

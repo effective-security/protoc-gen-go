@@ -662,7 +662,7 @@ const (
 {{- $root := . }}
 {{- with .Enum }}
   {{- range $root.Description.Enums }}
-    Display_{{enum_name $root.Enum .Name}} = "{{.Display}}"
+    Display_{{enum_name $root.Enum .Name}} = "{{.GetDisplayName}}"
   {{- end }}
 {{- end }}
 {{- end }}
@@ -682,7 +682,9 @@ var EnumNameTypes = map[string]reflect.Type{
 {{- $root := . }}				
 var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 	Name: "{{.Description.Name}}",
+	{{- if .Description.Display }}
 	Display: "{{.Description.Display}}",
+	{{- end }}
 	FullName: "{{.Description.FullName}}",
 	{{- if .Description.Documentation }}
 	Documentation: ` + "`{{.Description.Documentation}}`" + `,
@@ -695,8 +697,13 @@ var {{.Description.Name}}_MessageDescription = &api.MessageDescription {
 		{
 			Name: "{{.Name}}",
 			FullName: "{{.FullName}}",
+			{{- if .Display }}
 			Display: "{{.Display}}",
+			{{- end }}
 			Type: "{{.Type}}",
+			{{- if .Alias }}
+			Alias: "{{.Alias}}",
+			{{- end }}
 			{{- if .StructName }}
 			StructName: "{{.StructName}}",
 			{{- end }}

@@ -52,7 +52,7 @@ func ValidateRequest(ctx context.Context, req proto.Message, md *MessageDescript
 
 	msgReflect := req.ProtoReflect()
 	if !msgReflect.IsValid() {
-		return httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "%s: is not a valid protobuf message", md.Display)
+		return httperror.NewGrpcFromCtx(ctx, codes.InvalidArgument, "%s: is not a valid protobuf message", md.GetDisplayName())
 	}
 
 	defer func() {

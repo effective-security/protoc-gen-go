@@ -151,7 +151,7 @@ export const {{ enum_ts_name .Enum }}Name: ITypeNameInterface = {
 export const {{ enum_ts_name .Enum }}DisplayName: ITypeNameInterface = {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
-    {{ .Value }}: '{{ .Display }}',
+    {{ .Value }}: '{{ .GetDisplayName }}',
 {{- end }}
 {{- end }}
 }
@@ -175,7 +175,7 @@ export const {{ enum_ts_name .Enum }}NameEnum: INameEnumInterface = {
 export const {{ enum_ts_name .Enum }}DisplayNameEnum: INameEnumInterface = {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
-    '{{ .Display }}': {{ .Value }},
+    '{{ .GetDisplayName }}': {{ .Value }},
 {{- end }}
 {{- end }}
 }
