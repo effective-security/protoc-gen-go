@@ -576,3 +576,34 @@ func TestValidateRequest_Annotation(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateRequest_Basic(t *testing.T) {
+	ctx := context.Background()
+
+	tcases := []struct {
+		name string
+		msg  *e2e.Basic
+		exp  string
+	}{
+		{
+			name: "nil",
+			msg:  nil,
+			exp:  "bad_request: Basic: is not a valid protobuf message",
+		},
+		{
+			name: "no_map",
+			msg:  &e2e.Basic{},
+			exp:  "bad_request: map: minimum count is 1",
+		},
+	}
+	for _, tc := range tcases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.msg.Validate(ctx)
+			if tc.exp == "" {
+				assert.NoError(t, err)
+			} else {
+				assert.EqualError(t, err, tc.exp)
+			}
+		})
+	}
+}

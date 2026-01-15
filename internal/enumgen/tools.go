@@ -87,6 +87,7 @@ func CreateMessageDescription(msg *protogen.Message, isInput, isOutput bool, arg
 
 	display := opts.Get(api.E_MessageDisplay.TypeDescriptor()).String()
 	description := opts.Get(api.E_MessageDescription.TypeDescriptor()).String()
+	generateModel := opts.Get(api.E_GenerateModel.TypeDescriptor()).Bool()
 	deprecated := false
 	ro := msg.Desc.Options()
 	if mo, ok := ro.(*descriptorpb.MethodOptions); ok {
@@ -106,9 +107,10 @@ func CreateMessageDescription(msg *protogen.Message, isInput, isOutput bool, arg
 		FullName:      fn,
 		Documentation: cleanComment(description),
 
-		Deprecated: deprecated,
-		IsInput:    isInput,
-		IsOutput:   isOutput,
+		Deprecated:    deprecated,
+		IsInput:       isInput,
+		IsOutput:      isOutput,
+		GenerateModel: generateModel,
 
 		ProtogenMessage: msg,
 		Package:         path.Base(string(msg.GoIdent.GoImportPath)),
@@ -175,6 +177,7 @@ func fieldMeta(field *protogen.Field, args Opts, queueToDiscover map[string]*pro
 	fm := &FieldMeta{
 		Name:          name,
 		FullName:      fullname,
+		GoName:        field.GoName,
 		Alias:         alias,
 		Documentation: cleanComment(description),
 		Required:      required,
@@ -313,6 +316,8 @@ type MessageDescription struct {
 	// IsOutput is true if the message is an output message
 	IsOutput bool
 
+	GenerateModel bool
+
 	// message is the original message descriptor
 	ProtogenMessage *protogen.Message
 	Package         string
@@ -328,6 +333,7 @@ type FieldMeta struct {
 	SearchOptions   api.SearchOption_Enum
 	Required        bool
 	RequiredOr      []string
+	GoName          string
 	StructName      string
 	Fields          []*FieldMeta
 	EnumDescription *EnumDescription

@@ -66,6 +66,8 @@ message KVPair {
 }
 
 message Annotation {
+    option (es.api.generate_model) = true;
+
     string ID = 1 [
         json_name         = "ID",
         (es.api.required) = true,

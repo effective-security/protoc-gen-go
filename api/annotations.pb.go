@@ -768,6 +768,14 @@ var file_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 		Tag:           "bytes,53003,opt,name=message_description",
 		Filename:      "annotations.proto",
 	},
+	{
+		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
+		ExtensionType: (*bool)(nil),
+		Field:         53004,
+		Name:          "es.api.generate_model",
+		Tag:           "varint,53004,opt,name=generate_model",
+		Filename:      "annotations.proto",
+	},
 }
 
 // Extension fields to descriptorpb.MethodOptions.
@@ -905,6 +913,11 @@ var (
 	//
 	// optional string message_description = 53003;
 	E_MessageDescription = &file_annotations_proto_extTypes[21]
+	// generate_model is the option for generating the message's model
+	// for search index.
+	//
+	// optional bool generate_model = 53004;
+	E_GenerateModel = &file_annotations_proto_extTypes[22]
 )
 
 var File_annotations_proto protoreflect.FileDescriptor
@@ -999,7 +1012,8 @@ const file_annotations_proto_rawDesc = "" +
 	"enum_group\x12!.google.protobuf.EnumValueOptions\x18\xa4\x96\x03 \x01(\tR\tenumGroup:F\n" +
 	"\rgenerate_meta\x12\x1f.google.protobuf.MessageOptions\x18\x89\x9e\x03 \x01(\bR\fgenerateMeta:J\n" +
 	"\x0fmessage_display\x12\x1f.google.protobuf.MessageOptions\x18\x8a\x9e\x03 \x01(\tR\x0emessageDisplay:R\n" +
-	"\x13message_description\x12\x1f.google.protobuf.MessageOptions\x18\x8b\x9e\x03 \x01(\tR\x12messageDescriptionB1Z/github.com/effective-security/protoc-gen-go/apib\x06proto3"
+	"\x13message_description\x12\x1f.google.protobuf.MessageOptions\x18\x8b\x9e\x03 \x01(\tR\x12messageDescription:H\n" +
+	"\x0egenerate_model\x12\x1f.google.protobuf.MessageOptions\x18\x8c\x9e\x03 \x01(\bR\rgenerateModelB1Z/github.com/effective-security/protoc-gen-go/apib\x06proto3"
 
 var (
 	file_annotations_proto_rawDescOnce sync.Once
@@ -1056,10 +1070,11 @@ var file_annotations_proto_depIdxs = []int32{
 	10, // 24: es.api.generate_meta:extendee -> google.protobuf.MessageOptions
 	10, // 25: es.api.message_display:extendee -> google.protobuf.MessageOptions
 	10, // 26: es.api.message_description:extendee -> google.protobuf.MessageOptions
-	27, // [27:27] is the sub-list for method output_type
-	27, // [27:27] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	5,  // [5:27] is the sub-list for extension extendee
+	10, // 27: es.api.generate_model:extendee -> google.protobuf.MessageOptions
+	28, // [28:28] is the sub-list for method output_type
+	28, // [28:28] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	5,  // [5:28] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
 }
 
@@ -1075,7 +1090,7 @@ func file_annotations_proto_init() {
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_annotations_proto_rawDesc), len(file_annotations_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   5,
-			NumExtensions: 22,
+			NumExtensions: 23,
 			NumServices:   0,
 		},
 		GoTypes:           file_annotations_proto_goTypes,
