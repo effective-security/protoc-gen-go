@@ -14,6 +14,7 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/effective-security/protoc-gen-go/api"
 	"github.com/effective-security/x/enum"
+	"github.com/effective-security/x/values"
 	"github.com/effective-security/xlog"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -64,6 +65,31 @@ func ApplyMessagesTemplate(f *protogen.GeneratedFile, opts Opts, msgs []*Message
 	}
 
 	err := ApplyMessages(buf, opts, msgs)
+	if err != nil {
+		return err
+	}
+
+	src := buf.Bytes()
+	code, err := format.Source(src)
+	if err != nil {
+		fmt.Printf("failed to format source:\n%s\n", string(src))
+		return errors.Wrapf(err, "failed to format source")
+	}
+	_, err = f.Write(code)
+	return err
+}
+
+// This function is called with a param which contains the entire definition of a method.
+func ApplyModelsTemplate(f *protogen.GeneratedFile, opts Opts, msgs []*MessageDescription) error {
+	buf := &bytes.Buffer{}
+	if err := headerTemplate.Execute(buf, tplHeader{
+		Opts: opts,
+		//BuildFlags: "//go:build proto_go_model",
+	}); err != nil {
+		return errors.Wrapf(err, "failed to execute template")
+	}
+
+	err := ApplyModels(buf, msgs)
 	if err != nil {
 		return err
 	}
@@ -131,6 +157,121 @@ func ApplyMessages(w io.Writer, opts Opts, msgs []*MessageDescription) error {
 	if err := messagesMapTemplate.Execute(w, mt); err != nil {
 		return errors.Wrapf(err, "failed to execute template")
 	}
+	return nil
+}
+
+func ApplyModels(w io.Writer, msgs []*MessageDescription) error {
+	toGenerate := make([]*MessageDescription, 0, len(msgs))
+	// Execute Templates
+	for _, md := range msgs {
+		if !md.GenerateModel {
+			continue
+		}
+		toGenerate = append(toGenerate, md)
+	}
+
+	sort.Slice(toGenerate, func(i, j int) bool {
+		return toGenerate[i].FullName < toGenerate[j].FullName
+	})
+
+	err := GenerateGoModels(w, toGenerate)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GenerateGoModels(w io.Writer, msgs []*MessageDescription) error {
+	seen := make(map[string]bool)
+	return generateGoModels(w, msgs, seen)
+}
+
+func generateGoModels(w io.Writer, msgs []*MessageDescription, seen map[string]bool) error {
+	for _, md := range msgs {
+		if _, ok := seen[md.FullName]; ok {
+			continue
+		}
+		seen[md.FullName] = true
+		err := goModel(w, md)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write model: %s", md.FullName)
+		}
+
+		for _, field := range md.Fields {
+			if field.Type == "struct" || field.Type == "[]struct" {
+				md := &MessageDescription{
+					Name:     field.StructName,
+					Fields:   field.Fields,
+					FullName: field.StructName,
+				}
+				if md.Fields == nil {
+					def := messageDescriptions[field.StructName]
+					if def != nil {
+						md.Fields = def.Fields
+					}
+				}
+				err := generateGoModels(w, []*MessageDescription{md}, seen)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func structName(name string) string {
+	if i := strings.LastIndex(name, "."); i != -1 {
+		return name[i+1:]
+	}
+	return name
+}
+
+func goModel(w io.Writer, m *MessageDescription) error {
+	fullName := values.StringsCoalesce(m.FullName, m.Name)
+	name := structName(m.Name)
+
+	_, _ = fmt.Fprintf(w, "\n// %sModel is the Go model for the %s message.\n", name, fullName)
+	_, _ = fmt.Fprintln(w, "// It can be used to decode the message from JSON.")
+	_, _ = fmt.Fprintf(w, "type %sModel struct {\n", name)
+	for _, field := range m.Fields {
+		_, _ = fmt.Fprintf(w, "   %s ", field.GoName)
+		switch field.Type {
+		case "struct", "object":
+			//fmt.Fprintf(w, "*%sModel", structName(field.Name))
+			_, _ = fmt.Fprintf(w, "json.RawMessage")
+		case "[]struct":
+			//fmt.Fprintf(w, "[]*%sModel", structName(field.Name))
+			_, _ = fmt.Fprintf(w, "json.RawMessage")
+		case "map":
+			def := field.Fields
+			if def == nil {
+				md := messageDescriptions[field.StructName]
+				if md != nil {
+					def = md.Fields
+				}
+			}
+			if len(def) == 2 {
+				keyType := def[0].Type
+				valueType := def[1].Type
+				if valueType == "struct" {
+					// md := messageDescriptions[def[1].StructName]
+					// if md != nil {
+					// 	valueType = "*" + structName(def[1].Name)
+					// }
+					_, _ = fmt.Fprintf(w, "json.RawMessage")
+				} else {
+					_, _ = fmt.Fprintf(w, "map[%s]%s", keyType, valueType)
+				}
+			} else {
+				_, _ = fmt.Fprintf(w, "json.RawMessage  // unable to find definition for %s", field.StructName)
+			}
+		default:
+			_, _ = fmt.Fprintf(w, "%s", field.Type)
+		}
+		_, _ = fmt.Fprintf(w, " `json:\"%s,omitempty\"`\n", field.Name)
+	}
+	_, _ = fmt.Fprintln(w, "}")
 	return nil
 }
 
@@ -280,10 +421,10 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 		for _, msg := range f.Messages {
 			popts := msg.Desc.Options().ProtoReflect()
 			describe := popts.Get(api.E_GenerateMeta.TypeDescriptor()).Bool()
-			if !describe {
-				continue
+			generateModel := popts.Get(api.E_GenerateModel.TypeDescriptor()).Bool()
+			if describe || generateModel {
+				checkMessage(msg, false, false)
 			}
-			checkMessage(msg, false, false)
 		}
 	}
 
@@ -421,6 +562,7 @@ func tempFuncs() template.FuncMap {
 
 type tplHeader struct {
 	Opts
+	BuildFlags string
 }
 
 type tplEnum struct {
@@ -447,7 +589,9 @@ var (
 			Funcs(tempFuncs()).
 			Parse(`
 // Code generated by protoc-gen-go-json. DO NOT EDIT.
-
+{{ if .BuildFlags }}
+{{ .BuildFlags }}
+{{- end }}
 package {{.Package}}
 
 import (

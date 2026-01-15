@@ -93,6 +93,9 @@ extend google.protobuf.MessageOptions {
     string message_display = 53002;
     // message_description is the option for the message's description.
     string message_description = 53003;
+    // generate_model is the option for generating the message's model
+    // for search index.
+    bool generate_model = 53004;
 }
 
 message EnumMeta {

@@ -1,9 +1,11 @@
 package enumgen
 
 import (
+	"bytes"
 	"os"
 	"testing"
 
+	"github.com/effective-security/protoc-gen-go/api"
 	"github.com/effective-security/protoc-gen-go/e2e"
 	"github.com/effective-security/x/format"
 	"github.com/stretchr/testify/assert"
@@ -102,4 +104,77 @@ func loadPluginFromRequestBin(t *testing.T, path string) *protogen.Plugin {
 	p, err := opts.New(req)
 	require.NoError(t, err)
 	return p
+}
+
+func Test_GoModel(t *testing.T) {
+	hestedFields := []*FieldMeta{
+		{
+			Name:   "NestedField",
+			GoName: "NestedField",
+			Type:   "string",
+		},
+		{
+			Name:   "NestedField2",
+			GoName: "NestedField2",
+			Type:   "map",
+			Fields: []*FieldMeta{
+				{
+					Name:   "Key",
+					GoName: "Key",
+					Type:   "string",
+				},
+				{
+					Name:   "Value",
+					GoName: "Value",
+					Type:   "string",
+				},
+			},
+		},
+	}
+	msg := &MessageDescription{
+		FullName: "e2e.Test",
+		Name:     "Test",
+		Fields: []*FieldMeta{
+			{
+				Name:   "str",
+				GoName: "Str",
+				Type:   "string",
+			},
+			{
+				Name:          "HiddenCounter",
+				GoName:        "HiddenCounter",
+				Type:          "int32",
+				SearchOptions: api.SearchOption_NoIndex,
+			},
+			{
+				Name:          "Counter",
+				GoName:        "Counter",
+				Type:          "int32",
+				SearchOptions: api.SearchOption_None,
+			},
+			{
+				Name:       "Nested",
+				GoName:     "Nested",
+				Type:       "struct",
+				StructName: "Nested",
+				Fields:     hestedFields,
+			},
+			{
+				Name:       "NestedList",
+				GoName:     "NestedList",
+				Type:       "[]struct",
+				StructName: "Nested",
+				Fields:     hestedFields,
+			},
+		},
+	}
+
+	var buf bytes.Buffer
+	err := GenerateGoModels(&buf, []*MessageDescription{msg})
+	require.NoError(t, err)
+	js := buf.String()
+
+	exp, err := os.ReadFile("testdata/gen_model.go.txt")
+	require.NoError(t, err)
+	assert.Equal(t, string(exp), js)
 }

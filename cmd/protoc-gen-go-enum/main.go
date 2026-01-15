@@ -17,6 +17,7 @@ var (
 	log        = flag.Bool("logs", false, "output logs")
 	out        = flag.String("out", "enums", "output file prefix")
 	outMsgs    = flag.String("out-msgs", "messages", "output messages")
+	outModels  = flag.String("out-models", "models", "output models")
 	importpath = flag.String("import", "", "go import path")
 	pkg        = flag.String("package", "", "go package name")
 )
@@ -55,6 +56,15 @@ func main() {
 
 			f := gp.NewGeneratedFile(fn, protogen.GoImportPath(*importpath))
 			err := enumgen.ApplyMessagesTemplate(f, dopts, msgs)
+			if err != nil {
+				gp.Error(err)
+			}
+
+			fn2 := fmt.Sprintf("%s.pb.go", *outModels)
+			logger.Infof("Generating %s\n", fn2)
+
+			f2 := gp.NewGeneratedFile(fn2, protogen.GoImportPath(*importpath))
+			err = enumgen.ApplyModelsTemplate(f2, dopts, msgs)
 			if err != nil {
 				gp.Error(err)
 			}
