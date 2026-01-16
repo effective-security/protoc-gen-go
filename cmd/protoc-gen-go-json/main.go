@@ -15,12 +15,12 @@ var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go"
 
 var (
 	log          = flag.Bool("logs", false, "output logs")
-	enumsAsInts  = flag.Bool("enums_as_ints", false, "render enums as integers as opposed to strings")
+	enumsAsInts  = flag.Bool("enums_as_ints", true, "render enums as integers as opposed to strings")
 	emitDefaults = flag.Bool("emit_defaults", false, "render fields with zero values")
 	origName     = flag.Bool("orig_name", false, "use original (.proto) name for fields")
 	multiline    = flag.Bool("multiline", false, "encode JSON with indent")
-	partial      = flag.Bool("partial", false, "allow partial encoding")
-	allowUnknown = flag.Bool("allow_unknown", false, "allow messages to contain unknown fields when unmarshaling")
+	partial      = flag.Bool("partial", true, "allow partial encoding")
+	allowUnknown = flag.Bool("allow_unknown", true, "allow messages to contain unknown fields when unmarshaling")
 )
 
 func main() {

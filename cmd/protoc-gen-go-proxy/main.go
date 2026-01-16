@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/cockroachdb/errors"
 	"github.com/effective-security/protoc-gen-go/internal/proxygen"
@@ -55,9 +55,9 @@ func main() {
 
 			logger.Infof("Processing: %s", name)
 
-			prefix := path.Base(f.GeneratedFilenamePrefix)
+			prefix := filepath.Base(f.GeneratedFilenamePrefix)
 			fn := fmt.Sprintf("%s.proxy.pb.go", prefix)
-			fullFn := path.Join(pkg, fn)
+			fullFn := filepath.Join(pkg, fn)
 			logger.Infof("Generating %s\n", fullFn)
 
 			gf := gp.NewGeneratedFile(fullFn, f.GoImportPath)

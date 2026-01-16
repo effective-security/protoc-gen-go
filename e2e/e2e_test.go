@@ -80,3 +80,43 @@ func TestTable(t *testing.T) {
 		})
 	}
 }
+
+func TestEnumUnmarshalJSON(t *testing.T) {
+	bs, err := json.Marshal(ServiceStatus_Running)
+	require.NoError(t, err)
+	require.NotEmpty(t, bs)
+
+	var svcStatus ServiceStatus_Enum
+	require.NoError(t, json.Unmarshal(bs, &svcStatus))
+	require.Equal(t, ServiceStatus_Running, svcStatus)
+
+	bs2, err := json.Marshal("Failed")
+	require.NoError(t, err)
+	require.NotEmpty(t, bs2)
+
+	require.NoError(t, json.Unmarshal(bs2, &svcStatus))
+	require.Equal(t, ServiceStatus_Failed, svcStatus)
+
+	bs3, err := json.Marshal([]string{"Running", "Failed"})
+	require.NoError(t, err)
+	require.NotEmpty(t, bs3)
+
+	require.NoError(t, json.Unmarshal(bs3, &svcStatus))
+	require.Equal(t, ServiceStatus_Running|ServiceStatus_Failed, svcStatus)
+
+	bs4, err := json.Marshal(JobStatus_Cancelled | JobStatus_Failed)
+	require.NoError(t, err)
+	require.NotEmpty(t, bs4)
+
+	var jobStatus JobStatus_Enum
+	require.NoError(t, json.Unmarshal(bs4, &jobStatus))
+	require.Equal(t, JobStatus_Cancelled|JobStatus_Failed, jobStatus)
+
+	bs5, err := json.Marshal([]string{"Cancelled", "Failed"})
+	require.NoError(t, err)
+	require.NotEmpty(t, bs5)
+
+	var jobStatuses JobStatus_EnumSlice
+	require.NoError(t, json.Unmarshal(bs5, &jobStatuses))
+	require.Equal(t, JobStatus_EnumSlice{JobStatus_Cancelled, JobStatus_Failed}, jobStatuses)
+}

@@ -33,6 +33,8 @@ func (e *EnumDescription) Parse(val any) int32 {
 		res = int32(v)
 	case uint32:
 		res = int32(v)
+	case float64:
+		res = int32(v)
 	case string:
 		var tokens []string
 		if strings.Contains(v, ",") {
@@ -78,6 +80,10 @@ func (e *EnumDescription) Parse(val any) int32 {
 	case []int:
 		for _, token := range v {
 			res |= int32(token)
+		}
+	case []any:
+		for _, token := range v {
+			res |= e.Parse(token)
 		}
 	default:
 		panic(fmt.Sprintf("unsupported type: %T", v))

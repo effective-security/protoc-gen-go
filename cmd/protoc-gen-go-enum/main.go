@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/cockroachdb/errors"
 	"github.com/effective-security/protoc-gen-go/internal/enumgen"
@@ -14,12 +15,13 @@ import (
 var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "go-enums")
 
 var (
-	log        = flag.Bool("logs", false, "output logs")
-	out        = flag.String("out", "enums", "output file prefix")
-	outMsgs    = flag.String("out-msgs", "messages", "output messages")
-	outModels  = flag.String("out-models", "models", "output models")
-	importpath = flag.String("import", "", "go import path")
-	pkg        = flag.String("package", "", "go package name")
+	log          = flag.Bool("logs", false, "output logs")
+	out          = flag.String("out", "enums", "output file prefix")
+	outMsgs      = flag.String("out-msgs", "messages", "output messages")
+	outModels    = flag.String("out-models", "models", "output models")
+	importpath   = flag.String("import", "", "go import path")
+	pkgName      = flag.String("package", "", "go package name")
+	modelPkgName = flag.String("model-pkg", "modelpb", "go package name for model types")
 )
 
 func main() {
@@ -40,11 +42,15 @@ func main() {
 		xlog.SetFormatter(formatter)
 
 		dopts := enumgen.Opts{
-			Package: *pkg,
+			Package:      *pkgName,
+			ModelPackage: *modelPkgName,
 		}
 
 		if dopts.Package == "" {
 			return errors.Errorf("package is required")
+		}
+		if dopts.ModelPackage == "" {
+			return errors.Errorf("model package is required")
 		}
 
 		allEnums := enumgen.GetEnumsDescriptions(gp, dopts)
@@ -61,9 +67,10 @@ func main() {
 			}
 
 			fn2 := fmt.Sprintf("%s.pb.go", *outModels)
-			logger.Infof("Generating %s\n", fn2)
+			fullFn := filepath.Join(dopts.ModelPackage, fn2)
+			logger.Infof("Generating %s\n", fullFn)
 
-			f2 := gp.NewGeneratedFile(fn2, protogen.GoImportPath(*importpath))
+			f2 := gp.NewGeneratedFile(fullFn, protogen.GoImportPath(*importpath))
 			err = enumgen.ApplyModelsTemplate(f2, dopts, msgs)
 			if err != nil {
 				gp.Error(err)
