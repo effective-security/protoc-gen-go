@@ -134,6 +134,7 @@ func Test_GoModel(t *testing.T) {
 	msg := &MessageDescription{
 		FullName: "e2e.Test",
 		Name:     "Test",
+		Package:  "e2e",
 		Fields: []*FieldMeta{
 			{
 				Name:   "str",
@@ -157,6 +158,7 @@ func Test_GoModel(t *testing.T) {
 				GoName:     "Nested",
 				Type:       "struct",
 				StructName: "Nested",
+				Package:    "e2e",
 				Fields:     hestedFields,
 			},
 			{
@@ -164,13 +166,16 @@ func Test_GoModel(t *testing.T) {
 				GoName:     "NestedList",
 				Type:       "[]struct",
 				StructName: "Nested",
+				Package:    "e2e",
 				Fields:     hestedFields,
 			},
 		},
 	}
 
+	opts := Opts{Package: "e2e", ModelPackage: "modelpb"}
+
 	var buf bytes.Buffer
-	err := GenerateGoModels(&buf, []*MessageDescription{msg})
+	err := GenerateGoModels(&buf, opts, []*MessageDescription{msg})
 	require.NoError(t, err)
 	js := buf.String()
 

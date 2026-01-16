@@ -47,7 +47,7 @@ case $key in
     shift # past value
     ;;
     --json)
-    JSON="--go-json_out=enums_as_ints=true,orig_name=true,partial=true,multiline=false,paths=source_relative:$2"
+    JSON="--go-json_out=enums_as_ints=true,orig_name=true,partial=true,allow_unknown=true,multiline=false,paths=source_relative:$2"
     shift # past argument
     shift # past value
     ;;

@@ -72,7 +72,7 @@ proto:
 		--openapi_out=output_mode=source_relative,naming=proto:./../openapi \
 		--go_out=paths=source_relative:./.. \
 		--go-grpc_out=require_unimplemented_servers=false,paths=source_relative:./.. \
-		--go-json_out=logs=false,enums_as_ints=true,multiline=true,partial=true:./.. \
+		--go-json_out=logs=false,enums_as_ints=true,allow_unknown=true,multiline=true,partial=true:./.. \
 		--go-enum_out=logs=true,package=e2e:./.. \
 		--go-mock_out=logs=false:./.. \
 		--go-proxy_out=logs=false:./.. \

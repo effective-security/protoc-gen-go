@@ -1,7 +1,7 @@
 
-// TestModel is the Go model for the e2e.Test message.
+// Test is the Go model for the e2e.Test message.
 // It can be used to decode the message from JSON.
-type TestModel struct {
+type Test struct {
    Str string `json:"str,omitempty"`
    HiddenCounter int32 `json:"HiddenCounter,omitempty"`
    Counter int32 `json:"Counter,omitempty"`
@@ -9,9 +9,9 @@ type TestModel struct {
    NestedList json.RawMessage `json:"NestedList,omitempty"`
 }
 
-// NestedModel is the Go model for the Nested message.
+// Nested is the Go model for the Nested message.
 // It can be used to decode the message from JSON.
-type NestedModel struct {
+type Nested struct {
    NestedField string `json:"NestedField,omitempty"`
    NestedField2 map[string]string `json:"NestedField2,omitempty"`
 }

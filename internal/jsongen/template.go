@@ -109,6 +109,7 @@ var JsonMarshalOptions = protojson.MarshalOptions {
 }
 
 var JsonUnmarshalOptions = protojson.UnmarshalOptions {
+	AllowPartial: {{.Partial}},
 	DiscardUnknown: {{.AllowUnknownFields}},
 }
 
