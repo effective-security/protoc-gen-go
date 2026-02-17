@@ -157,6 +157,7 @@ export const {{ enum_ts_name .Enum }}DisplayName: ITypeNameInterface = {
 }
 
 {{- if .Description.HasGroups }}
+
 export const {{ enum_ts_name .Enum }}Group: ITypeNameInterface = {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
@@ -208,11 +209,14 @@ export function get{{ enum_ts_function_name .Enum "DisplayName" }}(
     return {{ enum_ts_name .Enum }}DisplayName[opt] || 'Unknown'
 }
 
+{{- if .Description.HasGroups }}
+
 export function get{{ enum_ts_function_name .Enum "Group" }}(
     opt: {{ enum_ts_type .Enum }},
 ): string {
     return {{ enum_ts_name .Enum }}Group[opt] || 'Unknown'
 }
+{{- end }}
 
 export function parse{{ enum_ts_name .Enum }}(
     val: {{ enum_ts_parse_type .Enum }},

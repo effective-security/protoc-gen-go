@@ -186,6 +186,7 @@ export const TestEnumDisplayName: ITypeNameInterface = {
     0: 'Unknown',
     1: 'Active Status',
 }
+
 export const TestEnumGroup: ITypeNameInterface = {
     0: 'Unknown',
     1: 'Status',
