@@ -403,11 +403,11 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 	checkMessage := func(msg *protogen.Message, isInput, isOutput bool) {
 		fn := string(msg.Desc.FullName())
 		if isInput {
-			logger.Infof("! Discovered Input messages: %s", fn)
+			//logger.Infof("! Discovered Input messages: %s", fn)
 			inputMap[fn] = true
 		}
 		if isOutput {
-			logger.Infof("! Discovered Output messages: %s", fn)
+			//logger.Infof("! Discovered Output messages: %s", fn)
 			outputMap[fn] = true
 		}
 		if _, ok := seen[fn]; !ok {
@@ -430,8 +430,8 @@ func GetMessagesDescriptions(gp *protogen.Plugin, opts Opts) []*MessageDescripti
 		// first add all service requests
 		for _, svc := range f.Services {
 			//logger.Infof("  >> [%d] Parsing service: %s", i, svc.GoName)
-			for j, m := range svc.Methods {
-				logger.Infof("   >>> [%d] Parsing input: %s", j, m.Input.GoIdent.GoName)
+			for _, m := range svc.Methods {
+				//logger.Infof("   >>> [%d] Parsing input: %s", j, m.Input.GoIdent.GoName)
 				checkMessage(m.Input, true, false)
 				//logger.Infof("   >>> [%d] Parsing output: %s", j, m.Output.GoIdent.GoName)
 				checkMessage(m.Output, false, true)

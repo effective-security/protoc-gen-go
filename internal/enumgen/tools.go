@@ -303,6 +303,15 @@ type EnumDescription struct {
 	FileName     string
 }
 
+func (e *EnumDescription) HasGroups() bool {
+	for _, enum := range e.Enums {
+		if enum.Group != "" {
+			return true
+		}
+	}
+	return false
+}
+
 type MessageDescription struct {
 	Name            string
 	Display         string
