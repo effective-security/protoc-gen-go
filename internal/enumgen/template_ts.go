@@ -156,13 +156,17 @@ export const {{ enum_ts_name .Enum }}DisplayName: ITypeNameInterface = {
 {{- end }}
 }
 
+{{- if .Description.HasGroups }}
 export const {{ enum_ts_name .Enum }}Group: ITypeNameInterface = {
 {{- with .Enum }}
 {{- range $.Description.Enums }}
+{{- if .Group }}
     {{ .Value }}: '{{ .Group }}',
 {{- end }}
 {{- end }}
+{{- end }}
 }
+{{- end }}
 
 export const {{ enum_ts_name .Enum }}NameEnum: INameEnumInterface = {
 {{- with .Enum }}
