@@ -45,6 +45,7 @@ func CreateEnumDescription(en *protogen.Enum) *EnumDescription {
 		description := opts.Get(api.E_EnumDescription.TypeDescriptor()).String()
 		args := opts.Get(api.E_EnumArgs.TypeDescriptor()).String()
 		group := opts.Get(api.E_EnumGroup.TypeDescriptor()).String()
+		eopts := opts.Get(api.E_EnumOpts.TypeDescriptor()).String()
 
 		// Fallback to comments if description is empty
 		if description == "" {
@@ -62,6 +63,7 @@ func CreateEnumDescription(en *protogen.Enum) *EnumDescription {
 			Documentation: cleanComment(description),
 			Args:          slices.StringsSafeSplit(args, ","),
 			Group:         group,
+			Options:       slices.StringsSafeSplit(eopts, ","),
 		}
 		if display != meta.Name {
 			meta.Display = display

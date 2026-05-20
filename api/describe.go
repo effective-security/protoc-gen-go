@@ -425,7 +425,7 @@ func (d *describer) GetTabularData(msg proto.Message) (*TabularData, error) {
 	tabularData.Tables = append(tabularData.Tables, t)
 
 	// after getting the raw value, we need to get the element value to access the fields
-	if mpval.Kind() == reflect.Ptr {
+	if mpval.Kind() == reflect.Pointer {
 		mpval = mpval.Elem()
 	}
 

@@ -160,6 +160,7 @@ func TestTSEnums(t *testing.T) {
 							Documentation: "Active description",
 							Args:          []string{"Active", "Status"},
 							Group:         "Status",
+							Options:       []string{"option1", "option2"},
 						},
 					},
 					ProtogenEnum: &protogen.Enum{
