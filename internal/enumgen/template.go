@@ -825,6 +825,9 @@ var {{.Enum.GoIdent.GoName}}_EnumDescription = &api.EnumDescription {
 			{{- if .Args }}
 			Args: {{list .Args}},
 			{{- end }}
+			{{- if .Options }}
+			Options: {{list .Options}},
+			{{- end }}
 			{{- if .Documentation }}
 			Documentation: ` + "`{{.Documentation}}`" + `,
 			{{- end }}

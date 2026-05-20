@@ -111,6 +111,7 @@ type EnumMeta struct {
 	Documentation string                 `protobuf:"bytes,5,opt,name=Documentation,proto3" json:"Documentation,omitempty"`
 	Args          []string               `protobuf:"bytes,6,rep,name=Args,proto3" json:"Args,omitempty"`
 	Group         string                 `protobuf:"bytes,7,opt,name=Group,proto3" json:"Group,omitempty"`
+	Options       []string               `protobuf:"bytes,8,rep,name=Options,proto3" json:"Options,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -192,6 +193,13 @@ func (x *EnumMeta) GetGroup() string {
 		return x.Group
 	}
 	return ""
+}
+
+func (x *EnumMeta) GetOptions() []string {
+	if x != nil {
+		return x.Options
+	}
+	return nil
 }
 
 type SearchOption struct {
@@ -745,6 +753,14 @@ var file_annotations_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "annotations.proto",
 	},
 	{
+		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
+		ExtensionType: (*string)(nil),
+		Field:         52005,
+		Name:          "es.api.enum_opts",
+		Tag:           "bytes,52005,opt,name=enum_opts",
+		Filename:      "annotations.proto",
+	},
+	{
 		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 		ExtensionType: (*bool)(nil),
 		Field:         53001,
@@ -896,6 +912,11 @@ var (
 	//
 	// optional string enum_group = 52004;
 	E_EnumGroup = &file_annotations_proto_extTypes[18]
+	// opts is the miscellaneous options for the enum,
+	// For example, "arg1,arg2,arg3" will be parsed as a list of strings
+	//
+	// optional string enum_opts = 52005;
+	E_EnumOpts = &file_annotations_proto_extTypes[19]
 )
 
 // Extension fields to descriptorpb.MessageOptions.
@@ -904,27 +925,27 @@ var (
 	// information. By default, only for Request and Response messages.
 	//
 	// optional bool generate_meta = 53001;
-	E_GenerateMeta = &file_annotations_proto_extTypes[19]
+	E_GenerateMeta = &file_annotations_proto_extTypes[20]
 	// message_display is the option for the message's Display Name in the UI.
 	//
 	// optional string message_display = 53002;
-	E_MessageDisplay = &file_annotations_proto_extTypes[20]
+	E_MessageDisplay = &file_annotations_proto_extTypes[21]
 	// message_description is the option for the message's description.
 	//
 	// optional string message_description = 53003;
-	E_MessageDescription = &file_annotations_proto_extTypes[21]
+	E_MessageDescription = &file_annotations_proto_extTypes[22]
 	// generate_model is the option for generating the message's model
 	// for search index.
 	//
 	// optional bool generate_model = 53004;
-	E_GenerateModel = &file_annotations_proto_extTypes[22]
+	E_GenerateModel = &file_annotations_proto_extTypes[23]
 )
 
 var File_annotations_proto protoreflect.FileDescriptor
 
 const file_annotations_proto_rawDesc = "" +
 	"\n" +
-	"\x11annotations.proto\x12\x06es.api\x1a google/protobuf/descriptor.proto\"\xba\x01\n" +
+	"\x11annotations.proto\x12\x06es.api\x1a google/protobuf/descriptor.proto\"\xd4\x01\n" +
 	"\bEnumMeta\x12\x14\n" +
 	"\x05Value\x18\x01 \x01(\x05R\x05Value\x12\x12\n" +
 	"\x04Name\x18\x02 \x01(\tR\x04Name\x12\x1a\n" +
@@ -932,7 +953,8 @@ const file_annotations_proto_rawDesc = "" +
 	"\aDisplay\x18\x04 \x01(\tR\aDisplay\x12$\n" +
 	"\rDocumentation\x18\x05 \x01(\tR\rDocumentation\x12\x12\n" +
 	"\x04Args\x18\x06 \x03(\tR\x04Args\x12\x14\n" +
-	"\x05Group\x18\a \x01(\tR\x05Group\"\x8a\x01\n" +
+	"\x05Group\x18\a \x01(\tR\x05Group\x12\x18\n" +
+	"\aOptions\x18\b \x03(\tR\aOptions\"\x8a\x01\n" +
 	"\fSearchOption\"z\n" +
 	"\x04Enum\x12\b\n" +
 	"\x04None\x10\x00\x12\t\n" +
@@ -1009,7 +1031,8 @@ const file_annotations_proto_rawDesc = "" +
 	"\fenum_display\x12!.google.protobuf.EnumValueOptions\x18\xa2\x96\x03 \x01(\tR\venumDisplay:N\n" +
 	"\x10enum_description\x12!.google.protobuf.EnumValueOptions\x18\xa3\x96\x03 \x01(\tR\x0fenumDescription:B\n" +
 	"\n" +
-	"enum_group\x12!.google.protobuf.EnumValueOptions\x18\xa4\x96\x03 \x01(\tR\tenumGroup:F\n" +
+	"enum_group\x12!.google.protobuf.EnumValueOptions\x18\xa4\x96\x03 \x01(\tR\tenumGroup:@\n" +
+	"\tenum_opts\x12!.google.protobuf.EnumValueOptions\x18\xa5\x96\x03 \x01(\tR\benumOpts:F\n" +
 	"\rgenerate_meta\x12\x1f.google.protobuf.MessageOptions\x18\x89\x9e\x03 \x01(\bR\fgenerateMeta:J\n" +
 	"\x0fmessage_display\x12\x1f.google.protobuf.MessageOptions\x18\x8a\x9e\x03 \x01(\tR\x0emessageDisplay:R\n" +
 	"\x13message_description\x12\x1f.google.protobuf.MessageOptions\x18\x8b\x9e\x03 \x01(\tR\x12messageDescription:H\n" +
@@ -1067,14 +1090,15 @@ var file_annotations_proto_depIdxs = []int32{
 	9,  // 21: es.api.enum_display:extendee -> google.protobuf.EnumValueOptions
 	9,  // 22: es.api.enum_description:extendee -> google.protobuf.EnumValueOptions
 	9,  // 23: es.api.enum_group:extendee -> google.protobuf.EnumValueOptions
-	10, // 24: es.api.generate_meta:extendee -> google.protobuf.MessageOptions
-	10, // 25: es.api.message_display:extendee -> google.protobuf.MessageOptions
-	10, // 26: es.api.message_description:extendee -> google.protobuf.MessageOptions
-	10, // 27: es.api.generate_model:extendee -> google.protobuf.MessageOptions
-	28, // [28:28] is the sub-list for method output_type
-	28, // [28:28] is the sub-list for method input_type
-	28, // [28:28] is the sub-list for extension type_name
-	5,  // [5:28] is the sub-list for extension extendee
+	9,  // 24: es.api.enum_opts:extendee -> google.protobuf.EnumValueOptions
+	10, // 25: es.api.generate_meta:extendee -> google.protobuf.MessageOptions
+	10, // 26: es.api.message_display:extendee -> google.protobuf.MessageOptions
+	10, // 27: es.api.message_description:extendee -> google.protobuf.MessageOptions
+	10, // 28: es.api.generate_model:extendee -> google.protobuf.MessageOptions
+	29, // [29:29] is the sub-list for method output_type
+	29, // [29:29] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	5,  // [5:29] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
 }
 
@@ -1090,7 +1114,7 @@ func file_annotations_proto_init() {
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_annotations_proto_rawDesc), len(file_annotations_proto_rawDesc)),
 			NumEnums:      1,
 			NumMessages:   5,
-			NumExtensions: 23,
+			NumExtensions: 24,
 			NumServices:   0,
 		},
 		GoTypes:           file_annotations_proto_goTypes,

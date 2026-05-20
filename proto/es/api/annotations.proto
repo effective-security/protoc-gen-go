@@ -82,6 +82,9 @@ extend google.protobuf.EnumValueOptions {
     string enum_description = 52003;
     // enum_group is the option for the field's group name.
     string enum_group = 52004;
+    // opts is the miscellaneous options for the enum,
+    // For example, "arg1,arg2,arg3" will be parsed as a list of strings
+    string enum_opts = 52005;
 }
 
 // Custom message option
@@ -99,13 +102,14 @@ extend google.protobuf.MessageOptions {
 }
 
 message EnumMeta {
-    int32 Value          = 1 [json_name = "Value"];
-    string Name          = 2 [json_name = "Name"];
-    string FullName      = 3 [json_name = "FullName"];
-    string Display       = 4 [json_name = "Display"];
-    string Documentation = 5 [json_name = "Documentation"];
-    repeated string Args = 6 [json_name = "Args"];
-    string Group         = 7 [json_name = "Group"];
+    int32 Value             = 1 [json_name = "Value"];
+    string Name             = 2 [json_name = "Name"];
+    string FullName         = 3 [json_name = "FullName"];
+    string Display          = 4 [json_name = "Display"];
+    string Documentation    = 5 [json_name = "Documentation"];
+    repeated string Args    = 6 [json_name = "Args"];
+    string Group            = 7 [json_name = "Group"];
+    repeated string Options = 8 [json_name = "Options"];
 }
 
 message SearchOption {
