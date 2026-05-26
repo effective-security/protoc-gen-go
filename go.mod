@@ -5,12 +5,11 @@ go 1.26.3
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cockroachdb/errors v1.13.0
-	github.com/effective-security/porto v0.37.398
-	github.com/effective-security/x v0.16.91
-	github.com/effective-security/xlog v0.10.53
+	github.com/effective-security/porto v0.37.399
+	github.com/effective-security/x v0.16.92
+	github.com/effective-security/xlog v0.11.54
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/stretchr/testify v1.11.1
-	google.golang.org/genproto/googleapis/api v0.0.0-20260519071638-aa98bba5eb94
 	google.golang.org/grpc v1.81.1
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
@@ -31,9 +30,8 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
 	github.com/cockroachdb/redact v1.1.8 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/effective-security/metrics v0.8.136 // indirect
-	github.com/effective-security/xdb v0.24.144 // indirect
-	github.com/effective-security/xpki v0.26.264 // indirect
+	github.com/effective-security/xdb v0.24.145 // indirect
+	github.com/effective-security/xpki v0.26.265 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/getsentry/sentry-go v0.46.2 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.5 // indirect
@@ -45,8 +43,6 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
-	github.com/jinzhu/copier v0.4.0 // indirect
-	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
@@ -56,7 +52,6 @@ require (
 	github.com/mattn/go-runewidth v0.0.23 // indirect
 	github.com/microsoft/go-mssqldb v1.10.0 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
-	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/oleiade/reflections v1.1.0 // indirect
 	github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6 // indirect
@@ -65,7 +60,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
-	github.com/rs/cors v1.11.1 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
