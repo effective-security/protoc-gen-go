@@ -34,7 +34,7 @@ func main() {
 		var formatter xlog.Formatter
 		if *log {
 			formatter = xlog.NewStringFormatter(os.Stderr).
-				Options(xlog.FormatNoCaller, xlog.FormatSkipTime, xlog.FormatSkipLevel)
+				Options(xlog.FormatWithCaller(false), xlog.FormatSkipTime(true), xlog.FormatSkipLevel(true))
 			xlog.SetGlobalLogLevel(xlog.INFO)
 		} else {
 			formatter = xlog.NewNilFormatter()
