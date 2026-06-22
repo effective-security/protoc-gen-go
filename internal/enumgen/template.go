@@ -364,7 +364,7 @@ func GetEnumsDescriptions(gp *protogen.Plugin, opts Opts) []*EnumDescription {
 		}
 
 		for i := 0; i < 3 && len(msgsToDiscover) > 0; i++ {
-			logger.Infof("[%d] *** Discovering nested messages: %d", i, len(msgsToDiscover))
+			//logger.Infof("[%d] *** Discovering nested messages: %d", i, len(msgsToDiscover))
 			prev := msgsToDiscover
 			msgsToDiscover = make(map[string]*protogen.Message)
 			for _, msg := range prev {

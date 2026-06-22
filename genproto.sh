@@ -27,12 +27,14 @@ key="$1"
 
 case $key in
     --dirs)
-    DIRS="$2"
+    DIRS_INPUT="$2"
+    DIRS="${DIRS_INPUT//,/ }"
     shift # past argument
     shift # past value
     ;;
     --files)
-    FILES="$2"
+    FILES_INPUT="$2"
+    FILES="${FILES_INPUT//,/ }"
     shift # past argument
     shift # past value
     ;;
