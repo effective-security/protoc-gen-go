@@ -146,6 +146,7 @@ import (
 	"github.com/effective-security/protoc-gen-go/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 `))
 
