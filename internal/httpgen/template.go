@@ -143,6 +143,7 @@ import (
 
 	{{.File.GoImportPath}}
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"github.com/effective-security/porto/restserver"
 	"github.com/effective-security/porto/xhttp/correlation"
 	"github.com/effective-security/porto/xhttp/httperror"
