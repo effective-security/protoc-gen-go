@@ -723,7 +723,7 @@ func (s *{{.Enum.GoIdent.GoName}}) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &val); err != nil {
 		return err
 	}
-	*s = {{.Enum.GoIdent.GoName}}({{.Enum.GoIdent.GoName}}_EnumDescription.Parse(val))
+	*s = {{.Enum.GoIdent.GoName}}(0).Parse(val)
 	return nil
 }
 
@@ -776,6 +776,16 @@ func (s {{.Enum.GoIdent.GoName}}) Meta() *api.EnumMeta {
 // Describe returns Enum meta information for all values
 func (s {{.Enum.GoIdent.GoName}}) Describe() map[{{.Enum.GoIdent.GoName}}]*api.EnumMeta {
 	return {{.Enum.GoIdent.GoName}}_Meta
+}
+
+// GetDescription returns Enum description
+func (s {{.Enum.GoIdent.GoName}}) GetDescription() *api.EnumDescription {
+	return {{.Enum.GoIdent.GoName}}_EnumDescription
+}
+
+// Parse returns Enum value parsed from val
+func (_ {{.Enum.GoIdent.GoName}}) Parse(val any) {{.Enum.GoIdent.GoName}} {
+	return {{.Enum.GoIdent.GoName}}_EnumDescription.ParseEnum[{{.Enum.GoIdent.GoName}}](val)
 }
 
 var {{.Enum.GoIdent.GoName}}_Name = map[{{.Enum.GoIdent.GoName}}]string {
