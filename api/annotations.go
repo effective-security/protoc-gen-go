@@ -8,17 +8,32 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 )
 
-type EnumLike interface {
+// EnumNumberer is implemented by protobuf enum types.
+type EnumNumberer interface {
 	Number() protoreflect.EnumNumber
 }
 
+// EnumLike constrains protobuf-style enum types (~int32) for typed Parse helpers.
+type EnumLike interface {
+	~int32
+	EnumNumberer
+}
+
+// ParseEnum parses val and returns it as enum type E.
+// If the value is not parsed, it returns the zero value of E.
+func (e *EnumDescription) ParseEnum[E EnumLike](val any) E {
+	return E(e.Parse(val))
+}
+
+// Parse parses the value and returns the enum value.
+// If the value is not parsed, it returns 0.
 func (e *EnumDescription) Parse(val any) int32 {
 	if val == nil {
 		return 0
 	}
 	var res int32
 
-	if v, ok := val.(EnumLike); ok {
+	if v, ok := val.(EnumNumberer); ok {
 		return int32(v.Number())
 	}
 
