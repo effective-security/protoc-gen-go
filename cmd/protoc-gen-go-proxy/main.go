@@ -38,7 +38,7 @@ func main() {
 
 		pkg := *pkgName
 		if pkg == "" {
-			return errors.Errorf("Proxy should be generated in a separage package. Use -pkg flag.")
+			return errors.Errorf("proxy should be generated in a separate package: use -pkg flag")
 		}
 
 		opts := proxygen.Options{
