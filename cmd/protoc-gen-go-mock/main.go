@@ -38,7 +38,7 @@ func main() {
 
 		pkg := *pkgName
 		if pkg == "" {
-			return errors.Errorf("Mocks should be generated in a separage package. Use -pkg flag.")
+			return errors.Errorf("mocks should be generated in a separate package: use -pkg flag")
 		}
 
 		opts := mockgen.Options{

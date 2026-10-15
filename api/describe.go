@@ -466,9 +466,8 @@ func (d *describer) createRowsFromList(sval protoreflect.Value, fields []*FieldM
 	var rows []*TableRow
 
 	for i := 0; i < list.Len(); i++ {
-		item := list.Get(i)
-		rmsg := item.Message()
-		if rmsg == nil {
+		rmsg := list.Get(i).Message()
+		if !rmsg.IsValid() {
 			continue
 		}
 		row := d.createRow(rmsg, fields)

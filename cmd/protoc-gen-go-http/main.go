@@ -39,7 +39,7 @@ func main() {
 
 		pkg := *pkgName
 		if pkg == "" {
-			return errors.Errorf("HTTP handler should be generated in a separage package. Use -pkg flag.")
+			return errors.Errorf("http handler should be generated in a separate package: use -pkg flag")
 		}
 		// pbpkg := *pbPkgName
 		// if pbpkg == "" {

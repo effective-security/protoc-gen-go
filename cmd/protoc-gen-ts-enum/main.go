@@ -50,7 +50,6 @@ func main() {
 
 		var fileEnumInfos []enumgen.FileEnumInfo
 		for fn, enums := range grouped {
-
 			sort.Slice(enums, func(i, j int) bool {
 				return strings.ToLower(enums[i].FullName) < strings.ToLower(enums[j].FullName)
 			})
