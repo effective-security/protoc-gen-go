@@ -82,7 +82,7 @@ jobs:
         run: make vars tools
 
       - name: Proto
-        run: make build proto
+        run: make build proto tidy
 
       - name: Test
         if: github.event_name == 'push'

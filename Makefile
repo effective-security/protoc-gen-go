@@ -86,3 +86,7 @@ proto:
 
 docker: tools
 	docker build -f Dockerfile -t effectivesecurity/protoc-gen-go:main .
+
+tidy:
+	echo "*** Tidying dependencies"
+	go mod tidy
