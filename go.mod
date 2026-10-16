@@ -5,8 +5,8 @@ go 1.27.2
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cockroachdb/errors v1.14.0
-	github.com/effective-security/porto v1.0.449
-	github.com/effective-security/x v0.18.106
+	github.com/effective-security/porto v1.0.450
+	github.com/effective-security/x v1.0.109
 	github.com/effective-security/xlog v1.0.69
 	github.com/olekukonko/tablewriter v1.1.5
 	github.com/stretchr/testify v1.12.1
@@ -30,9 +30,9 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
 	github.com/cockroachdb/redact v1.1.8 // indirect
-	github.com/effective-security/metrics v0.10.153 // indirect
-	github.com/effective-security/xdb v0.25.164 // indirect
-	github.com/effective-security/xpki v1.0.313 // indirect
+	github.com/effective-security/metrics v0.10.154 // indirect
+	github.com/effective-security/xdb v0.25.165 // indirect
+	github.com/effective-security/xpki v1.0.314 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/getsentry/sentry-go v0.50.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.6 // indirect
@@ -46,7 +46,7 @@ require (
 	github.com/huandu/xstrings v1.6.2 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
-	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.12.3 // indirect
