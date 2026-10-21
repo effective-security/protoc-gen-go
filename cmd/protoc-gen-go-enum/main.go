@@ -10,6 +10,7 @@ import (
 	"github.com/effective-security/protoc-gen-go/internal/enumgen"
 	"github.com/effective-security/xlog"
 	"google.golang.org/protobuf/compiler/protogen"
+	"google.golang.org/protobuf/types/pluginpb"
 )
 
 var logger = xlog.NewPackageLogger("github.com/effective-security/protoc-gen-go", "go-enums")
@@ -31,6 +32,8 @@ func main() {
 	protogen.Options{
 		ParamFunc: flag.CommandLine.Set,
 	}.Run(func(gp *protogen.Plugin) error {
+		gp.SupportedFeatures = uint64(pluginpb.CodeGeneratorResponse_FEATURE_PROTO3_OPTIONAL)
+
 		var formatter xlog.Formatter
 		if *log {
 			formatter = xlog.NewStringFormatter(os.Stderr).

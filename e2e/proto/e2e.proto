@@ -96,11 +96,14 @@ message Generic {
     Nested.Message nested = 12;
 
     map<string, Generic.Message> map2 = 13;
+
+    optional bool disabledOption = 14;
 }
 
 message VectorScore {
-    string Vector = 1 [json_name = "Vector"];
-    double Score  = 2 [json_name = "Score"];
+    string Vector        = 1 [json_name = "Vector"];
+    double Score         = 2 [json_name = "Score"];
+    optional bool Legacy = 3 [json_name = "Legacy"];
 }
 
 message Cvss {
