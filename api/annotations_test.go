@@ -19,6 +19,8 @@ func TestEnumDescription_Parse(t *testing.T) {
 	assert.Equal(t, int32(e2e.Role_User|e2e.Role_Admin), ed.Parse([]int{int(e2e.Role_User), int(e2e.Role_Admin)}))
 	assert.Equal(t, int32(e2e.Role_User|e2e.Role_Admin), ed.Parse("User,Admin"))
 	assert.Equal(t, int32(e2e.Role_User|e2e.Role_Admin), ed.Parse("User|Admin"))
+	assert.Equal(t, int32(e2e.Role_User|e2e.Role_Admin), ed.Parse("user|admin"))
+	assert.Equal(t, int32(e2e.Role_User|e2e.Role_Admin), ed.Parse("USER|ADMIN"))
 }
 
 func TestEnumDescription_ParseEnum(t *testing.T) {
@@ -31,6 +33,14 @@ func TestEnumDescription_ParseEnum(t *testing.T) {
 func TestEnumDescription_UnmarshalJSON(t *testing.T) {
 	var e e2e.Role
 	err := json.Unmarshal([]byte(`"User|Admin"`), &e)
+	assert.NoError(t, err)
+	assert.Equal(t, e2e.Role_User|e2e.Role_Admin, e)
+
+	err = json.Unmarshal([]byte(`"USER|ADMIN"`), &e)
+	assert.NoError(t, err)
+	assert.Equal(t, e2e.Role_User|e2e.Role_Admin, e)
+
+	err = json.Unmarshal([]byte(`"admin|user"`), &e)
 	assert.NoError(t, err)
 	assert.Equal(t, e2e.Role_User|e2e.Role_Admin, e)
 

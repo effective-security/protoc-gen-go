@@ -65,7 +65,7 @@ func (e *EnumDescription) Parse(val any) int32 {
 				continue
 			}
 			for _, enum := range e.Enums {
-				if enum.Name == token || enum.FullName == token || enum.Display == token {
+				if enum.IsMatch(token) {
 					res |= enum.Value
 					if !e.IsBitmask {
 						break
@@ -80,7 +80,7 @@ func (e *EnumDescription) Parse(val any) int32 {
 				continue
 			}
 			for _, enum := range e.Enums {
-				if enum.Name == token || enum.FullName == token || enum.Display == token {
+				if enum.IsMatch(token) {
 					res |= enum.Value
 					if !e.IsBitmask {
 						break
@@ -105,6 +105,10 @@ func (e *EnumDescription) Parse(val any) int32 {
 	}
 
 	return res
+}
+
+func (m *EnumMeta) IsMatch(token string) bool {
+	return strings.EqualFold(m.Name, token) || strings.EqualFold(m.FullName, token) || strings.EqualFold(m.Display, token)
 }
 
 func (m *FieldMeta) GetDisplayName() string {
