@@ -5,11 +5,12 @@ go 1.27.3
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cockroachdb/errors v1.14.0
-	github.com/effective-security/porto v1.0.452
-	github.com/effective-security/x v1.0.109
-	github.com/effective-security/xlog v1.0.69
+	github.com/effective-security/porto v1.1.455
+	github.com/effective-security/x v1.0.111
+	github.com/effective-security/xlog v1.0.70
 	github.com/olekukonko/tablewriter v1.1.5
 	github.com/stretchr/testify v1.12.1
+	google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab
 	google.golang.org/grpc v1.86.0-dev
 	google.golang.org/protobuf v1.36.12
 	gopkg.in/yaml.v3 v3.0.1
@@ -29,12 +30,13 @@ require (
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
 	github.com/cockroachdb/redact v1.1.8 // indirect
-	github.com/effective-security/xdb v1.0.166 // indirect
-	github.com/effective-security/xpki v1.0.317 // indirect
+	github.com/effective-security/metrics v0.10.158 // indirect
+	github.com/effective-security/xdb v1.0.169 // indirect
+	github.com/effective-security/xpki v1.1.321 // indirect
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/getsentry/sentry-go v0.50.0 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.6 // indirect
-	github.com/goccy/go-json v0.11.2 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.9 // indirect
+	github.com/goccy/go-json v0.12.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.2 // indirect
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
@@ -42,7 +44,9 @@ require (
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/huandu/xstrings v1.6.3 // indirect
-	github.com/klauspost/cpuid/v2 v2.4.1 // indirect
+	github.com/jinzhu/copier v0.4.0 // indirect
+	github.com/julienschmidt/httprouter v1.3.0 // indirect
+	github.com/klauspost/cpuid/v2 v2.4.2 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.12.3 // indirect
@@ -59,6 +63,7 @@ require (
 	github.com/olekukonko/ll v0.1.9 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 	github.com/shopspring/decimal v1.6.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
@@ -66,12 +71,12 @@ require (
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	go.uber.org/config v1.4.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
-	golang.org/x/net v0.61.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/tools v0.52.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
